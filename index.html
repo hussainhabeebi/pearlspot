@@ -483,6 +483,7 @@ tr:last-child td{border-bottom:none}
     <div class="topbar-search"><span class="si">🔍</span><input id="gsearch" placeholder="Search enquiries, conversations…" oninput="globalSearch(this.value)"><span class="sk">⌘K</span></div>
     <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
       <button class="btn sm" onclick="loadAll()">⟳ Refresh</button>
+      <button class="btn sm" onclick="runConnectionTest()" title="Test n8n connection" style="font-size:11px">🔌 Test</button>
       <button class="btn primary sm" onclick="showPage('composer',null)">+ New Message</button>
       <div style="position:relative">
         <button class="notif-btn" id="notif-toggle" onclick="toggleNotif()">🔔<span class="notif-badge" id="notif-count">0</span></button>
@@ -493,6 +494,9 @@ tr:last-child td{border-bottom:none}
       </div>
     </div>
   </div>
+
+  <!-- Connection status banner -->
+  <div id="conn-banner" style="display:none"></div>
 
   <!-- ── TODAY PAGE ── -->
   <div id="page-today" class="page-content" style="display:flex;flex:1;overflow-y:auto">
@@ -1174,14 +1178,11 @@ const CW_TOKEN = 'rcbgwbfThHKajjyG1VBWgkBL';
 const API = {
   leads:       `${N8N}/pearlspot/leads`,
   leadsUpdate: `${N8N}/pearlspot/leads/update`,
-  convs:       `${N8N}/pearlspot/conversations`,
-  convMsgs:    `${N8N}/pearlspot/conv-messages`,
-  sendReply:   `${N8N}/pearlspot/send-reply`,
-  toggleStatus:`${N8N}/pearlspot/toggle-status`,
   wasSend:     `${N8N}/pearlspot/whatsapp/send`,
   automation:  `${N8N}/pearlspot/automation/trigger`,
   analytics:   `${N8N}/pearlspot/analytics`,
 };
+// Conversations wired directly to Chatwoot API (no n8n proxy needed)
 const STAGES = ['New','Quoted','Confirmed','Paid','Checked-In','Completed','Cancelled'];
 const AVATARBG = ['#1f93ff','#7c3aed','#059669','#d97706','#dc2626','#0891b2','#9333ea'];
 const bg = n => AVATARBG[(n||'A').charCodeAt(0) % AVATARBG.length];
@@ -1236,6 +1237,7 @@ window.addEventListener('DOMContentLoaded', function(){
   loadAll();
   setTimeout(renderToday, 1200);
   setTimeout(renderTemplateList, 500);
+  setTimeout(runConnectionTest, 2000);
 });
 
 document.addEventListener('keydown', e => {
@@ -1274,10 +1276,15 @@ function loadAll(){ loadLeads(); loadConvs('open'); }
 // LEADS
 // ═══════════════════════════════════════
 async function loadLeads(){
+  // Show loading state
+  const bodyEl = document.getElementById('enq-body');
+  if(bodyEl) bodyEl.innerHTML = '<tr><td colspan="14" style="text-align:center;padding:30px;color:var(--muted)">⏳ Loading from Google Sheets…</td></tr>';
   try {
     const r = await fetch(API.leads, {headers:{'Accept':'application/json'}});
+    if(!r.ok) throw new Error('HTTP '+r.status+' — is the n8n workflow active?');
     const data = await r.json();
     allLeads = Array.isArray(data) ? data : (data.leads||data.rows||[]);
+    if(!Array.isArray(allLeads)) throw new Error('Unexpected response format from n8n');
     document.getElementById('badge-leads').textContent = allLeads.length;
     populateFilters();
     renderLeadsTable();
@@ -1285,7 +1292,23 @@ async function loadLeads(){
     renderToday();
     renderKanban();
     updateCampCount();
-  } catch(e){ toast('Could not load leads — check n8n webhook','err'); }
+    if(allLeads.length===0) toast('Connected — Google Sheet is empty','warn');
+    else toast('✅ Loaded '+allLeads.length+' enquiries','ok');
+  } catch(e){
+    const msg = e.message||'Unknown error';
+    if(bodyEl) bodyEl.innerHTML = `<tr><td colspan="14" style="text-align:center;padding:30px">
+      <div style="font-size:14px;font-weight:600;color:var(--red);margin-bottom:8px">❌ Could not load data</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${msg}</div>
+      <div style="font-size:11px;color:var(--muted);background:var(--bg);padding:10px;border-radius:6px;text-align:left;max-width:400px;margin:0 auto">
+        <strong>Checklist:</strong><br>
+        1. n8n workflow "Pearlspot · All Webhooks" is imported<br>
+        2. Workflow is <strong>Active</strong> (toggle ON)<br>
+        3. Google Sheets credential is mapped<br>
+        4. Test URL: <a href="${API.leads}" target="_blank" style="color:var(--accent)">${API.leads}</a>
+      </div>
+    </td></tr>`;
+    toast('Load failed: '+msg,'err');
+  }
 }
 
 function lv(l, ...keys){ for(const k of keys){ const v=l[k]; if(v!==undefined&&v!==null&&v!=='') return String(v); } return ''; }
@@ -2045,6 +2068,29 @@ function toast(msg,type='ok'){ const el=document.getElementById('toast'); el.tex
 function toggleNotif(){ document.getElementById('notif-panel').classList.toggle('open'); }
 function clearNotifs(){ document.getElementById('notif-list').innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No notifications</div>'; document.getElementById('notif-count').textContent='0'; document.getElementById('notif-panel').classList.remove('open'); }
 document.addEventListener('click',e=>{ if(!e.target.closest('#notif-toggle')&&!e.target.closest('#notif-panel')) document.getElementById('notif-panel')?.classList.remove('open'); });
+
+// ═══════════════════════════════════════
+// CONNECTION TEST
+// ═══════════════════════════════════════
+async function runConnectionTest(){
+  const banner = document.getElementById('conn-banner');
+  if(!banner) return;
+  try {
+    const r = await fetch(API.leads, {headers:{'Accept':'application/json'}});
+    if(r.ok){
+      const data = await r.json();
+      const count = Array.isArray(data) ? data.length : (data.rows||data.leads||[]).length;
+      banner.style.cssText='display:flex;align-items:center;gap:10px;padding:8px 16px;background:#ecfdf5;border-bottom:1px solid #a7f3d0;font-size:12px;color:#065f46';
+      banner.innerHTML=`<span>✅</span><span><strong>n8n connected</strong> — ${count} enquiries loaded from Google Sheets</span><button onclick="this.parentElement.style.display='none'" style="margin-left:auto;background:none;border:none;cursor:pointer;color:#065f46;font-size:14px">✕</button>`;
+      setTimeout(()=>{ if(banner) banner.style.display='none'; }, 4000);
+    } else {
+      throw new Error('HTTP '+r.status);
+    }
+  } catch(e){
+    banner.style.cssText='display:flex;align-items:center;gap:10px;padding:8px 16px;background:#fef2f2;border-bottom:1px solid #fecaca;font-size:12px;color:#991b1b';
+    banner.innerHTML=`<span>❌</span><span><strong>n8n not reachable</strong> — ${e.message}. Check workflow is active at <a href="https://n8n.aiingo.com" target="_blank" style="color:#1f93ff">n8n.aiingo.com</a></span><button onclick="this.parentElement.style.display='none'" style="margin-left:auto;background:none;border:none;cursor:pointer;color:#991b1b;font-size:14px">✕</button>`;
+  }
+}
 
 // ═══════════════════════════════════════
 // TEMPLATE MANAGER
