@@ -147,10 +147,11 @@ function selectUser(id) {
   document.querySelectorAll('.user-pill').forEach(p => p.classList.remove('active'));
   document.getElementById('pill-' + id)?.classList.add('active');
   document.getElementById('email').value = u.email;
-  document.getElementById('password').value = u.pwd;
+  document.getElementById('password').value = '';
   document.getElementById('email').classList.remove('error');
   document.getElementById('password').classList.remove('error');
   document.getElementById('error-msg').style.display = 'none';
+  document.getElementById('password').focus();
 }
 
 function doLogin() {
