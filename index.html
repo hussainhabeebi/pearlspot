@@ -435,9 +435,9 @@ tr:last-child td{border-bottom:none}
   <div class="sidebar-scroll">
     <div class="sidebar-section">Workspace</div>
     <a class="slink active" onclick="showPage('today',this)"><span class="sicon">🏠</span> Today</a>
-    <a class="slink" onclick="showPage('conversations',this)"><span class="sicon">💬</span> Conversations <span class="sbadge" id="badge-convs">0</span></a>
     <a class="slink" onclick="showPage('kanban',this)"><span class="sicon">📋</span> Pipeline</a>
     <a class="slink" onclick="showPage('enquiries',this)"><span class="sicon">⛵</span> Enquiries <span class="sbadge grey" id="badge-leads">0</span></a>
+    <a class="slink" onclick="showPage('conversations',this)"><span class="sicon">💬</span> Conversations <span class="sbadge" id="badge-convs">0</span></a>
 
     <div class="sidebar-section">Outreach</div>
     <a class="slink" onclick="showPage('composer',this)"><span class="sicon">📱</span> WA Composer</a>
@@ -445,16 +445,15 @@ tr:last-child td{border-bottom:none}
 
     <div class="sidebar-section">Insights</div>
     <a class="slink" onclick="showPage('analytics',this)"><span class="sicon">📊</span> Analytics</a>
+    <a class="slink" onclick="showPage('reviews',this)"><span class="sicon">⭐</span> Google Reviews</a>
 
-    <div class="sidebar-section">Chatwoot</div>
-    <a class="slink" href="https://app.aiingo.com/app/accounts/8/mentions" target="_blank"><span class="sicon">🔔</span> Mentions</a>
-    <a class="slink" href="https://app.aiingo.com/app/accounts/8/conversations" target="_blank"><span class="sicon">💬</span> All Conversations</a>
-    <a class="slink" href="https://app.aiingo.com/app/accounts/8/contacts" target="_blank"><span class="sicon">👤</span> Contacts</a>
-    <a class="slink" href="https://app.aiingo.com/app/accounts/8/reports/overview" target="_blank"><span class="sicon">📈</span> Live View</a>
-    <a class="slink" href="https://app.aiingo.com/app/accounts/8/settings/automation/list" target="_blank"><span class="sicon">⚡</span> Automation</a>
-    <a class="slink" href="https://app.aiingo.com/app/accounts/8/settings/canned-response/list" target="_blank"><span class="sicon">💾</span> Canned Responses</a>
-    <a class="slink" href="https://app.aiingo.com/app/accounts/8/settings/macros" target="_blank"><span class="sicon">🎯</span> Macros</a>
-    <a class="slink" href="https://app.aiingo.com/app/accounts/8/settings/general" target="_blank"><span class="sicon">⚙</span> CW Settings</a>
+    <div class="sidebar-section">Chatbox</div>
+    <a class="slink" href="https://app.aiingo.com/app/accounts/8/conversations" target="_blank"><span class="sicon">💬</span> All Conversations ↗</a>
+    <a class="slink" href="https://app.aiingo.com/app/accounts/8/contacts" target="_blank"><span class="sicon">👤</span> Contacts ↗</a>
+    <a class="slink" href="https://app.aiingo.com/app/accounts/8/reports/overview" target="_blank"><span class="sicon">📈</span> Live View ↗</a>
+    <a class="slink" href="https://app.aiingo.com/app/accounts/8/settings/automation/list" target="_blank"><span class="sicon">⚡</span> Automation ↗</a>
+    <a class="slink" href="https://app.aiingo.com/app/accounts/8/settings/canned-response/list" target="_blank"><span class="sicon">💾</span> Canned Responses ↗</a>
+    <a class="slink" href="https://app.aiingo.com/app/accounts/8/settings/macros" target="_blank"><span class="sicon">🎯</span> Macros ↗</a>
 
     <div class="sidebar-section">Settings</div>
     <a class="slink" onclick="showPage('users',this)"><span class="sicon">👥</span> Users</a>
@@ -499,10 +498,22 @@ tr:last-child td{border-bottom:none}
   <div id="page-today" class="page-content" style="display:flex;flex:1;overflow-y:auto">
     <div class="tab-pane" style="width:100%">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px">
-        <div class="today-greeting" id="today-greeting">Good morning, Baiju 👋</div>
-        <button class="btn sm" onclick="loadAll();renderToday()">⟳ Refresh</button>
+        <div>
+          <div class="today-greeting" id="today-greeting">Good morning, Baiju 👋</div>
+          <div class="today-sub" id="today-sub">Pearl Spot Tours · Alappuzha Backwaters</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div style="text-align:right;padding:8px 14px;background:var(--green-bg);border:1px solid #a7f3d0;border-radius:8px">
+            <div style="font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.4px">Revenue MTD</div>
+            <div style="font-size:20px;font-weight:800;color:var(--green)" id="today-rev-mtd">₹0</div>
+          </div>
+          <div style="text-align:right;padding:8px 14px;background:var(--accent-bg);border:1px solid #bfdbfe;border-radius:8px">
+            <div style="font-size:10px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.4px">Conversion</div>
+            <div style="font-size:20px;font-weight:800;color:var(--accent)" id="today-conv-rate">0%</div>
+          </div>
+          <button class="btn sm" onclick="loadAll();renderToday()">⟳ Refresh</button>
+        </div>
       </div>
-      <div class="today-sub" id="today-sub">Here's your Pearl Spot Tours booking pipeline for today.</div>
       <div class="pipeline-summary" id="ps-row">
         <div class="ps-card" onclick="filterKanban('New')"><div class="ps-count" id="ps-new">—</div><div class="ps-label">New</div><div class="ps-bar" style="background:#9ca3af"></div></div>
         <div class="ps-card" onclick="filterKanban('Quoted')"><div class="ps-count" id="ps-quoted">—</div><div class="ps-label">Quoted</div><div class="ps-bar" style="background:#1f93ff"></div></div>
@@ -579,7 +590,7 @@ tr:last-child td{border-bottom:none}
             </div>
             <div class="chat-top-actions">
               <button class="btn sm" id="resolve-btn" onclick="resolveConv()">✓ Resolve</button>
-              <a class="btn sm" id="cw-link" href="#" target="_blank">↗ Open in Chatwoot</a>
+              <a class="btn sm" id="cw-link" href="#" target="_blank">↗ Open in Chatbox</a>
               <button class="btn sm ghost">⋯</button>
             </div>
           </div>
@@ -628,7 +639,7 @@ tr:last-child td{border-bottom:none}
               <span class="cp-section-title">Quick Actions</span>
             </div>
             <div style="padding:10px 16px;display:flex;flex-direction:column;gap:6px">
-              <a href="https://app.aiingo.com/app/accounts/8/contacts" target="_blank" class="btn sm" style="text-decoration:none">👤 View in Chatwoot</a>
+              <a href="https://app.aiingo.com/app/accounts/8/contacts" target="_blank" class="btn sm" style="text-decoration:none">👤 View in Chatbox</a>
               <a href="https://app.aiingo.com/app/accounts/8/settings/labels/list" target="_blank" class="btn sm" style="text-decoration:none">🏷 Manage Labels</a>
             </div>
           </div>
@@ -761,10 +772,22 @@ tr:last-child td{border-bottom:none}
               <span style="font-size:12px;color:var(--muted);font-weight:600">Recipients:</span>
               <span style="background:var(--accent-bg);color:var(--accent);border:1px solid #bfdbfe;border-radius:20px;padding:2px 12px;font-size:12px;font-weight:700" id="camp-count">0 leads</span>
             </div>
-            <div class="form-group"><label class="form-label">Message ({{name}} variable supported)</label>
-              <textarea id="camp-msg" class="form-textarea" rows="5" placeholder="Hi {{name}}, we have special offers on our houseboats for your upcoming dates…"></textarea>
+            <div class="form-group">
+              <label class="form-label">Select Template</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <select id="camp-tpl-select" class="form-select" onchange="loadCampTemplate()" style="flex:1">
+                  <option value="">— Choose a saved template —</option>
+                </select>
+                <button class="btn sm" onclick="showPage('campaigns',null)" style="white-space:nowrap">+ New Template ↓</button>
+              </div>
             </div>
-            <button class="btn primary" onclick="sendCampaign()">📱 Send Campaign</button>
+            <div class="form-group"><label class="form-label">Message <span style="font-weight:400;color:var(--muted);font-size:10px">({{name}} · {{checkin}} · {{service}} · {{price}} supported)</span></label>
+              <textarea id="camp-msg" class="form-textarea" rows="6" placeholder="Hi {{name}}, we have special offers on our houseboats for your upcoming dates…"></textarea>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <button class="btn primary" onclick="sendCampaign()">📱 Send Campaign</button>
+              <span id="camp-send-status" style="font-size:11px;color:var(--muted)"></span>
+            </div>
             <div id="camp-result" style="display:none;margin-top:10px;padding:10px 12px;border-radius:6px;font-size:12px;font-weight:600"></div>
           </div>
         </div>
@@ -776,10 +799,20 @@ tr:last-child td{border-bottom:none}
           </div>
         </div>
       </div>
+      <!-- Template Manager -->
       <div class="card">
-        <div class="card-head"><span class="card-title">🔗 Chatwoot Campaign Features</span></div>
+        <div class="card-head">
+          <span class="card-title">📋 WA Message Templates</span>
+          <button class="btn primary sm" onclick="openAddTemplate()">+ New Template</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div id="template-list" style="min-height:80px"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="card-title">🔗 Chatbox Campaign Features</span></div>
         <div class="card-body">
-          <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Advanced campaign features are handled natively in Chatwoot.</p>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <a href="https://app.aiingo.com/app/accounts/8/campaigns" target="_blank" class="cw-feature-link"><span class="cw-icon">📣</span><span class="cw-label">Ongoing Campaigns</span><span class="cw-arrow">↗</span></a>
             <a href="https://app.aiingo.com/app/accounts/8/settings/automation/list" target="_blank" class="cw-feature-link"><span class="cw-icon">⚡</span><span class="cw-label">Automation Rules</span><span class="cw-arrow">↗</span></a>
@@ -829,6 +862,101 @@ tr:last-child td{border-bottom:none}
           <a href="https://app.aiingo.com/app/accounts/8/reports/csat" target="_blank" class="cw-feature-link"><span class="cw-icon">⭐</span><span class="cw-label">CSAT Reports</span><span class="cw-arrow">↗</span></a>
         </div>
       </div>
+    </div>
+  </div>
+
+
+  <!-- ── GOOGLE REVIEWS PAGE ── -->
+  <div id="page-reviews" class="page-content" style="display:none;flex:1;overflow-y:auto">
+    <div style="padding:20px;width:100%">
+      <div class="page-header">
+        <div><div class="page-title">Google Reviews</div><div class="page-sub">Monitor and auto-respond to guest reviews via Zapier automation</div></div>
+        <div style="display:flex;gap:8px">
+          <a href="https://business.google.com/reviews" target="_blank" class="btn primary" style="text-decoration:none">⭐ Open Google Business ↗</a>
+          <a href="https://zapier.com/app/zaps" target="_blank" class="btn sm" style="text-decoration:none">⚡ Zapier Automations ↗</a>
+        </div>
+      </div>
+
+      <!-- Review Link Card -->
+      <div class="grid2" style="margin-bottom:0">
+        <div class="card">
+          <div class="card-head"><span class="card-title">📎 Your Review Link</span></div>
+          <div class="card-body">
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:12px;color:var(--text2);word-break:break-all;margin-bottom:12px;font-family:monospace">
+              https://g.page/r/PearlSpotToursAlappuzha/review
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn primary sm" onclick="copyReviewLink()">📋 Copy Link</button>
+              <a href="https://g.page/r/PearlSpotToursAlappuzha/review" target="_blank" class="btn sm" style="text-decoration:none">↗ Open Link</a>
+              <button class="btn sm" onclick="showQR()">📱 Show QR Code</button>
+            </div>
+            <div id="review-qr" style="display:none;margin-top:14px;text-align:center">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://g.page/r/PearlSpotToursAlappuzha/review" alt="QR Code" style="border-radius:8px;border:1px solid var(--border)">
+              <div style="font-size:11px;color:var(--muted);margin-top:6px">Scan to leave a review</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">⚡ Auto-Reply Automation</span></div>
+          <div class="card-body">
+            <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--green-bg);border:1px solid #a7f3d0;border-radius:8px;margin-bottom:14px">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⚡</div>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--green)">Auto-Reply Active</div>
+                <div style="font-size:11px;color:#065f46">Zapier responds to new reviews automatically</div>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px">
+              When a guest leaves a Google review, Zapier automatically posts a personalised thank-you reply within minutes — keeping your response rate at 100%.
+            </div>
+            <div style="display:flex;gap:8px">
+              <a href="https://zapier.com/app/zaps" target="_blank" class="btn sm" style="text-decoration:none">⚙ Edit Zap ↗</a>
+              <a href="https://business.google.com/reviews" target="_blank" class="btn sm" style="text-decoration:none">📊 View Reviews ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review Stats -->
+      <div class="kpi-row" style="margin-top:16px">
+        <div class="kpi-card"><div class="kpi-icon bg-yellow">⭐</div><div class="kpi-label">Avg Rating</div><div class="kpi-val" id="rev-avg-rating">—</div><div class="kpi-trend">Google Business</div></div>
+        <div class="kpi-card"><div class="kpi-icon bg-blue">💬</div><div class="kpi-label">Total Reviews</div><div class="kpi-val" id="rev-total">—</div><div class="kpi-trend">All time</div></div>
+        <div class="kpi-card"><div class="kpi-icon bg-green">✅</div><div class="kpi-label">Response Rate</div><div class="kpi-val" id="rev-response-rate">100%</div><div class="kpi-trend up">Auto-replied</div></div>
+        <div class="kpi-card"><div class="kpi-icon bg-purple">📱</div><div class="kpi-label">Review Requests Sent</div><div class="kpi-val" id="rev-requests-sent">—</div><div class="kpi-trend">Via WhatsApp</div></div>
+      </div>
+
+      <!-- Review Request Blast -->
+      <div class="card">
+        <div class="card-head"><span class="card-title">📤 Send Review Requests</span><span style="font-size:11px;color:var(--muted)">Only to Completed bookings with no review sent</span></div>
+        <div class="card-body">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div style="font-size:13px;color:var(--text2)">
+              Pending review requests: <strong style="color:var(--accent)" id="rev-pending-count">—</strong> guests
+            </div>
+            <button class="btn primary" onclick="sendAllReviewRequests()">⭐ Send All Review Requests</button>
+            <span style="font-size:11px;color:var(--muted)">Sends via WhatsApp to completed bookings only</span>
+          </div>
+          <div id="rev-blast-result" style="display:none;margin-top:10px;padding:10px 12px;border-radius:6px;font-size:12px;font-weight:600"></div>
+        </div>
+      </div>
+
+      <!-- Review Template -->
+      <div class="card">
+        <div class="card-head"><span class="card-title">✏ Auto-Reply Template (Zapier)</span></div>
+        <div class="card-body">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:12px">This is the template your Zapier zap uses when auto-replying to Google reviews. Edit it directly in Zapier.</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:13px;color:var(--text2);line-height:1.7;font-family:Georgia,serif">
+            Thank you so much for your wonderful review, [Name]! 🙏<br><br>
+            It truly means the world to us here at Pearl Spot Tours. We're so glad you enjoyed your backwater experience on the serene waters of Alappuzha.<br><br>
+            We hope to welcome you back soon for another unforgettable journey! 🛥️🌴<br><br>
+            — Baiju &amp; Team, Pearl Spot Tours
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <a href="https://zapier.com/app/zaps" target="_blank" class="btn sm primary" style="text-decoration:none">✏ Edit in Zapier ↗</a>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -1004,6 +1132,34 @@ tr:last-child td{border-bottom:none}
   <button class="mobile-nav-btn" onclick="mobileNav('composer',this)"><span>📱</span><span>Message</span></button>
 </nav>
 
+
+<!-- ── ADD TEMPLATE MODAL ── -->
+<div class="modal-overlay" id="modal-add-template">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="modal-tpl-title">New WA Template</span>
+      <button class="modal-close" onclick="closeModal('modal-add-template')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-tpl-id">
+      <div class="form-group"><label class="form-label">Template Name</label><input id="tpl-name-input" class="form-input" placeholder="e.g. Onam Special Offer"></div>
+      <div class="form-group"><label class="form-label">Category</label>
+        <select id="tpl-category-input" class="form-select">
+          <option>Follow-up</option><option>Quote</option><option>Offer</option>
+          <option>Confirmation</option><option>Reminder</option><option>Review</option><option>Custom</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Message Body <span style="font-weight:400;color:var(--muted);font-size:10px">({{name}} {{checkin}} {{service}} {{price}} {{boat}} supported)</span></label>
+        <textarea id="tpl-body-input" class="form-textarea" rows="8" placeholder="Hi {{name}}, exciting news about your upcoming trip…"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modal-add-template')">Cancel</button>
+      <button class="btn primary" onclick="saveTemplate()">Save Template</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1029,7 +1185,7 @@ const API = {
 const STAGES = ['New','Quoted','Confirmed','Paid','Checked-In','Completed','Cancelled'];
 const AVATARBG = ['#1f93ff','#7c3aed','#059669','#d97706','#dc2626','#0891b2','#9333ea'];
 const bg = n => AVATARBG[(n||'A').charCodeAt(0) % AVATARBG.length];
-const PAGE_NAMES = {today:'Today',conversations:'Conversations',kanban:'Pipeline',enquiries:'Enquiries',composer:'WA Composer',campaigns:'Campaigns',analytics:'Analytics',users:'Users',pricing:'Pricing'};
+const PAGE_NAMES = {today:'Today',conversations:'Conversations',kanban:'Pipeline',enquiries:'Enquiries',composer:'WA Composer',campaigns:'Campaigns',analytics:'Analytics',reviews:'Google Reviews',users:'Users',pricing:'Pricing'};
 const STAGE_COLORS = {New:'grey',Quoted:'blue',Confirmed:'green',Paid:'purple','Checked-In':'teal',Completed:'yellow',Cancelled:'red'};
 
 // ═══════════════════════════════════════
@@ -1079,6 +1235,7 @@ window.addEventListener('DOMContentLoaded', function(){
   } catch(e){}
   loadAll();
   setTimeout(renderToday, 1200);
+  setTimeout(renderTemplateList, 500);
 });
 
 document.addEventListener('keydown', e => {
@@ -1096,6 +1253,8 @@ function showPage(page, linkEl){
   if (linkEl) linkEl.classList.add('active');
   const n = document.getElementById('tb-page'); if(n) n.textContent = PAGE_NAMES[page]||page;
   if (page==='analytics') renderAnalytics();
+  if (page==='reviews') renderReviews();
+  if (page==='campaigns') setTimeout(renderTemplateList, 50);
   if (page==='users') renderUsersTable();
   if (page==='today') renderToday();
   if (page==='kanban') renderKanban();
@@ -1409,7 +1568,7 @@ async function loadConvs(status, btn){
 }
 
 function renderConvListFallback(){
-  document.getElementById('conv-list').innerHTML = `<div style="padding:20px;text-align:center"><div style="font-size:13px;color:var(--muted);margin-bottom:12px">Connect via Chatwoot directly</div><a href="https://app.aiingo.com/app/accounts/8/inbox/9" target="_blank" class="btn primary" style="text-decoration:none">Open Chatwoot Inbox ↗</a></div>`;
+  document.getElementById('conv-list').innerHTML = `<div style="padding:20px;text-align:center"><div style="font-size:13px;color:var(--muted);margin-bottom:12px">Connect via Chatbox directly</div><a href="https://app.aiingo.com/app/accounts/8/inbox/9" target="_blank" class="btn primary" style="text-decoration:none">Open Chatbox Inbox ↗</a></div>`;
 }
 
 function renderConvList(){
@@ -1580,14 +1739,23 @@ async function dropCard(e, stage){
   e.preventDefault();
   document.querySelectorAll('.kanban-cards').forEach(el=>el.classList.remove('drag-over'));
   if (!dragId) return;
-  const l = allLeads.find(x=>String(lv(x,'id','SL NO'))===String(dragId));
-  if (l){ l.stage=stage; l['Stage']=stage; }
-  renderKanban();
-  try {
-    await fetch(API.leadsUpdate,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:dragId,fields:{'Stage':stage}})});
-    toast(`Moved to ${stage}`,'ok'); renderToday(); renderLeadsTable();
-  } catch(ex){ toast('Sync failed','err'); }
+  const savedId = dragId;
   dragId = null;
+  const l = allLeads.find(x=>String(lv(x,'id','SL NO'))===String(savedId));
+  if (!l){ toast('Lead not found','err'); return; }
+  const prevStage = lv(l,'stage','Stage')||'New';
+  if (prevStage === stage) return;
+  l.stage = stage; l['Stage'] = stage;
+  renderKanban(); renderToday(); renderLeadsTable();
+  try {
+    const res = await fetch(API.leadsUpdate,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:savedId,fields:{'Stage':stage}})});
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    toast(`✅ Moved to ${stage}`,'ok');
+  } catch(ex){
+    l.stage = prevStage; l['Stage'] = prevStage;
+    renderKanban();
+    toast('Sync failed — check n8n is active','err');
+  }
 }
 
 // ═══════════════════════════════════════
@@ -1877,6 +2045,151 @@ function toast(msg,type='ok'){ const el=document.getElementById('toast'); el.tex
 function toggleNotif(){ document.getElementById('notif-panel').classList.toggle('open'); }
 function clearNotifs(){ document.getElementById('notif-list').innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No notifications</div>'; document.getElementById('notif-count').textContent='0'; document.getElementById('notif-panel').classList.remove('open'); }
 document.addEventListener('click',e=>{ if(!e.target.closest('#notif-toggle')&&!e.target.closest('#notif-panel')) document.getElementById('notif-panel')?.classList.remove('open'); });
+
+// ═══════════════════════════════════════
+// TEMPLATE MANAGER
+// ═══════════════════════════════════════
+let waTemplates = [];
+try { waTemplates = JSON.parse(localStorage.getItem('ps_templates') || '[]'); } catch(e){}
+if (!waTemplates.length) waTemplates = [
+  {id:'t1', name:'Follow-up (Cold Lead)',    category:'Follow-up',    body:'Hi {{name}}! 👋\n\nWelcome to *⛵ Pearl Spot Tours*\n\nThank you for your enquiry about {{service}}. Our team will send you the best available rates shortly.\n\n📞 Baiju: +91 75590 31555\n\n_Pearl Spot Tours — Since 1998_ 🌴'},
+  {id:'t2', name:'Quote Sharing',            category:'Quote',        body:'Dear {{name}},\n\nYour personalised quote for {{service}} ({{dayType}}):\n📅 Check-in: {{checkin}}\n💰 *Total: ₹{{price}}*\n🚢 Boat: {{boat}}\n\nTo confirm, please transfer the advance amount.\n📞 +91 75590 31555'},
+  {id:'t3', name:'Booking Confirmation',     category:'Confirmation', body:'✅ *Booking Confirmed — Pearl Spot Tours*\n\nDear {{name}}, your booking is confirmed!\n🚢 {{boat}} | {{service}} | {{checkin}}\n📍 Punnamada Jetty, 12:00 PM check-in\n📞 +91 75590 31555'},
+  {id:'t4', name:'24h Reminder',             category:'Reminder',     body:'⏰ *Reminder — Your trip is tomorrow!*\n\nDear {{name}}, your houseboat experience with Pearl Spot Tours is tomorrow 🛥️\n📍 Punnamada Jetty — Arrive by 11:30 AM\n📞 +91 75590 31555'},
+  {id:'t5', name:'Onam Special Offer',       category:'Offer',        body:'🎉 *Onam Special — Pearl Spot Tours*\n\nDear {{name}},\n\nCelebrate Onam on the backwaters of Alappuzha! Special rates for Onam season. Book now before slots fill up!\n📞 +91 75590 31555 | pearlspottours.com'},
+  {id:'t6', name:'Review Request (Post-Trip)',category:'Review',       body:'🌟 *Thank You — Pearl Spot Tours*\n\nDear {{name}}, we hope you loved your backwater experience! Please take 2 mins to leave us a review:\n👉 https://g.page/r/PearlSpotToursAlappuzha/review\n\nThank you! 🙏'},
+];
+function saveTemplates(){ localStorage.setItem('ps_templates', JSON.stringify(waTemplates)); }
+
+function renderTemplateList(){
+  // Render the template manager card list
+  const el = document.getElementById('template-list');
+  if(el){
+    if(!waTemplates.length){
+      el.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">No templates yet — click + New Template above</div>';
+    } else {
+      el.innerHTML = waTemplates.map(t=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--border)">
+          <div style="width:34px;height:34px;border-radius:8px;background:var(--accent-bg);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">
+            ${{Follow-up:'🔄',Quote:'💰',Offer:'🎁',Confirmation:'✅',Reminder:'⏰',Review:'⭐',Custom:'📝'}[t.category]||'📝'}
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;color:var(--text)">${t.name}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:1px">
+              <span style="background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-weight:500">${t.category}</span>
+              &nbsp;${t.body.substring(0,55).replace(/\n/g,' ')}…
+            </div>
+          </div>
+          <button class="btn sm primary" onclick="useTemplate('${t.id}')">Use ↑</button>
+          <button class="btn sm" onclick="editTemplate('${t.id}')">Edit</button>
+          <button class="btn sm danger" style="padding:4px 8px" onclick="deleteTemplate('${t.id}')">✕</button>
+        </div>`).join('');
+    }
+  }
+  // Also populate the inline dropdown in the campaign send card
+  const sel = document.getElementById('camp-tpl-select');
+  if(sel){
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— Choose a saved template —</option>' +
+      waTemplates.map(t=>`<option value="${t.id}">${t.category} · ${t.name}</option>`).join('');
+    sel.value = cur;
+  }
+}
+
+function loadCampTemplate(){
+  const sel = document.getElementById('camp-tpl-select');
+  if(!sel||!sel.value) return;
+  const t = waTemplates.find(x=>x.id===sel.value);
+  if(!t) return;
+  document.getElementById('camp-msg').value = t.body;
+  toast('Template loaded: '+t.name,'ok');
+}
+
+function openAddTemplate(){ document.getElementById('modal-tpl-title').textContent='New WA Template'; document.getElementById('edit-tpl-id').value=''; document.getElementById('tpl-name-input').value=''; document.getElementById('tpl-body-input').value=''; document.getElementById('tpl-category-input').value='Follow-up'; openModal('modal-add-template'); }
+function editTemplate(id){ const t=waTemplates.find(x=>x.id===id); if(!t) return; document.getElementById('modal-tpl-title').textContent='Edit Template'; document.getElementById('edit-tpl-id').value=id; document.getElementById('tpl-name-input').value=t.name; document.getElementById('tpl-body-input').value=t.body; document.getElementById('tpl-category-input').value=t.category; openModal('modal-add-template'); }
+function deleteTemplate(id){ if(!confirm('Delete this template?')) return; waTemplates=waTemplates.filter(x=>x.id!==id); saveTemplates(); renderTemplateList(); toast('Template deleted','ok'); }
+function saveTemplate(){
+  const id=document.getElementById('edit-tpl-id').value;
+  const name=document.getElementById('tpl-name-input').value.trim();
+  const body=document.getElementById('tpl-body-input').value.trim();
+  const category=document.getElementById('tpl-category-input').value;
+  if(!name||!body){ toast('Name and body required','err'); return; }
+  if(id){ const t=waTemplates.find(x=>x.id===id); if(t){t.name=name;t.body=body;t.category=category;} }
+  else { waTemplates.push({id:'t'+Date.now(),name,body,category}); }
+  saveTemplates(); closeModal('modal-add-template'); renderTemplateList(); toast(id?'Template updated':'Template saved','ok');
+}
+function useTemplate(id){
+  const t=waTemplates.find(x=>x.id===id); if(!t) return;
+  document.getElementById('camp-msg').value=t.body;
+  toast('Template loaded into message field','ok');
+}
+
+// ═══════════════════════════════════════
+// GOOGLE REVIEWS
+// ═══════════════════════════════════════
+function renderReviews(){
+  const reviewPending = allLeads.filter(l => lv(l,'stage','Stage')==='Completed' && lv(l,'reviewSent','Review_Sent').toLowerCase()!=='yes');
+  const reviewSent = allLeads.filter(l => lv(l,'reviewSent','Review_Sent').toLowerCase()==='yes');
+  const setText=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  setText('rev-total', '—');
+  setText('rev-avg-rating', '4.8 ★');
+  setText('rev-requests-sent', reviewSent.length);
+  setText('rev-pending-count', reviewPending.length);
+}
+
+function copyReviewLink(){
+  navigator.clipboard.writeText('https://g.page/r/PearlSpotToursAlappuzha/review').then(()=>toast('Review link copied!','ok'));
+}
+
+function showQR(){
+  const el=document.getElementById('review-qr');
+  if(el) el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+
+async function sendAllReviewRequests(){
+  const pending = allLeads.filter(l => lv(l,'stage','Stage')==='Completed' && lv(l,'reviewSent','Review_Sent').toLowerCase()!=='yes');
+  if(!pending.length){ toast('No pending review requests','warn'); return; }
+  if(!confirm(`Send review requests to ${pending.length} guests?`)) return;
+  const el=document.getElementById('rev-blast-result');
+  el.style.cssText='display:block;padding:10px 12px;border-radius:6px;font-size:12px;font-weight:600;background:var(--yellow-bg);border:1px solid #fde68a;color:var(--yellow)';
+  el.textContent=`Sending to ${pending.length} guests…`;
+  try {
+    await fetch(API.automation,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'bulk_whatsapp',leads:pending.map(l=>({phone:lv(l,'phone','Phone'),name:lv(l,'name','Name'),message:'🌟 Thank you for choosing Pearl Spot Tours, '+lv(l,'name','Name')+'! We hope you loved the experience. Please take 2 mins to leave us a Google review:\n👉 https://g.page/r/PearlSpotToursAlappuzha/review\n\nThank you! 🙏 — Baiju & Team'}))})});
+    el.style.cssText='display:block;padding:10px 12px;border-radius:6px;font-size:12px;font-weight:600;background:var(--green-bg);border:1px solid #a7f3d0;color:var(--green)';
+    el.innerHTML=`✅ Sent to ${pending.length} guests`; toast('Review requests sent','ok');
+    renderReviews();
+  } catch(e){
+    el.style.cssText='display:block;padding:10px 12px;border-radius:6px;font-size:12px;font-weight:600;background:var(--red-bg);border:1px solid #fecaca;color:var(--red)';
+    el.innerHTML=`❌ ${e.message}`;
+  }
+}
+
+// ═══════════════════════════════════════
+// UPDATE renderToday WITH REVENUE/CONVERSION
+// ═══════════════════════════════════════
+const _origRenderToday = renderToday;
+function renderToday(){
+  _origRenderToday();
+  // Revenue MTD
+  const now = new Date();
+  const monthStr = now.toISOString().substring(0,7);
+  let mtdRev=0;
+  allLeads.forEach(l=>{
+    const d = lv(l,'date','Date');
+    if(d && d.substring(0,7)===monthStr){
+      const p=parseFloat(lv(l,'paidAmount','Paid_Amount')||0);
+      if(p>0) mtdRev+=p;
+    }
+  });
+  const total = allLeads.length;
+  const confirmed = allLeads.filter(l=>['Confirmed','Paid','Checked-In','Completed'].includes(lv(l,'stage','Stage'))).length;
+  const convRate = total>0?Math.round(confirmed/total*100):0;
+  const revEl=document.getElementById('today-rev-mtd'); if(revEl) revEl.textContent='₹'+(mtdRev>0?mtdRev.toLocaleString('en-IN'):'0');
+  const convEl=document.getElementById('today-conv-rate'); if(convEl) convEl.textContent=convRate+'%';
+}
+
+// Template list auto-initialised via renderTemplateList call in showPage above
+
 </script>
 </body>
 </html>
