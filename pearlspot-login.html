@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pearl Spot Tours · Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f3f4f6;
+  --surface:#ffffff;
+  --border:#e5e7eb;
+  --border2:#d1d5db;
+  --accent:#1f93ff;
+  --accent-dark:#1570cd;
+  --accent-bg:#eff6ff;
+  --text:#1f2937;
+  --text2:#374151;
+  --muted:#6b7280;
+  --muted2:#9ca3af;
+  --green:#059669;
+  --green-bg:#ecfdf5;
+  --red:#dc2626;
+  --red-bg:#fef2f2;
+  --shadow:0 1px 3px rgba(0,0,0,.08);
+  --shadow-md:0 4px 24px rgba(0,0,0,.10);
+  --radius:8px;
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+html,body{height:100%;background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text)}
+body{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+
+.login-wrap{width:100%;max-width:400px}
+
+.login-brand{text-align:center;margin-bottom:32px}
+.login-logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#0ea5e9,#1f93ff);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;box-shadow:0 4px 14px rgba(31,147,255,.25)}
+.login-logo svg{width:28px;height:28px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.login-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:-.3px}
+.login-sub{font-size:13px;color:var(--muted)}
+
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:32px;box-shadow:var(--shadow-md)}
+.login-card-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px}
+.login-card-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.form-input{width:100%;background:var(--surface);border:1.5px solid var(--border);color:var(--text);padding:10px 13px;border-radius:8px;font-size:14px;font-family:inherit;outline:none;transition:.15s}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(31,147,255,.1)}
+.form-input::placeholder{color:var(--muted2)}
+.form-input.error{border-color:var(--red)}
+
+.btn-login{width:100%;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+.btn-login:hover{background:var(--accent-dark)}
+.btn-login:active{transform:scale(.99)}
+.btn-login:disabled{opacity:.6;cursor:not-allowed}
+
+.error-msg{background:var(--red-bg);border:1px solid #fecaca;color:var(--red);padding:10px 13px;border-radius:8px;font-size:13px;font-weight:500;margin-bottom:16px;display:none}
+
+.user-select-label{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:block}
+.user-pills{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px}
+.user-pill{display:flex;align-items:center;gap:7px;padding:7px 12px;border:1.5px solid var(--border);border-radius:30px;cursor:pointer;transition:.13s;background:var(--surface);font-size:13px;font-weight:500;color:var(--text2)}
+.user-pill:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.user-pill.active{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.user-pill-avatar{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+
+.divider{display:flex;align-items:center;gap:10px;margin:20px 0;color:var(--muted2);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.login-footer{text-align:center;margin-top:20px;font-size:12px;color:var(--muted)}
+.login-footer a{color:var(--accent);text-decoration:none;font-weight:500}
+
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div class="login-wrap">
+
+  <div class="login-brand">
+    <div class="login-logo">
+      <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M9 21V9h6v12"/><path d="M5 21h14"/></svg>
+    </div>
+    <div class="login-title">Pearl Spot Tours</div>
+    <div class="login-sub">Backwater CRM · Powered by Aiingo</div>
+  </div>
+
+  <div class="login-card">
+    <div class="login-card-title">Sign in to your account</div>
+    <div class="login-card-sub">Select your profile or enter credentials below</div>
+
+    <div id="error-msg" class="error-msg">Invalid email or password. Please try again.</div>
+
+    <span class="user-select-label">Quick access</span>
+    <div class="user-pills" id="user-pills"></div>
+
+    <div class="divider">or enter manually</div>
+
+    <div class="form-group">
+      <label class="form-label">Email address</label>
+      <input id="email" class="form-input" type="email" placeholder="you@pearlspottours.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input id="password" class="form-input" type="password" placeholder="Enter your password" autocomplete="current-password">
+    </div>
+
+    <button class="btn-login" id="login-btn" onclick="doLogin()">
+      <span id="btn-text">Sign in</span>
+      <div class="spinner" id="spinner"></div>
+    </button>
+  </div>
+
+  <div class="login-footer">
+    Powered by <a href="https://aiingo.com" target="_blank">Aiingo Technologies</a> &nbsp;·&nbsp; Pearl Spot Tours © 2026
+  </div>
+
+</div>
+
+<script>
+const AVATARBG = ['#1f93ff','#7c3aed','#059669','#d97706','#0891b2','#9333ea','#dc2626'];
+const bg = n => AVATARBG[n.charCodeAt(0) % AVATARBG.length];
+
+const USERS = [
+  { id:'u1', name:'Baiju',        email:'baiju@pearlspottours.com',   pwd:'Pearl@Baiju26',  role:'admin'  },
+  { id:'u2', name:'Admin',        email:'admin@pearlspottours.com',    pwd:'Pearl@Admin26',  role:'admin'  },
+  { id:'u3', name:'Hussain',      email:'hussain@aiingo.com',          pwd:'Aiingo@2026',    role:'admin'  },
+  { id:'u4', name:'Reception',    email:'reception@pearlspottours.com',pwd:'Pearl@Recep26',  role:'agent'  },
+  { id:'u5', name:'Boat Staff',   email:'staff@pearlspottours.com',    pwd:'Pearl@Staff26',  role:'viewer' },
+];
+
+localStorage.setItem('ps_users', JSON.stringify(USERS));
+
+function renderPills() {
+  const wrap = document.getElementById('user-pills');
+  wrap.innerHTML = USERS.map(u => `
+    <div class="user-pill" onclick="selectUser('${u.id}')" id="pill-${u.id}">
+      <div class="user-pill-avatar" style="background:${bg(u.name)}">${u.name.charAt(0)}</div>
+      ${u.name}
+    </div>`).join('');
+}
+
+function selectUser(id) {
+  const u = USERS.find(x => x.id === id);
+  if (!u) return;
+  document.querySelectorAll('.user-pill').forEach(p => p.classList.remove('active'));
+  document.getElementById('pill-' + id)?.classList.add('active');
+  document.getElementById('email').value = u.email;
+  document.getElementById('password').value = u.pwd;
+  document.getElementById('email').classList.remove('error');
+  document.getElementById('password').classList.remove('error');
+  document.getElementById('error-msg').style.display = 'none';
+}
+
+function doLogin() {
+  const email = document.getElementById('email').value.trim().toLowerCase();
+  const pwd   = document.getElementById('password').value;
+  const errEl = document.getElementById('error-msg');
+  errEl.style.display = 'none';
+  document.getElementById('email').classList.remove('error');
+  document.getElementById('password').classList.remove('error');
+
+  if (!email || !pwd) {
+    errEl.textContent = 'Please enter your email and password.';
+    errEl.style.display = 'block';
+    if (!email) document.getElementById('email').classList.add('error');
+    if (!pwd)   document.getElementById('password').classList.add('error');
+    return;
+  }
+
+  const user = USERS.find(u => u.email.toLowerCase() === email && u.pwd === pwd);
+  if (!user) {
+    errEl.textContent = 'Invalid email or password. Please try again.';
+    errEl.style.display = 'block';
+    document.getElementById('password').classList.add('error');
+    document.getElementById('password').value = '';
+    return;
+  }
+
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true;
+  document.getElementById('btn-text').textContent = 'Signing in…';
+  document.getElementById('spinner').style.display = 'block';
+
+  const session = { id: user.id, name: user.name, email: user.email, role: user.role, loginAt: new Date().toISOString() };
+  sessionStorage.setItem('ps_user', JSON.stringify(session));
+  localStorage.setItem('ps_user', JSON.stringify(session));
+
+  setTimeout(() => { window.location.href = 'index.html'; }, 600);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+renderPills();
+</script>
+</body>
+</html>

@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pearl Spot Tours · CRM</title>
+<script async src="https://js.stripe.com/v3/pricing-table.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f3f4f6;
+  --sidebar-bg:#1f2d3d;
+  --sidebar-text:#b0bec5;
+  --sidebar-active:#3d9ff5;
+  --sidebar-active-bg:rgba(61,159,245,.12);
+  --sidebar-hover:rgba(255,255,255,.06);
+  --surface:#fff;
+  --surface2:#f9fafb;
+  --border:#e5e7eb;
+  --border2:#d1d5db;
+  --accent:#1f93ff;
+  --accent-bg:#eff6ff;
+  --accent-dark:#1570cd;
+  --green:#059669;--green-bg:#ecfdf5;
+  --yellow:#d97706;--yellow-bg:#fffbeb;
+  --red:#dc2626;--red-bg:#fef2f2;
+  --purple:#7c3aed;--purple-bg:#f5f3ff;
+  --teal:#0891b2;--teal-bg:#ecfeff;
+  --text:#1f2937;--text2:#374151;
+  --muted:#6b7280;--muted2:#9ca3af;
+  --radius:6px;
+  --shadow:0 1px 3px rgba(0,0,0,.08);
+  --shadow-md:0 4px 12px rgba(0,0,0,.1);
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --sidebar-w:228px;
+  --mid-w:320px;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;display:flex}
+#app{display:flex;height:100vh;width:100%}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.sidebar-brand{padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.06)}
+.brand-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#0ea5e9,#1f93ff);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.brand-icon svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.brand-name{font-size:14px;font-weight:700;color:#fff;opacity:.92;line-height:1.2}
+.brand-tag{font-size:10px;color:rgba(255,255,255,.4);font-weight:400}
+.sidebar-search{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sidebar-search input{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#e2e8f0;padding:6px 10px;border-radius:6px;font-size:12px;font-family:inherit;outline:none}
+.sidebar-search input::placeholder{color:rgba(255,255,255,.3)}
+.sidebar-search input:focus{border-color:var(--sidebar-active);background:rgba(255,255,255,.1)}
+.sidebar-scroll{overflow-y:auto;flex:1;padding:8px 0}
+.sidebar-scroll::-webkit-scrollbar{width:3px}
+.sidebar-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px}
+.sidebar-section{padding:16px 14px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.28)}
+.slink{display:flex;align-items:center;gap:9px;padding:7px 14px;cursor:pointer;color:var(--sidebar-text);font-size:13px;font-weight:500;transition:.1s;text-decoration:none;margin:1px 8px;border-radius:6px}
+.slink:hover{background:var(--sidebar-hover);color:#e2e8f0}
+.slink.active{background:var(--sidebar-active-bg);color:var(--sidebar-active);font-weight:600}
+.slink .sicon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.slink .sbadge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center}
+.slink .sbadge.grey{background:rgba(255,255,255,.15);color:var(--sidebar-text)}
+.sidebar-bottom{padding:10px 12px;border-top:1px solid rgba(255,255,255,.06)}
+.user-row{display:flex;align-items:center;gap:9px;padding:6px 2px;cursor:pointer;border-radius:6px;transition:.1s}
+.user-row:hover{background:rgba(255,255,255,.06)}
+.user-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;position:relative}
+.user-status-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;border:2px solid var(--sidebar-bg);position:absolute;bottom:0;right:0}
+.user-name{font-size:12px;font-weight:600;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role{font-size:10px;color:rgba(255,255,255,.4)}
+.user-actions{display:flex;gap:4px}
+.user-action-btn{background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;padding:4px;border-radius:4px;font-size:12px;transition:.1s}
+.user-action-btn:hover{background:rgba(255,255,255,.08);color:#e2e8f0}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── TOPBAR ── */
+.topbar{height:52px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;position:relative;z-index:100}
+.topbar-bc{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.bc-sep{color:var(--border2)}
+.bc-cur{color:var(--text);font-weight:600}
+.topbar-search{position:relative;flex:1;max-width:300px;margin:0 10px}
+.topbar-search input{width:100%;background:var(--bg);border:1.5px solid var(--border);color:var(--text);padding:6px 10px 6px 30px;border-radius:6px;font-size:12px;font-family:inherit;outline:none;transition:.12s}
+.topbar-search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(31,147,255,.1);background:#fff}
+.topbar-search .si{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--muted2);font-size:13px;pointer-events:none}
+.topbar-search .sk{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--muted2);background:var(--border);padding:1px 5px;border-radius:3px}
+.notif-btn{position:relative;background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:var(--muted);font-size:18px;transition:.12s}
+.notif-btn:hover{background:var(--bg);color:var(--text2)}
+.notif-badge{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:var(--red);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--surface)}
+.notif-panel{position:absolute;top:52px;right:10px;width:300px;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-md);z-index:300;display:none}
+.notif-panel.open{display:block}
+.notif-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;color:var(--text)}
+.notif-item{padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:.1s;display:flex;align-items:center;gap:8px}
+.notif-item:hover{background:var(--bg)}
+.notif-item:last-child{border-bottom:none}
+.notif-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.notif-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.notif-sub{font-size:11px;color:var(--muted)}
+
+/* ── PAGE CONTENT ── */
+.page-content{display:none;flex:1;flex-direction:column;overflow:hidden}
+.tab-pane{flex:1;overflow-y:auto;padding:20px}
+
+/* ── BUTTONS ── */
+.btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-size:12px;font-family:inherit;font-weight:500;transition:.12s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.btn:hover{border-color:var(--border2);background:var(--bg)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+.btn.success{background:var(--green);border-color:var(--green);color:#fff}
+.btn.success:hover{filter:brightness(.92)}
+.btn.danger{background:var(--red);border-color:var(--red);color:#fff}
+.btn.sm{padding:4px 10px;font-size:11px}
+.btn.ghost{background:none;border:none;color:var(--muted);padding:5px 8px}
+.btn.ghost:hover{background:var(--bg);color:var(--text2)}
+.btn-icon{background:none;border:none;color:var(--muted);cursor:pointer;padding:5px;border-radius:5px;font-size:14px;transition:.1s}
+.btn-icon:hover{background:var(--bg);color:var(--text2)}
+
+/* ── STANDARD LAYOUT ── */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.page-title{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.page-sub{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* ── KPI ── */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;box-shadow:var(--shadow)}
+.kpi-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:10px}
+.bg-blue{background:#eff6ff}.bg-green{background:#ecfdf5}.bg-yellow{background:#fffbeb}
+.bg-red{background:#fef2f2}.bg-purple{background:#f5f3ff}.bg-teal{background:#ecfeff}
+.kpi-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.kpi-val{font-size:28px;font-weight:800;color:var(--text);line-height:1}
+.kpi-trend{font-size:11px;color:var(--muted);margin-top:3px}
+.kpi-trend.up{color:var(--green)}.kpi-trend.dn{color:var(--red)}
+
+/* ── CARD ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);margin-bottom:16px}
+.card-head{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:13px;font-weight:600;color:var(--text2)}
+.card-body{padding:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:9px 13px;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap}
+td{padding:9px 13px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+tr:hover td{background:#f9fafb}
+tr:last-child td{border-bottom:none}
+
+/* ── BADGE ── */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
+.badge.green{background:#dcfce7;color:#15803d}
+.badge.yellow{background:#fef9c3;color:#a16207}
+.badge.red{background:#fee2e2;color:#b91c1c}
+.badge.blue{background:#dbeafe;color:#1d4ed8}
+.badge.grey{background:#f3f4f6;color:#6b7280;border:1px solid var(--border)}
+.badge.purple{background:#ede9fe;color:#6d28d9}
+.badge.teal{background:#ccfbf1;color:#0f766e}
+.badge.orange{background:#ffedd5;color:#c2410c}
+
+/* ── FILTERS ── */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.f-input,.f-select{background:var(--surface);border:1.5px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:12px;font-family:inherit;outline:none;transition:.12s}
+.f-input:focus,.f-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(31,147,255,.1)}
+
+/* ── FORM ── */
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.form-label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px}
+.form-input,.form-select,.form-textarea{background:var(--surface);border:1.5px solid var(--border);color:var(--text);padding:8px 11px;border-radius:6px;font-size:13px;font-family:inherit;outline:none;transition:.12s;width:100%}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(31,147,255,.1)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* ── PROGRESS ── */
+.prog-item{margin-bottom:10px}
+.prog-row{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:500}
+.prog-track{height:5px;background:#f3f4f6;border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;background:var(--accent);transition:.5s}
+.prog-fill.green{background:var(--green)}.prog-fill.yellow{background:var(--yellow)}
+.prog-fill.red{background:var(--red)}.prog-fill.purple{background:var(--purple)}
+.prog-fill.teal{background:var(--teal)}
+
+/* ── MINI BARS ── */
+.mini-bars{display:flex;align-items:flex-end;gap:4px;height:64px;padding-top:4px}
+.mini-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.mini-bar{width:100%;border-radius:3px 3px 0 0;background:var(--accent);opacity:.8;min-height:2px;transition:.4s}
+.mini-bar-label{font-size:9px;color:var(--muted);white-space:nowrap}
+
+/* ── STAT ROW ── */
+.stat-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.stat-row:last-child{border-bottom:none}
+.stat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.stat-label{flex:1;color:var(--muted)}
+.stat-val{font-weight:700;color:var(--text)}
+.stat-pct{color:var(--muted2);font-size:11px;margin-left:4px}
+
+/* ── TODAY ── */
+.today-greeting{font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px;letter-spacing:-.4px}
+.today-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.pipeline-summary{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:20px}
+.ps-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center;cursor:pointer;transition:.12s;box-shadow:var(--shadow)}
+.ps-card:hover{border-color:var(--accent);box-shadow:0 0 0 3px rgba(31,147,255,.1)}
+.ps-count{font-size:26px;font-weight:800;color:var(--text);line-height:1}
+.ps-label{font-size:10px;color:var(--muted);margin-top:4px;font-weight:500}
+.ps-bar{height:3px;border-radius:2px;margin-top:8px}
+.today-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.today-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.call-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.call-item:last-child{border-bottom:none}
+.call-avatar{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.call-name{font-size:13px;font-weight:600;color:var(--text)}
+.call-meta{font-size:11px;color:var(--muted)}
+.call-time{margin-left:auto;font-size:11px;font-weight:600;color:var(--accent);white-space:nowrap}
+
+/* ── KANBAN ── */
+.kanban-board{display:grid;grid-template-columns:repeat(7,minmax(190px,1fr));gap:12px;overflow-x:auto;padding-bottom:16px}
+.kanban-col{background:var(--surface2);border:1px solid var(--border);border-radius:8px;min-height:400px;display:flex;flex-direction:column}
+.kanban-col-head{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface2);z-index:1}
+.kanban-col-title{font-size:12px;font-weight:700;color:var(--text2)}
+.kanban-col-count{font-size:11px;font-weight:700;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;border-radius:10px;padding:0 6px}
+.kanban-cards{padding:8px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.kanban-cards.drag-over{background:rgba(31,147,255,.06);border-radius:6px}
+.kcard{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px;cursor:grab;transition:.12s;box-shadow:var(--shadow)}
+.kcard:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(31,147,255,.12)}
+.kcard.dragging{opacity:.4;border-style:dashed}
+.kcard-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px}
+.kcard-meta{font-size:10px;color:var(--muted);line-height:1.7}
+.kcard-actions{display:flex;gap:4px;margin-top:6px}
+.kcard-btn{font-size:11px;padding:3px 7px;border-radius:4px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-family:inherit;transition:.1s}
+.kcard-btn:hover{background:var(--bg);color:var(--text2)}
+
+/* ── CONVERSATIONS (3-col Chatwoot layout) ── */
+.conv-3col{display:grid;grid-template-columns:var(--mid-w) 1fr 260px;flex:1;overflow:hidden;height:100%}
+.conv-mid{border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface2);overflow:hidden}
+.conv-mid-head{padding:12px 14px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:8px}
+.conv-mid-head-title{font-size:14px;font-weight:700;color:var(--text)}
+.conv-mid-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface);padding:0 14px}
+.cmid-tab{padding:9px 14px;border:none;background:none;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;font-family:inherit;position:relative;transition:.1s}
+.cmid-tab:hover{color:var(--text2)}
+.cmid-tab.active{color:var(--accent);font-weight:600}
+.cmid-tab.active::after{content:"";position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--accent)}
+.cmid-tab-badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;background:var(--accent);color:#fff;border-radius:8px;font-size:9px;font-weight:700;margin-left:4px}
+.conv-list-scroll{overflow-y:auto;flex:1}
+.conv-list-scroll::-webkit-scrollbar{width:3px}
+.conv-list-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.conv-item{padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:.1s;background:var(--surface)}
+.conv-item:hover{background:#f0f7ff}
+.conv-item.selected{background:var(--accent-bg);border-left:3px solid var(--accent)}
+.conv-item-top{display:flex;align-items:flex-start;gap:10px}
+.conv-item-avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+.conv-item-content{flex:1;min-width:0}
+.conv-item-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+.conv-item-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+.conv-item-time{font-size:11px;color:var(--muted2);flex-shrink:0}
+.conv-item-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.unread-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:3px}
+.chat-view{display:flex;flex-direction:column;background:#fff;overflow:hidden}
+.chat-top{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);flex-shrink:0}
+.chat-top-left{display:flex;align-items:center;gap:10px}
+.chat-top-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+.chat-top-name{font-size:14px;font-weight:700;color:var(--text)}
+.chat-top-channel{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:3px}
+.chat-top-actions{display:flex;gap:6px;align-items:center}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:#f8fafc}
+.msg-row{display:flex;gap:8px;align-items:flex-end}
+.msg-row.out{flex-direction:row-reverse}
+.msg-bubble{max-width:68%;padding:9px 13px;border-radius:10px;font-size:13px;line-height:1.55}
+.msg-row.in .msg-bubble{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:3px;color:var(--text)}
+.msg-row.out .msg-bubble{background:#ebf5ff;border:1px solid #bfdbfe;border-bottom-right-radius:3px;color:var(--text)}
+.msg-meta{font-size:10px;color:var(--muted2);margin-top:3px}
+.msg-row.out .msg-meta{text-align:right}
+.chat-composer{border-top:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.comp-tabs{display:flex;gap:0;padding:0 14px;border-bottom:1px solid var(--border)}
+.comp-tab{padding:8px 14px;border:none;background:none;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;font-family:inherit;transition:.1s}
+.comp-tab.active{color:var(--text);font-weight:600}
+.comp-body{padding:10px 14px}
+.comp-input{width:100%;border:none;outline:none;font-size:13px;font-family:inherit;color:var(--text);background:transparent;resize:none;min-height:60px}
+.comp-input::placeholder{color:var(--muted2)}
+.comp-footer{padding:8px 14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.comp-tools{display:flex;gap:2px}
+.comp-tool{background:none;border:none;color:var(--muted);cursor:pointer;padding:5px;border-radius:5px;font-size:14px;transition:.1s}
+.comp-tool:hover{background:var(--bg);color:var(--text2)}
+.send-btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:.15s}
+.send-btn:hover{background:var(--accent-dark)}
+.contact-panel{border-left:1px solid var(--border);background:var(--surface);overflow-y:auto;display:flex;flex-direction:column}
+.contact-panel::-webkit-scrollbar{width:3px}
+.contact-panel::-webkit-scrollbar-thumb{background:var(--border2)}
+.cp-head{padding:16px;border-bottom:1px solid var(--border);display:flex;gap:0}
+.cp-tab{flex:1;padding:7px;border:none;background:none;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit;border-radius:6px;transition:.1s}
+.cp-tab.active{background:var(--accent-bg);color:var(--accent)}
+.cp-avatar-section{padding:16px;text-align:center;border-bottom:1px solid var(--border)}
+.cp-big-avatar{width:56px;height:56px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff}
+.cp-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px}
+.cp-company{font-size:12px;color:var(--muted)}
+.cp-section{border-bottom:1px solid var(--border)}
+.cp-section-head{padding:10px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.cp-section-title{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px}
+.cp-field{padding:6px 16px;display:flex;align-items:flex-start;gap:8px}
+.cp-field-icon{color:var(--muted2);font-size:13px;margin-top:1px;flex-shrink:0;width:16px}
+.cp-field-val{font-size:12px;color:var(--text2);word-break:break-all;line-height:1.5}
+.cp-field-label{font-size:10px;color:var(--muted2);font-weight:500}
+.chat-empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px}
+.chat-empty-icon{font-size:48px;opacity:.2}
+
+/* ── LEAD MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:10px;width:440px;box-shadow:var(--shadow-md);transform:scale(.96);transition:.2s}
+.modal-overlay.open .modal{transform:scale(1)}
+.modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:15px;font-weight:700;color:var(--text)}
+.modal-close{background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:2px 6px;border-radius:4px}
+.modal-close:hover{background:var(--bg)}
+.modal-body{padding:20px}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+/* Lead profile modal */
+.lead-modal .modal{width:720px;max-width:96vw;max-height:88vh;display:flex;flex-direction:column}
+.lead-modal .modal-body{display:grid;grid-template-columns:220px 1fr;gap:0;padding:0;overflow:hidden;flex:1}
+.lm-sidebar{border-right:1px solid var(--border);padding:16px;overflow-y:auto;background:var(--surface2)}
+.lm-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;margin-bottom:10px}
+.lm-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px}
+.lm-sub{font-size:11px;color:var(--muted);margin-bottom:14px}
+.lm-field{margin-bottom:8px}
+.lm-field-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted2);margin-bottom:2px}
+.lm-field-val{font-size:12px;color:var(--text2);font-weight:500}
+.lm-stage-sel{width:100%;background:var(--surface);border:1.5px solid var(--border);color:var(--text);padding:6px 8px;border-radius:6px;font-size:12px;font-family:inherit;outline:none;margin-top:8px}
+.lm-stage-sel:focus{border-color:var(--accent)}
+.lm-main{display:flex;flex-direction:column;overflow:hidden}
+.lm-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 16px;flex-shrink:0}
+.lm-tab{padding:10px 14px;border:none;background:none;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;font-family:inherit;position:relative;transition:.1s}
+.lm-tab.active{color:var(--accent);font-weight:600}
+.lm-tab.active::after{content:"";position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--accent)}
+.lm-tab-content{flex:1;overflow-y:auto;padding:16px}
+.note-item{padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;margin-bottom:8px}
+.note-item-text{font-size:13px;color:var(--text2);line-height:1.55;margin-bottom:4px}
+.note-item-meta{font-size:10px;color:var(--muted2)}
+.note-add-wrap{display:flex;gap:8px;margin-bottom:12px}
+.note-add-wrap textarea{flex:1;background:var(--surface);border:1.5px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:12px;font-family:inherit;resize:none;outline:none;min-height:60px}
+.note-add-wrap textarea:focus{border-color:var(--accent)}
+
+/* ── EMAIL COMPOSER ── */
+.ec-layout{display:grid;grid-template-columns:1fr 1fr;gap:0;height:100%}
+.ec-left{border-right:1px solid var(--border);padding:20px;overflow-y:auto}
+.ec-right{padding:20px;overflow-y:auto;background:var(--surface2)}
+.ec-preview-frame{background:#fff;border:1px solid var(--border);border-radius:6px;padding:20px;font-size:13px;line-height:1.7;color:var(--text2);min-height:300px;white-space:pre-wrap;font-family:Georgia,serif}
+.tpl-btn{padding:6px 12px;border-radius:6px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-size:12px;font-family:inherit;font-weight:500;transition:.12s;white-space:nowrap}
+.tpl-btn:hover{border-color:var(--accent);color:var(--accent)}
+.tpl-btn.active{background:var(--accent-bg);border-color:var(--accent);color:var(--accent);font-weight:600}
+
+/* ── PAGINATION ── */
+.pagination{display:flex;gap:6px;align-items:center;justify-content:center;padding:12px 0;font-size:12px;color:var(--muted)}
+.pagination button{background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:5px;cursor:pointer;font-size:11px;font-family:inherit;font-weight:500}
+.pagination button:hover:not(:disabled){background:var(--bg)}
+.pagination button:disabled{opacity:.4;cursor:default}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 16px;font-size:12px;font-weight:600;box-shadow:var(--shadow-md);opacity:0;pointer-events:none;transition:.2s;z-index:999;display:flex;align-items:center;gap:7px}
+.toast.show{opacity:1}
+.toast.ok{border-color:#a7f3d0;color:var(--green);background:var(--green-bg)}
+.toast.err{border-color:#fecaca;color:var(--red);background:var(--red-bg)}
+.toast.warn{border-color:#fde68a;color:var(--yellow);background:var(--yellow-bg)}
+
+/* ── STRIPE ── */
+.stripe-hero{text-align:center;padding:30px 0 28px;margin-bottom:28px}
+.stripe-hero h2{font-size:26px;font-weight:800;color:var(--text);margin-bottom:6px;letter-spacing:-.4px}
+.stripe-hero p{font-size:14px;color:var(--muted)}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* ── MOBILE NAV ── */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--sidebar-bg);border-top:1px solid rgba(255,255,255,.08);z-index:400;align-items:center;justify-content:space-around;padding:0 4px}
+.mobile-nav-btn{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;color:var(--sidebar-text);cursor:pointer;font-family:inherit;padding:6px 10px;border-radius:8px;transition:.1s;flex:1}
+.mobile-nav-btn:hover,.mobile-nav-btn.active{color:var(--sidebar-active);background:var(--sidebar-active-bg)}
+.mobile-nav-btn span:first-child{font-size:18px}
+.mobile-nav-btn span:last-child{font-size:9px;font-weight:600;letter-spacing:.3px}
+
+/* ── CW FEATURE LINK ── */
+.cw-feature-link{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);text-decoration:none;color:var(--text2);font-size:13px;font-weight:500;transition:.12s;margin-bottom:8px}
+.cw-feature-link:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.cw-feature-link .cw-icon{font-size:15px;width:22px;flex-shrink:0}
+.cw-feature-link .cw-label{flex:1;margin-left:8px}
+.cw-feature-link .cw-arrow{color:var(--muted2);font-size:11px}
+.cw-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:16px 0 8px}
+
+@media(max-width:1024px){
+  :root{--sidebar-w:180px;--mid-w:260px}
+  .contact-panel{display:none}
+  .grid3{grid-template-columns:1fr 1fr}
+  .pipeline-summary{grid-template-columns:repeat(4,1fr)}
+  .kanban-board{grid-template-columns:repeat(4,minmax(180px,1fr))}
+}
+@media(max-width:768px){
+  .sidebar{display:none}
+  .mobile-nav{display:flex!important}
+  #app{flex-direction:column}
+  .main{width:100%;min-width:0;padding-bottom:56px}
+  .topbar-search{display:none}
+  .conv-3col{grid-template-columns:1fr;height:auto}
+  .conv-mid{display:none}
+  .conv-mid.mobile-show{display:flex}
+  .contact-panel{display:none}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .pipeline-summary{grid-template-columns:repeat(3,1fr)}
+  .kanban-board{grid-template-columns:repeat(2,minmax(160px,1fr))}
+  .form-grid{grid-template-columns:1fr}
+  .modal{width:96vw!important;margin:0 8px}
+  .lead-modal .modal-body{grid-template-columns:1fr}
+  .ec-layout{grid-template-columns:1fr}
+  .ec-right{display:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M9 21V9h6v12"/></svg>
+    </div>
+    <div>
+      <div class="brand-name">Pearl Spot Tours</div>
+      <div class="brand-tag">Backwater CRM</div>
+    </div>
+  </div>
+  <div class="sidebar-search">
+    <input placeholder="🔍  Search…" oninput="globalSearch(this.value)">
+  </div>
+  <div class="sidebar-scroll">
+    <div class="sidebar-section">Workspace</div>
+    <a class="slink active" onclick="showPage('today',this)"><span class="sicon">🏠</span> Today</a>
+    <a class="slink" onclick="showPage('conversations',this)"><span class="sicon">💬</span> Conversations <span class="sbadge" id="badge-convs">0</span></a>
+    <a class="slink" onclick="showPage('kanban',this)"><span class="sicon">📋</span> Pipeline</a>
+    <a class="slink" onclick="showPage('enquiries',this)"><span class="sicon">⛵</span> Enquiries <span class="sbadge grey" id="badge-leads">0</span></a>
+
+    <div class="sidebar-section">Outreach</div>
+    <a class="slink" onclick="showPage('composer',this)"><span class="sicon">📱</span> WA Composer</a>
+    <a class="slink" onclick="showPage('campaigns',this)"><span class="sicon">📣</span> Bulk Campaigns</a>
+
+    <div class="sidebar-section">Insights</div>
+    <a class="slink" onclick="showPage('analytics',this)"><span class="sicon">📊</span> Analytics</a>
+
+    <div class="sidebar-section">Chatwoot</div>
+    <a class="slink" href="https://app.aiingo.com/app/accounts/8/mentions" target="_blank"><span class="sicon">🔔</span> Mentions</a>
+    <a class="slink" href="https://app.aiingo.com/app/accounts/8/conversations" target="_blank"><span class="sicon">💬</span> All Conversations</a>
+    <a class="slink" href="https://app.aiingo.com/app/accounts/8/contacts" target="_blank"><span class="sicon">👤</span> Contacts</a>
+    <a class="slink" href="https://app.aiingo.com/app/accounts/8/reports/overview" target="_blank"><span class="sicon">📈</span> Live View</a>
+    <a class="slink" href="https://app.aiingo.com/app/accounts/8/settings/automation/list" target="_blank"><span class="sicon">⚡</span> Automation</a>
+    <a class="slink" href="https://app.aiingo.com/app/accounts/8/settings/canned-response/list" target="_blank"><span class="sicon">💾</span> Canned Responses</a>
+    <a class="slink" href="https://app.aiingo.com/app/accounts/8/settings/macros" target="_blank"><span class="sicon">🎯</span> Macros</a>
+    <a class="slink" href="https://app.aiingo.com/app/accounts/8/settings/general" target="_blank"><span class="sicon">⚙</span> CW Settings</a>
+
+    <div class="sidebar-section">Settings</div>
+    <a class="slink" onclick="showPage('users',this)"><span class="sicon">👥</span> Users</a>
+    <a class="slink" onclick="showPage('pricing',this)"><span class="sicon">💳</span> Pricing</a>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="user-row">
+      <div class="user-avatar" id="sb-avatar" style="background:#1f93ff">B<div class="user-status-dot"></div></div>
+      <div style="flex:1;min-width:0">
+        <div class="user-name" id="sb-name">Baiju</div>
+        <div class="user-role" id="sb-role">Administrator</div>
+      </div>
+      <div class="user-actions">
+        <button class="user-action-btn" onclick="showPage('users',null)" title="Settings">⚙</button>
+        <button class="user-action-btn" onclick="doLogout()" title="Logout">⏏</button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-bc"><span>Pearl Spot</span><span class="bc-sep">/</span><span class="bc-cur" id="tb-page">Today</span></div>
+    <div class="topbar-search"><span class="si">🔍</span><input id="gsearch" placeholder="Search enquiries, conversations…" oninput="globalSearch(this.value)"><span class="sk">⌘K</span></div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+      <button class="btn sm" onclick="loadAll()">⟳ Refresh</button>
+      <button class="btn primary sm" onclick="showPage('composer',null)">+ New Message</button>
+      <div style="position:relative">
+        <button class="notif-btn" id="notif-toggle" onclick="toggleNotif()">🔔<span class="notif-badge" id="notif-count">0</span></button>
+        <div class="notif-panel" id="notif-panel">
+          <div class="notif-head"><span>Notifications</span><button class="btn sm ghost" onclick="clearNotifs()">Clear</button></div>
+          <div id="notif-list"><div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No notifications</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TODAY PAGE ── -->
+  <div id="page-today" class="page-content" style="display:flex;flex:1;overflow-y:auto">
+    <div class="tab-pane" style="width:100%">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px">
+        <div class="today-greeting" id="today-greeting">Good morning, Baiju 👋</div>
+        <button class="btn sm" onclick="loadAll();renderToday()">⟳ Refresh</button>
+      </div>
+      <div class="today-sub" id="today-sub">Here's your Pearl Spot Tours booking pipeline for today.</div>
+      <div class="pipeline-summary" id="ps-row">
+        <div class="ps-card" onclick="filterKanban('New')"><div class="ps-count" id="ps-new">—</div><div class="ps-label">New</div><div class="ps-bar" style="background:#9ca3af"></div></div>
+        <div class="ps-card" onclick="filterKanban('Quoted')"><div class="ps-count" id="ps-quoted">—</div><div class="ps-label">Quoted</div><div class="ps-bar" style="background:#1f93ff"></div></div>
+        <div class="ps-card" onclick="filterKanban('Confirmed')"><div class="ps-count" id="ps-confirmed">—</div><div class="ps-label">Confirmed</div><div class="ps-bar" style="background:#059669"></div></div>
+        <div class="ps-card" onclick="filterKanban('Paid')"><div class="ps-count" id="ps-paid">—</div><div class="ps-label">Paid</div><div class="ps-bar" style="background:#7c3aed"></div></div>
+        <div class="ps-card" onclick="filterKanban('Checked-In')"><div class="ps-count" id="ps-checkedin">—</div><div class="ps-label">Checked-In</div><div class="ps-bar" style="background:#0891b2"></div></div>
+        <div class="ps-card" onclick="filterKanban('Completed')"><div class="ps-count" id="ps-completed">—</div><div class="ps-label">Completed</div><div class="ps-bar" style="background:#d97706"></div></div>
+        <div class="ps-card" onclick="filterKanban('Cancelled')"><div class="ps-count" id="ps-cancelled">—</div><div class="ps-label">Cancelled</div><div class="ps-bar" style="background:#dc2626"></div></div>
+      </div>
+      <div class="today-grid">
+        <div class="card">
+          <div class="card-head"><span class="card-title">⛵ Today's Check-ins</span><span id="checkins-count" style="font-size:11px;color:var(--accent);font-weight:600"></span></div>
+          <div class="card-body" style="padding:0 16px" id="today-checkins"><div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Loading…</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">✨ New Enquiries (24h)</span><span id="new-enq-count" style="font-size:11px;color:var(--accent);font-weight:600"></span></div>
+          <div class="card-body" style="padding:0 16px" id="today-new-enq"><div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Loading…</div></div>
+        </div>
+      </div>
+      <div class="today-grid3">
+        <div class="card">
+          <div class="card-head"><span class="card-title">⚠ Pending Quotes</span><span id="pending-q-count" style="font-size:11px;color:var(--red);font-weight:600"></span></div>
+          <div class="card-body" style="padding:0 16px" id="today-pending-q"><div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Loading…</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">📱 Confirmation Pending</span></div>
+          <div class="card-body" style="padding:0 16px" id="today-conf-pending"><div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Loading…</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">⭐ Review Pending</span></div>
+          <div class="card-body" style="padding:0 16px" id="today-review-pending"><div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Loading…</div></div>
+        </div>
+      </div>
+      <div style="margin-bottom:16px">
+        <a href="https://app.aiingo.com/app/accounts/8/inbox/9" target="_blank" class="btn primary" style="text-decoration:none;display:inline-flex">💬 Open Chatwoot Inbox (Pearl WhatsApp) ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONVERSATIONS PAGE ── -->
+  <div id="page-conversations" class="page-content" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+    <div class="conv-3col" style="flex:1">
+      <div class="conv-mid">
+        <div class="conv-mid-head">
+          <div class="conv-mid-head-title">Conversations</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="badge blue" id="conv-status-badge">Open</span>
+            <a href="https://app.aiingo.com/app/accounts/8/conversations" target="_blank" class="btn sm">↗ Chatwoot</a>
+          </div>
+        </div>
+        <div class="conv-mid-tabs">
+          <button class="cmid-tab active" onclick="loadConvs('open',this)">Mine <span class="cmid-tab-badge" id="mine-badge">0</span></button>
+          <button class="cmid-tab" onclick="loadConvs('pending',this)">Pending</button>
+          <button class="cmid-tab" onclick="loadConvs('resolved',this)">Resolved</button>
+          <button class="cmid-tab" onclick="loadConvs('open',this)">All</button>
+        </div>
+        <div class="conv-list-scroll" id="conv-list"></div>
+      </div>
+      <div class="chat-view" id="chat-view">
+        <div class="chat-empty-state" id="chat-empty">
+          <div class="chat-empty-icon">💬</div>
+          <div style="font-size:15px;font-weight:600;color:var(--text2)">No conversation selected</div>
+          <div style="font-size:12px;color:var(--muted)">Choose a conversation from the left</div>
+          <a href="https://app.aiingo.com/app/accounts/8/inbox/9" target="_blank" class="btn primary" style="margin-top:12px;text-decoration:none">Open Full Chatwoot ↗</a>
+        </div>
+        <div id="chat-active" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+          <div class="chat-top">
+            <div class="chat-top-left">
+              <div class="chat-top-avatar" id="chat-av" style="background:#1f93ff">?</div>
+              <div>
+                <div class="chat-top-name" id="chat-name">—</div>
+                <div class="chat-top-channel">📱 Pearl WhatsApp · +91 75590 31555</div>
+              </div>
+            </div>
+            <div class="chat-top-actions">
+              <button class="btn sm" id="resolve-btn" onclick="resolveConv()">✓ Resolve</button>
+              <a class="btn sm" id="cw-link" href="#" target="_blank">↗ Open in Chatwoot</a>
+              <button class="btn sm ghost">⋯</button>
+            </div>
+          </div>
+          <div class="chat-messages" id="chat-messages"></div>
+          <div class="chat-composer">
+            <div class="comp-tabs">
+              <button class="comp-tab active">Reply</button>
+              <button class="comp-tab">Private Note</button>
+            </div>
+            <div class="comp-body">
+              <textarea id="chat-reply" class="comp-input" placeholder="Type a message… (Enter to send, Shift+Enter for new line)" rows="3"></textarea>
+            </div>
+            <div class="comp-footer">
+              <div class="comp-tools">
+                <button class="comp-tool" title="Emoji">😊</button>
+                <button class="comp-tool" title="Attach">📎</button>
+                <button class="comp-tool" title="AI Assist" style="background:var(--accent-bg);color:var(--accent);border-radius:5px;padding:4px 8px;font-size:11px;font-weight:600">✨ AI</button>
+              </div>
+              <button class="send-btn" onclick="sendReply()">Send ↵</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="contact-panel" id="contact-panel">
+        <div class="cp-head">
+          <button class="cp-tab active" onclick="cpTab(this,'contact')">Contact</button>
+          <button class="cp-tab" onclick="cpTab(this,'booking')">Booking</button>
+        </div>
+        <div id="cp-contact">
+          <div class="cp-avatar-section">
+            <div class="cp-big-avatar" id="cp-avatar" style="background:linear-gradient(135deg,#0ea5e9,#1f93ff)">?</div>
+            <div class="cp-name" id="cp-name">Select a conversation</div>
+            <div class="cp-company" id="cp-company">—</div>
+          </div>
+          <div class="cp-section">
+            <div class="cp-section-head"><span class="cp-section-title">Contact Info</span></div>
+            <div id="cp-fields"></div>
+          </div>
+          <div class="cp-section">
+            <div class="cp-section-head"><span class="cp-section-title">Booking Details</span></div>
+            <div id="cp-booking"></div>
+            <div style="padding-bottom:8px"></div>
+          </div>
+          <div class="cp-section">
+            <div class="cp-section-head">
+              <span class="cp-section-title">Quick Actions</span>
+            </div>
+            <div style="padding:10px 16px;display:flex;flex-direction:column;gap:6px">
+              <a href="https://app.aiingo.com/app/accounts/8/contacts" target="_blank" class="btn sm" style="text-decoration:none">👤 View in Chatwoot</a>
+              <a href="https://app.aiingo.com/app/accounts/8/settings/labels/list" target="_blank" class="btn sm" style="text-decoration:none">🏷 Manage Labels</a>
+            </div>
+          </div>
+        </div>
+        <div id="cp-booking-tab" style="display:none;padding:16px;color:var(--muted);font-size:12px">Select a conversation to see booking details.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ENQUIRIES PAGE ── -->
+  <div id="page-enquiries" class="page-content" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+    <div style="flex:1;overflow-y:auto;padding:20px;width:100%">
+      <div class="page-header">
+        <div><div class="page-title">Enquiries</div><div class="page-sub">All houseboat booking enquiries from Google Sheets</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn sm" onclick="loadLeads()">⟳ Refresh</button>
+          <button class="btn primary" onclick="exportCSV()">⬇ Export CSV</button>
+        </div>
+      </div>
+      <div class="filters">
+        <input id="enq-search" class="f-input" placeholder="🔍  Search name / phone…" style="min-width:200px" oninput="renderLeadsTable()">
+        <select id="enq-stage" class="f-select" onchange="renderLeadsTable()"><option value="">All Stages</option></select>
+        <select id="enq-service" class="f-select" onchange="renderLeadsTable()"><option value="">All Services</option></select>
+        <select id="enq-source" class="f-select" onchange="renderLeadsTable()"><option value="">All Sources</option></select>
+        <select id="enq-daytype" class="f-select" onchange="renderLeadsTable()">
+          <option value="">All Types</option>
+          <option>Day Trip</option><option>Overnight</option><option>Night Stay</option>
+          <option>Sharing Overnight</option><option>Sharing Day Trip</option>
+        </select>
+        <span id="enq-count" style="font-size:11px;color:var(--muted);margin-left:auto;font-weight:600"></span>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Service</th><th>Day Type</th><th>Check-in</th><th>Adults</th><th>Rooms</th><th>Source</th><th>Quoted</th><th>Paid</th><th>Stage</th><th>Flags</th><th></th></tr></thead>
+            <tbody id="enq-body"><tr><td colspan="14" style="text-align:center;padding:30px;color:var(--muted)">Loading…</td></tr></tbody>
+          </table>
+        </div>
+        <div style="padding:4px 16px;border-top:1px solid var(--border);background:var(--surface2)"><div class="pagination" id="enq-pag"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── KANBAN PAGE ── -->
+  <div id="page-kanban" class="page-content" style="display:none;flex:1;overflow:hidden;flex-direction:column">
+    <div style="flex:1;overflow:auto;padding:20px;width:100%">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div><div class="page-title">Booking Pipeline</div><div class="page-sub">Drag cards between stages — syncs to Google Sheets</div></div>
+        <div style="display:flex;gap:6px">
+          <button class="btn sm" id="kf-all" onclick="kFilter('all',this)">All</button>
+          <button class="btn sm" onclick="kFilter('Day Trip',this)">Day Trip</button>
+          <button class="btn sm" onclick="kFilter('Overnight',this)">Overnight</button>
+          <button class="btn sm" onclick="kFilter('Sharing',this)">Sharing</button>
+        </div>
+      </div>
+      <div class="kanban-board" id="kanban-board"></div>
+    </div>
+  </div>
+
+  <!-- ── WA COMPOSER ── -->
+  <div id="page-composer" class="page-content" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+    <div style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+      <div style="padding:14px 20px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:12px;flex-shrink:0">
+        <div class="page-title" style="font-size:16px">📱 WhatsApp Composer</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="tpl-btns">
+          <button class="tpl-btn active" onclick="loadTpl('followup',this)">🔄 Follow-up</button>
+          <button class="tpl-btn" onclick="loadTpl('quote',this)">💰 Quote</button>
+          <button class="tpl-btn" onclick="loadTpl('confirmation',this)">✅ Confirmation</button>
+          <button class="tpl-btn" onclick="loadTpl('reminder',this)">⏰ Reminder</button>
+          <button class="tpl-btn" onclick="loadTpl('review',this)">⭐ Review Request</button>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button class="btn primary sm" onclick="sendComposerWA()">📱 Send</button>
+        </div>
+      </div>
+      <div class="ec-layout" style="flex:1;overflow:hidden">
+        <div class="ec-left">
+          <div class="form-group">
+            <label class="form-label">To — Filter Leads</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <select id="wc-stage" class="f-select" style="font-size:12px" onchange="updateWcCount()"><option value="">All Stages</option><option>New</option><option>Quoted</option><option>Confirmed</option><option>Paid</option><option>Completed</option></select>
+              <select id="wc-service" class="f-select" style="font-size:12px" onchange="updateWcCount()"><option value="">All Services</option></select>
+              <select id="wc-daytype" class="f-select" style="font-size:12px" onchange="updateWcCount()">
+                <option value="">All Types</option>
+                <option>Day Trip</option><option>Overnight</option><option>Night Stay</option><option>Sharing Overnight</option><option>Sharing Day Trip</option>
+              </select>
+            </div>
+            <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+              <span style="font-size:12px;color:var(--muted)">Recipients:</span>
+              <span style="background:var(--accent-bg);color:var(--accent);border:1px solid #bfdbfe;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:700" id="wc-count">—</span>
+              <button class="btn sm" onclick="updateWcCount()">Count</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Message <span style="font-weight:400;color:var(--muted);font-size:10px">({{name}} · {{checkin}} · {{service}} · {{dayType}} · {{price}} · {{boat}})</span></label>
+            <textarea id="wc-body" class="form-textarea" rows="14" oninput="updateWcPreview()"></textarea>
+          </div>
+          <div id="wc-result" style="display:none;margin-top:10px;padding:10px 12px;border-radius:6px;font-size:12px;font-weight:600"></div>
+        </div>
+        <div class="ec-right">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:10px">Live Preview</div>
+          <div class="ec-preview-frame" id="wc-preview-body">Select a template…</div>
+          <div style="margin-top:12px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;font-size:11px;color:var(--muted)">
+            <strong style="color:var(--text2)">Variable legend</strong><br>
+            {{name}} · {{checkin}} · {{checkout}} · {{service}} · {{dayType}}<br>
+            {{adults}} · {{rooms}} · {{price}} · {{boat}} · {{occasion}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CAMPAIGNS PAGE ── -->
+  <div id="page-campaigns" class="page-content" style="display:none;flex:1;overflow-y:auto">
+    <div style="padding:20px;width:100%">
+      <div class="page-header">
+        <div><div class="page-title">Bulk Campaigns</div><div class="page-sub">Send WhatsApp blasts to filtered lead lists</div></div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-head"><span class="card-title">📱 Send Bulk WhatsApp</span></div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="form-group"><label class="form-label">Stage</label><select id="camp-stage" class="form-select" onchange="updateCampCount()"><option value="">All</option><option>New</option><option>Quoted</option><option>Confirmed</option><option>Paid</option><option>Completed</option></select></div>
+              <div class="form-group"><label class="form-label">Service</label><select id="camp-service" class="form-select" onchange="updateCampCount()"><option value="">All</option></select></div>
+              <div class="form-group"><label class="form-label">Day Type</label><select id="camp-daytype" class="form-select" onchange="updateCampCount()"><option value="">All</option><option>Day Trip</option><option>Overnight</option><option>Night Stay</option><option>Sharing Overnight</option><option>Sharing Day Trip</option></select></div>
+              <div class="form-group"><label class="form-label">Source</label><select id="camp-source" class="form-select" onchange="updateCampCount()"><option value="">All</option></select></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;margin:4px 0 12px">
+              <span style="font-size:12px;color:var(--muted);font-weight:600">Recipients:</span>
+              <span style="background:var(--accent-bg);color:var(--accent);border:1px solid #bfdbfe;border-radius:20px;padding:2px 12px;font-size:12px;font-weight:700" id="camp-count">0 leads</span>
+            </div>
+            <div class="form-group"><label class="form-label">Message ({{name}} variable supported)</label>
+              <textarea id="camp-msg" class="form-textarea" rows="5" placeholder="Hi {{name}}, we have special offers on our houseboats for your upcoming dates…"></textarea>
+            </div>
+            <button class="btn primary" onclick="sendCampaign()">📱 Send Campaign</button>
+            <div id="camp-result" style="display:none;margin-top:10px;padding:10px 12px;border-radius:6px;font-size:12px;font-weight:600"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Matched Leads</span><span id="camp-match-count" style="font-size:11px;color:var(--muted)"></span></div>
+          <div class="tbl-wrap" style="max-height:460px;overflow-y:auto">
+            <table><thead><tr><th>Name</th><th>Phone</th><th>Service</th><th>Stage</th></tr></thead>
+            <tbody id="camp-preview"><tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted)">Adjust filters above</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">🔗 Chatwoot Campaign Features</span></div>
+        <div class="card-body">
+          <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Advanced campaign features are handled natively in Chatwoot.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <a href="https://app.aiingo.com/app/accounts/8/campaigns" target="_blank" class="cw-feature-link"><span class="cw-icon">📣</span><span class="cw-label">Ongoing Campaigns</span><span class="cw-arrow">↗</span></a>
+            <a href="https://app.aiingo.com/app/accounts/8/settings/automation/list" target="_blank" class="cw-feature-link"><span class="cw-icon">⚡</span><span class="cw-label">Automation Rules</span><span class="cw-arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ANALYTICS PAGE ── -->
+  <div id="page-analytics" class="page-content" style="display:none;flex:1;overflow-y:auto">
+    <div style="padding:20px;width:100%">
+      <div class="page-header">
+        <div><div class="page-title">Analytics</div><div class="page-sub">Pearl Spot Tours booking intelligence</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn sm" onclick="loadLeads()">⟳ Refresh</button>
+          <a href="https://app.aiingo.com/app/accounts/8/reports/overview" target="_blank" class="btn sm">↗ Live View</a>
+          <a href="https://app.aiingo.com/app/accounts/8/reports/conversation" target="_blank" class="btn sm">↗ CW Reports</a>
+        </div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-card"><div class="kpi-icon bg-blue">⛵</div><div class="kpi-label">Total Enquiries</div><div class="kpi-val" id="an-total">—</div><div class="kpi-trend">All time</div></div>
+        <div class="kpi-card"><div class="kpi-icon bg-green">✅</div><div class="kpi-label">Confirmed</div><div class="kpi-val" id="an-confirmed">—</div><div class="kpi-trend up" id="an-conf-pct">—</div></div>
+        <div class="kpi-card"><div class="kpi-icon bg-purple">💰</div><div class="kpi-label">Revenue</div><div class="kpi-val" id="an-revenue">—</div><div class="kpi-trend up">Total paid</div></div>
+        <div class="kpi-card"><div class="kpi-icon bg-yellow">📈</div><div class="kpi-label">Conversion</div><div class="kpi-val" id="an-conversion">—</div><div class="kpi-trend">Enquiry → Paid</div></div>
+        <div class="kpi-card"><div class="kpi-icon bg-teal">🛥</div><div class="kpi-label">Avg Booking</div><div class="kpi-val" id="an-avg">—</div><div class="kpi-trend">Per paid booking</div></div>
+        <div class="kpi-card"><div class="kpi-icon bg-red">⏳</div><div class="kpi-label">Pending Quotes</div><div class="kpi-val" id="an-pending">—</div><div class="kpi-trend dn">Need follow-up</div></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><div class="card-head"><span class="card-title">🔄 Pipeline by Stage</span></div><div class="card-body" id="an-stage-bars"></div></div>
+        <div class="card"><div class="card-head"><span class="card-title">📦 By Service / Package</span></div><div class="card-body" id="an-service-bars"></div></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><div class="card-head"><span class="card-title">🌐 By Source</span></div><div class="card-body" id="an-source-bars"></div></div>
+        <div class="card"><div class="card-head"><span class="card-title">⏱ By Day Type</span></div><div class="card-body" id="an-daytype-bars"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">📅 Monthly Trend (Enquiries)</span></div>
+        <div class="card-body"><div class="mini-bars" id="an-monthly-bars"></div></div>
+      </div>
+      <div style="margin-top:16px">
+        <div class="cw-section-title">Chatwoot Reports</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+          <a href="https://app.aiingo.com/app/accounts/8/reports/overview" target="_blank" class="cw-feature-link"><span class="cw-icon">👁</span><span class="cw-label">Live View</span><span class="cw-arrow">↗</span></a>
+          <a href="https://app.aiingo.com/app/accounts/8/reports/conversation" target="_blank" class="cw-feature-link"><span class="cw-icon">💬</span><span class="cw-label">Conversations</span><span class="cw-arrow">↗</span></a>
+          <a href="https://app.aiingo.com/app/accounts/8/reports/agent" target="_blank" class="cw-feature-link"><span class="cw-icon">👤</span><span class="cw-label">Agent Reports</span><span class="cw-arrow">↗</span></a>
+          <a href="https://app.aiingo.com/app/accounts/8/reports/csat" target="_blank" class="cw-feature-link"><span class="cw-icon">⭐</span><span class="cw-label">CSAT Reports</span><span class="cw-arrow">↗</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── USERS PAGE ── -->
+  <div id="page-users" class="page-content" style="display:none;flex:1;overflow-y:auto">
+    <div style="padding:20px;width:100%">
+      <div class="page-header">
+        <div><div class="page-title">User Management</div><div class="page-sub">Manage access to Pearl Spot Tours CRM</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn primary" onclick="openAddUser()">+ Add User</button>
+          <a href="https://app.aiingo.com/app/accounts/8/settings/agents/new" target="_blank" class="btn sm">+ Add Chatwoot Agent ↗</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table><thead><tr><th>User</th><th>Email</th><th>Role</th><th>Status</th><th>Last Login</th><th></th></tr></thead>
+          <tbody id="users-table"></tbody></table>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <div class="cw-section-title">Chatwoot Team</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <a href="https://app.aiingo.com/app/accounts/8/settings/agents" target="_blank" class="cw-feature-link"><span class="cw-icon">👥</span><span class="cw-label">Agents</span><span class="cw-arrow">↗</span></a>
+          <a href="https://app.aiingo.com/app/accounts/8/settings/teams/list" target="_blank" class="cw-feature-link"><span class="cw-icon">🏢</span><span class="cw-label">Teams</span><span class="cw-arrow">↗</span></a>
+          <a href="https://app.aiingo.com/app/accounts/8/settings/general" target="_blank" class="cw-feature-link"><span class="cw-icon">⚙</span><span class="cw-label">Account Settings</span><span class="cw-arrow">↗</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PRICING PAGE ── -->
+  <div id="page-pricing" class="page-content" style="display:none;flex:1;overflow-y:auto">
+    <div style="padding:20px;width:100%">
+      <div style="text-align:center;padding:30px 0 28px;margin-bottom:28px">
+        <h2 style="font-size:26px;font-weight:800;color:var(--text);margin-bottom:6px;letter-spacing:-.4px">Choose Your Plan</h2>
+        <p style="font-size:14px;color:var(--muted)">Upgrade to unlock more features for Pearl Spot Tours CRM</p>
+      </div>
+      <stripe-pricing-table
+        pricing-table-id="prctbl_1TaK2NJWa5B2ayZgqa6bHL33"
+        publishable-key="pk_live_51R1PadJWa5B2ayZg4ytt9Q9hI0b8j3Br1jXy7o1FVsiwBgPt6QGx4wYeWuonnkUyH82xRDNHB54xg95dK7wJkpG900cPYq5DuQ">
+      </stripe-pricing-table>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ── ADD USER MODAL ── -->
+<div class="modal-overlay" id="modal-add-user">
+  <div class="modal">
+    <div class="modal-head"><span class="modal-title" id="modal-user-title">Add User</span><button class="modal-close" onclick="closeModal('modal-add-user')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-user-id">
+      <div class="form-group"><label class="form-label">Full Name</label><input id="user-name-input" class="form-input" placeholder="e.g. Baiju Thomas"></div>
+      <div class="form-group"><label class="form-label">Email</label><input id="user-email-input" class="form-input" type="email" placeholder="user@pearlspottours.com"></div>
+      <div class="form-group"><label class="form-label">Password</label><input id="user-pwd-input" class="form-input" type="password" placeholder="Min 8 characters"></div>
+      <div class="form-group"><label class="form-label">Role</label>
+        <select id="user-role-input" class="form-select"><option value="admin">Administrator</option><option value="agent">Agent</option><option value="viewer">Viewer</option></select>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal('modal-add-user')">Cancel</button><button class="btn primary" onclick="saveUser()">Save User</button></div>
+  </div>
+</div>
+
+<!-- ── CHANGE PASSWORD MODAL ── -->
+<div class="modal-overlay" id="modal-change-pwd">
+  <div class="modal">
+    <div class="modal-head"><span class="modal-title">Change Password</span><button class="modal-close" onclick="closeModal('modal-change-pwd')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="cpwd-user-id">
+      <div class="form-group"><label class="form-label">New Password</label><input id="cpwd-new" class="form-input" type="password" placeholder="Min 8 characters"></div>
+      <div class="form-group"><label class="form-label">Confirm Password</label><input id="cpwd-confirm" class="form-input" type="password" placeholder="Repeat password"></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal('modal-change-pwd')">Cancel</button><button class="btn primary" onclick="doChangePwd()">Update Password</button></div>
+  </div>
+</div>
+
+<!-- ── LEAD PROFILE MODAL ── -->
+<div class="modal-overlay lead-modal" id="modal-lead">
+  <div class="modal">
+    <div class="modal-head"><span class="modal-title" id="lm-title">Enquiry Profile</span><button class="modal-close" onclick="closeModal('modal-lead')">✕</button></div>
+    <div class="modal-body">
+      <div class="lm-sidebar">
+        <div class="lm-avatar" id="lm-av">?</div>
+        <div class="lm-name" id="lm-name">—</div>
+        <div class="lm-sub" id="lm-phone">—</div>
+        <div class="lm-field"><div class="lm-field-label">Service</div><div class="lm-field-val" id="lm-service">—</div></div>
+        <div class="lm-field"><div class="lm-field-label">Day Type</div><div class="lm-field-val" id="lm-daytype">—</div></div>
+        <div class="lm-field"><div class="lm-field-label">Check-in</div><div class="lm-field-val" id="lm-checkin">—</div></div>
+        <div class="lm-field"><div class="lm-field-label">Check-out</div><div class="lm-field-val" id="lm-checkout">—</div></div>
+        <div class="lm-field"><div class="lm-field-label">Adults</div><div class="lm-field-val" id="lm-adults">—</div></div>
+        <div class="lm-field"><div class="lm-field-label">Children (5+)</div><div class="lm-field-val" id="lm-c5plus">—</div></div>
+        <div class="lm-field"><div class="lm-field-label">Children (&lt;5)</div><div class="lm-field-val" id="lm-c5below">—</div></div>
+        <div class="lm-field"><div class="lm-field-label">Rooms</div><div class="lm-field-val" id="lm-rooms">—</div></div>
+        <div class="lm-field"><div class="lm-field-label">Occasion</div><div class="lm-field-val" id="lm-occasion">—</div></div>
+        <div class="lm-field"><div class="lm-field-label">Food Pref</div><div class="lm-field-val" id="lm-food">—</div></div>
+        <div class="lm-field"><div class="lm-field-label">Source</div><div class="lm-field-val" id="lm-source">—</div></div>
+        <div class="lm-field"><div class="lm-field-label">Boat Assigned</div><div class="lm-field-val" id="lm-boat">—</div></div>
+        <div style="margin-top:10px">
+          <div class="lm-field-label" style="margin-bottom:4px">Stage</div>
+          <select class="lm-stage-sel" id="lm-stage-sel" onchange="updateLeadStage(this.value)">
+            <option>New</option><option>Quoted</option><option>Confirmed</option>
+            <option>Paid</option><option>Checked-In</option><option>Completed</option><option>Cancelled</option>
+          </select>
+        </div>
+        <div style="margin-top:10px">
+          <div class="lm-field-label" style="margin-bottom:4px">Payment</div>
+          <div style="font-size:12px;color:var(--text2)">Quoted: <strong id="lm-quoted">—</strong></div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">Paid: <strong id="lm-paid" style="color:var(--green)">—</strong></div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn sm primary" onclick="lmSendWA()">📱 WA</button>
+          <button class="btn sm success" onclick="lmSendConfirmation()">✅ Confirm</button>
+          <button class="btn sm" onclick="lmSendReminder()">⏰ Remind</button>
+          <button class="btn sm" onclick="lmSendReview()">⭐ Review</button>
+        </div>
+        <div style="margin-top:10px">
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);cursor:pointer">
+            <input type="checkbox" id="lm-images-sent" onchange="toggleImages()"> Images Sent
+          </label>
+        </div>
+      </div>
+      <div class="lm-main">
+        <div class="lm-tabs">
+          <button class="lm-tab active" onclick="lmTab(this,'notes')">📝 Notes</button>
+          <button class="lm-tab" onclick="lmTab(this,'calllog')">📞 Call Log</button>
+          <button class="lm-tab" onclick="lmTab(this,'edit')">✏ Edit</button>
+        </div>
+        <div class="lm-tab-content" id="lm-tab-notes">
+          <div class="note-add-wrap">
+            <textarea id="lm-note-input" placeholder="Add a note…" rows="2"></textarea>
+            <button class="btn primary sm" style="align-self:flex-end" onclick="addLeadNote()">Add</button>
+          </div>
+          <div id="lm-notes-list"></div>
+        </div>
+        <div class="lm-tab-content" id="lm-tab-calllog" style="display:none">
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <input id="lm-call-note" class="form-input" placeholder="Call outcome…" style="flex:1">
+            <select id="lm-call-outcome" class="form-select" style="width:130px">
+              <option>Answered</option><option>No Answer</option><option>Callback</option><option>Interested</option><option>Not Interested</option>
+            </select>
+            <button class="btn primary sm" onclick="addCallLog()">Log</button>
+          </div>
+          <div id="lm-calllog-list"></div>
+        </div>
+        <div class="lm-tab-content" id="lm-tab-edit" style="display:none">
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Boat Assigned</label><input id="edit-boat" class="form-input" placeholder="e.g. KL-02 Pearl"></div>
+            <div class="form-group"><label class="form-label">Quoted Amount (₹)</label><input id="edit-quoted" class="form-input" type="number" placeholder="0"></div>
+            <div class="form-group"><label class="form-label">Paid Amount (₹)</label><input id="edit-paid" class="form-input" type="number" placeholder="0"></div>
+            <div class="form-group"><label class="form-label">Payment Method</label>
+              <select id="edit-payment-method" class="form-select"><option value="">—</option><option>Cash</option><option>Bank Transfer</option><option>UPI</option><option>Card</option><option>Online</option></select>
+            </div>
+            <div class="form-group"><label class="form-label">Occasion</label><input id="edit-occasion" class="form-input" placeholder="e.g. Honeymoon"></div>
+            <div class="form-group"><label class="form-label">Food Preference</label>
+              <select id="edit-food" class="form-select"><option value="">—</option><option>Veg</option><option>Non-Veg</option><option>Jain</option></select>
+            </div>
+          </div>
+          <button class="btn primary" onclick="saveLeadEdits()">💾 Save Changes</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal('modal-lead')">Close</button></div>
+  </div>
+</div>
+
+<!-- ── MOBILE NAV ── -->
+<nav class="mobile-nav">
+  <button class="mobile-nav-btn active" onclick="mobileNav('today',this)"><span>🏠</span><span>Today</span></button>
+  <button class="mobile-nav-btn" onclick="mobileNav('conversations',this)"><span>💬</span><span>Chats</span></button>
+  <button class="mobile-nav-btn" onclick="mobileNav('enquiries',this)"><span>⛵</span><span>Enquiries</span></button>
+  <button class="mobile-nav-btn" onclick="mobileNav('analytics',this)"><span>📊</span><span>Reports</span></button>
+  <button class="mobile-nav-btn" onclick="mobileNav('composer',this)"><span>📱</span><span>Message</span></button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════
+const N8N = 'https://n8n.aiingo.com/webhook';
+const CW_BASE = 'https://app.aiingo.com';
+const CW_ACCOUNT = 8;
+const CW_INBOX = 9;
+const CW_TOKEN = 'rcbgwbfThHKajjyG1VBWgkBL';
+const API = {
+  leads:       `${N8N}/pearlspot/leads`,
+  leadsUpdate: `${N8N}/pearlspot/leads/update`,
+  convs:       `${N8N}/pearlspot/conversations`,
+  convMsgs:    `${N8N}/pearlspot/conv-messages`,
+  sendReply:   `${N8N}/pearlspot/send-reply`,
+  toggleStatus:`${N8N}/pearlspot/toggle-status`,
+  wasSend:     `${N8N}/pearlspot/whatsapp/send`,
+  automation:  `${N8N}/pearlspot/automation/trigger`,
+  analytics:   `${N8N}/pearlspot/analytics`,
+};
+const STAGES = ['New','Quoted','Confirmed','Paid','Checked-In','Completed','Cancelled'];
+const AVATARBG = ['#1f93ff','#7c3aed','#059669','#d97706','#dc2626','#0891b2','#9333ea'];
+const bg = n => AVATARBG[(n||'A').charCodeAt(0) % AVATARBG.length];
+const PAGE_NAMES = {today:'Today',conversations:'Conversations',kanban:'Pipeline',enquiries:'Enquiries',composer:'WA Composer',campaigns:'Campaigns',analytics:'Analytics',users:'Users',pricing:'Pricing'};
+const STAGE_COLORS = {New:'grey',Quoted:'blue',Confirmed:'green',Paid:'purple','Checked-In':'teal',Completed:'yellow',Cancelled:'red'};
+
+// ═══════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════
+let currentUser = null;
+try { currentUser = JSON.parse(sessionStorage.getItem('ps_user') || localStorage.getItem('ps_user') || 'null'); } catch(e){}
+if (!currentUser || !currentUser.email) { window.location.replace('login.html'); }
+if (!currentUser) currentUser = {name:'Admin',email:'admin@pearlspottours.com',role:'admin'};
+
+let USERS = [];
+try { USERS = JSON.parse(localStorage.getItem('ps_users') || '[]'); } catch(e){}
+if (!USERS.length) USERS = [
+  {id:'u1',name:'Baiju',       email:'baiju@pearlspottours.com',   pwd:'Pearl@Baiju26',  role:'admin', active:true,lastLogin:'—'},
+  {id:'u2',name:'Admin',       email:'admin@pearlspottours.com',    pwd:'Pearl@Admin26',  role:'admin', active:true,lastLogin:'—'},
+  {id:'u3',name:'Hussain',     email:'hussain@aiingo.com',          pwd:'Aiingo@2026',    role:'admin', active:true,lastLogin:'—'},
+  {id:'u4',name:'Reception',   email:'reception@pearlspottours.com',pwd:'Pearl@Recep26',  role:'agent', active:true,lastLogin:'—'},
+  {id:'u5',name:'Boat Staff',  email:'staff@pearlspottours.com',    pwd:'Pearl@Staff26',  role:'viewer',active:true,lastLogin:'—'},
+];
+
+function doLogout(){
+  sessionStorage.removeItem('ps_user'); localStorage.removeItem('ps_user');
+  window.location.replace('login.html');
+}
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let allLeads = [], allConvs = [], selectedConvId = null, leadsPage = 1, currentLeadId = null;
+let leadNotes = {}, leadCallLogs = {};
+const PAGE_SIZE = 25;
+try { leadNotes = JSON.parse(localStorage.getItem('ps_notes') || '{}'); } catch(e){}
+try { leadCallLogs = JSON.parse(localStorage.getItem('ps_calllogs') || '{}'); } catch(e){}
+function saveLeadData(){ localStorage.setItem('ps_notes',JSON.stringify(leadNotes)); localStorage.setItem('ps_calllogs',JSON.stringify(leadCallLogs)); }
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+window.addEventListener('DOMContentLoaded', function(){
+  try {
+    if (currentUser) {
+      const av = document.getElementById('sb-avatar');
+      document.getElementById('sb-name').textContent = currentUser.name;
+      document.getElementById('sb-role').textContent = currentUser.role === 'admin' ? 'Administrator' : currentUser.role === 'viewer' ? 'Viewer' : 'Agent';
+      if (av) { av.textContent = currentUser.name.charAt(0).toUpperCase(); av.style.background = bg(currentUser.name); }
+    }
+  } catch(e){}
+  loadAll();
+  setTimeout(renderToday, 1200);
+});
+
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k'){ e.preventDefault(); document.getElementById('gsearch')?.focus(); }
+});
+
+// ═══════════════════════════════════════
+// PAGES
+// ═══════════════════════════════════════
+function showPage(page, linkEl){
+  document.querySelectorAll('.page-content').forEach(p => p.style.display='none');
+  const el = document.getElementById('page-'+page);
+  if (el) el.style.display = 'flex';
+  document.querySelectorAll('.slink').forEach(l => l.classList.remove('active'));
+  if (linkEl) linkEl.classList.add('active');
+  const n = document.getElementById('tb-page'); if(n) n.textContent = PAGE_NAMES[page]||page;
+  if (page==='analytics') renderAnalytics();
+  if (page==='users') renderUsersTable();
+  if (page==='today') renderToday();
+  if (page==='kanban') renderKanban();
+  if (page==='composer') { initWcFilters(); updateWcPreview(); }
+  if (page==='campaigns') updateCampCount();
+}
+
+function mobileNav(page, btn){
+  document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  showPage(page, null);
+}
+
+function loadAll(){ loadLeads(); loadConvs('open'); }
+
+// ═══════════════════════════════════════
+// LEADS
+// ═══════════════════════════════════════
+async function loadLeads(){
+  try {
+    const r = await fetch(API.leads, {headers:{'Accept':'application/json'}});
+    const data = await r.json();
+    allLeads = Array.isArray(data) ? data : (data.leads||data.rows||[]);
+    document.getElementById('badge-leads').textContent = allLeads.length;
+    populateFilters();
+    renderLeadsTable();
+    renderAnalytics();
+    renderToday();
+    renderKanban();
+    updateCampCount();
+  } catch(e){ toast('Could not load leads — check n8n webhook','err'); }
+}
+
+function lv(l, ...keys){ for(const k of keys){ const v=l[k]; if(v!==undefined&&v!==null&&v!=='') return String(v); } return ''; }
+
+function populateFilters(){
+  const services = [...new Set(allLeads.map(l=>lv(l,'service','Service')).filter(Boolean))].sort();
+  const sources  = [...new Set(allLeads.map(l=>lv(l,'source','Source')).filter(Boolean))].sort();
+  const stages   = [...new Set(allLeads.map(l=>lv(l,'stage','Stage')).filter(Boolean))].sort();
+  const fill = (id, opts) => { const el=document.getElementById(id); if(!el) return; const cur=el.value; const first=el.options[0]?.text||'All'; el.innerHTML=`<option value="">${first}</option>`+opts.map(o=>`<option value="${o}">${o}</option>`).join(''); el.value=cur; };
+  ['enq-service','wc-service','camp-service'].forEach(id => fill(id, services));
+  ['camp-source'].forEach(id => fill(id, sources));
+}
+
+function filterLeads(extra={}){
+  const q      = (document.getElementById('enq-search')?.value||extra.q||'').toLowerCase();
+  const stage  = extra.stage  || document.getElementById('enq-stage')?.value  || '';
+  const service= extra.service|| document.getElementById('enq-service')?.value|| '';
+  const source = extra.source || '';
+  const daytype= extra.daytype|| document.getElementById('enq-daytype')?.value || '';
+  return allLeads.filter(l => {
+    if (q && !lv(l,'name','Name').toLowerCase().includes(q) && !lv(l,'phone','Phone').toLowerCase().includes(q)) return false;
+    if (stage   && lv(l,'stage','Stage')   !== stage)   return false;
+    if (service && lv(l,'service','Service') !== service) return false;
+    if (source  && lv(l,'source','Source')  !== source)  return false;
+    if (daytype && lv(l,'dayType','Day Type') !== daytype) return false;
+    return true;
+  });
+}
+
+function renderLeadsTable(){
+  const filtered = filterLeads();
+  const total = filtered.length;
+  const pages = Math.ceil(total/PAGE_SIZE);
+  if (leadsPage > pages) leadsPage = Math.max(1,pages);
+  const slice = filtered.slice((leadsPage-1)*PAGE_SIZE, leadsPage*PAGE_SIZE);
+  document.getElementById('enq-count').textContent = `${total} enquiries`;
+  document.getElementById('enq-body').innerHTML = slice.length ? slice.map(l => {
+    const id = lv(l,'id','SL NO');
+    const name = lv(l,'name','Name') || '—';
+    const phone = lv(l,'phone','Phone') || '—';
+    const service = lv(l,'service','Service') || '—';
+    const daytype = lv(l,'dayType','Day Type') || '—';
+    const checkin = lv(l,'checkin','check-in date') || '—';
+    const adults = lv(l,'adults','Adults') || '—';
+    const rooms = lv(l,'rooms','Rooms') || '—';
+    const source = lv(l,'source','Source') || '—';
+    const quoted = lv(l,'quotedAmount','Quoted_Amount');
+    const paid = lv(l,'paidAmount','Paid_Amount');
+    const stage = lv(l,'stage','Stage') || 'New';
+    const imgSent = lv(l,'imagesSent','Images_Sent');
+    const confSent = lv(l,'confirmationSent','Confirmation_Sent');
+    const sc = STAGE_COLORS[stage]||'grey';
+    const flags = [
+      imgSent.toLowerCase()==='yes' ? '<span class="badge teal" style="font-size:9px">📷 Img</span>' : '',
+      confSent.toLowerCase()==='yes' ? '<span class="badge green" style="font-size:9px">✅ Conf</span>' : '',
+    ].filter(Boolean).join(' ');
+    return `<tr>
+      <td style="color:var(--muted2)">${id}</td>
+      <td><strong style="cursor:pointer;color:var(--accent)" onclick="openLeadModal('${id}')">${name}</strong></td>
+      <td><a href="https://wa.me/${phone.replace(/\D/g,'')}" target="_blank" style="color:var(--text2);text-decoration:none">${phone}</a></td>
+      <td>${service}</td>
+      <td><span class="badge grey" style="font-size:9px">${daytype}</span></td>
+      <td>${checkin}</td>
+      <td>${adults}</td>
+      <td>${rooms}</td>
+      <td><span class="badge grey" style="font-size:9px">${source}</span></td>
+      <td style="font-weight:600;color:var(--text)">${quoted ? '₹'+quoted : '—'}</td>
+      <td style="color:var(--green);font-weight:600">${paid ? '₹'+paid : '—'}</td>
+      <td><span class="badge ${sc}">${stage}</span></td>
+      <td>${flags}</td>
+      <td><button class="btn sm" onclick="openLeadModal('${id}')">View</button></td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="14" style="text-align:center;padding:30px;color:var(--muted)">No enquiries found</td></tr>`;
+  // Pagination
+  let pag = '';
+  if (pages > 1){
+    pag += `<button onclick="leadsPage=Math.max(1,leadsPage-1);renderLeadsTable()" ${leadsPage===1?'disabled':''}>← Prev</button>`;
+    for (let i=1;i<=pages;i++) pag += `<button onclick="leadsPage=${i};renderLeadsTable()" style="${leadsPage===i?'background:var(--accent-bg);color:var(--accent);border-color:var(--accent);font-weight:700':''}">${i}</button>`;
+    pag += `<button onclick="leadsPage=Math.min(${pages},leadsPage+1);renderLeadsTable()" ${leadsPage===pages?'disabled':''}>Next →</button>`;
+  }
+  document.getElementById('enq-pag').innerHTML = pag + `<span style="margin-left:8px">Page ${leadsPage} of ${pages||1}</span>`;
+}
+
+function exportCSV(){
+  if (!allLeads.length){ toast('No data to export','warn'); return; }
+  const keys = ['id','name','phone','service','checkin','checkout','dayType','state','adults','rooms','stage','quotedAmount','paidAmount','source','notes'];
+  const rows = [keys.join(',')];
+  allLeads.forEach(l => rows.push(keys.map(k => `"${String(lv(l,k)||'').replace(/"/g,'""')}"`).join(',')));
+  const blob = new Blob([rows.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='pearlspot-enquiries.csv'; a.click();
+  toast('Exported','ok');
+}
+
+function globalSearch(q){
+  if(!q) return;
+  const ql = q.toLowerCase();
+  const match = allLeads.filter(l => lv(l,'name','Name').toLowerCase().includes(ql) || lv(l,'phone','Phone').includes(q));
+  if (match.length){ showPage('enquiries',null); document.getElementById('enq-search').value=q; renderLeadsTable(); toast(`${match.length} match(es)`, 'ok'); }
+}
+
+// ═══════════════════════════════════════
+// LEAD MODAL
+// ═══════════════════════════════════════
+function openLeadModal(id){
+  const l = allLeads.find(x => String(lv(x,'id','SL NO')) === String(id));
+  if (!l){ toast('Lead not found','err'); return; }
+  currentLeadId = id;
+  document.getElementById('lm-title').textContent = 'Enquiry #' + id;
+  const name = lv(l,'name','Name')||'—';
+  const av = document.getElementById('lm-av');
+  av.textContent = name.charAt(0).toUpperCase();
+  av.style.background = bg(name);
+  document.getElementById('lm-name').textContent = name;
+  document.getElementById('lm-phone').textContent = lv(l,'phone','Phone')||'—';
+  document.getElementById('lm-service').textContent = lv(l,'service','Service')||'—';
+  document.getElementById('lm-daytype').textContent = lv(l,'dayType','Day Type')||'—';
+  document.getElementById('lm-checkin').textContent = lv(l,'checkin','check-in date')||'—';
+  document.getElementById('lm-checkout').textContent = lv(l,'checkout','check-out date')||'—';
+  document.getElementById('lm-adults').textContent = lv(l,'adults','Adults')||'—';
+  document.getElementById('lm-c5plus').textContent = lv(l,'children5Plus','Children_5Plus')||'0';
+  document.getElementById('lm-c5below').textContent = lv(l,'children5Below','Children_5Below')||'0';
+  document.getElementById('lm-rooms').textContent = lv(l,'rooms','Rooms')||'—';
+  document.getElementById('lm-occasion').textContent = lv(l,'occasion','Occasion')||'—';
+  document.getElementById('lm-food').textContent = lv(l,'foodPref','Food_Pref')||'—';
+  document.getElementById('lm-source').textContent = lv(l,'source','Source')||'—';
+  document.getElementById('lm-boat').textContent = lv(l,'boatAssigned','Boat_Assigned')||'—';
+  document.getElementById('lm-quoted').textContent = lv(l,'quotedAmount','Quoted_Amount') ? '₹'+lv(l,'quotedAmount','Quoted_Amount') : '—';
+  document.getElementById('lm-paid').textContent = lv(l,'paidAmount','Paid_Amount') ? '₹'+lv(l,'paidAmount','Paid_Amount') : '—';
+  document.getElementById('lm-stage-sel').value = lv(l,'stage','Stage')||'New';
+  document.getElementById('lm-images-sent').checked = lv(l,'imagesSent','Images_Sent').toLowerCase()==='yes';
+  // edit tab pre-fill
+  document.getElementById('edit-boat').value = lv(l,'boatAssigned','Boat_Assigned');
+  document.getElementById('edit-quoted').value = lv(l,'quotedAmount','Quoted_Amount');
+  document.getElementById('edit-paid').value = lv(l,'paidAmount','Paid_Amount');
+  document.getElementById('edit-payment-method').value = lv(l,'paymentMethod','Payment_Method');
+  document.getElementById('edit-occasion').value = lv(l,'occasion','Occasion');
+  document.getElementById('edit-food').value = lv(l,'foodPref','Food_Pref');
+  lmTab(document.querySelector('.lm-tab.active')||document.querySelector('.lm-tab'), 'notes');
+  renderLeadNotes(); renderLeadCallLog();
+  openModal('modal-lead');
+}
+
+function lmTab(btn, tab){
+  document.querySelectorAll('.lm-tab').forEach(b=>b.classList.remove('active'));
+  btn?.classList.add('active');
+  ['notes','calllog','edit'].forEach(t => { const el=document.getElementById('lm-tab-'+t); if(el) el.style.display=t===tab?'block':'none'; });
+}
+
+function renderLeadNotes(){
+  const notes = leadNotes[currentLeadId]||[];
+  document.getElementById('lm-notes-list').innerHTML = notes.length ?
+    notes.slice().reverse().map(n=>`<div class="note-item"><div class="note-item-text">${n.text}</div><div class="note-item-meta">${n.by} · ${n.ts}</div></div>`).join('') :
+    '<div style="text-align:center;color:var(--muted);font-size:12px;padding:20px">No notes yet</div>';
+}
+
+function addLeadNote(){
+  const text = document.getElementById('lm-note-input').value.trim(); if(!text) return;
+  if(!leadNotes[currentLeadId]) leadNotes[currentLeadId]=[];
+  leadNotes[currentLeadId].push({text,by:currentUser?.name||'Admin',ts:new Date().toLocaleString()});
+  saveLeadData(); document.getElementById('lm-note-input').value=''; renderLeadNotes(); toast('Note added','ok');
+}
+
+function renderLeadCallLog(){
+  const logs = leadCallLogs[currentLeadId]||[];
+  document.getElementById('lm-calllog-list').innerHTML = logs.length ?
+    logs.slice().reverse().map(c=>`<div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)"><div style="width:28px;height:28px;border-radius:50%;background:var(--green-bg);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">📞</div><div><div style="font-size:12px;font-weight:600;color:var(--text)">${c.outcome} — ${c.note}</div><div style="font-size:11px;color:var(--muted)">${c.by} · ${c.ts}</div></div></div>`).join('') :
+    '<div style="text-align:center;color:var(--muted);font-size:12px;padding:20px">No call logs yet</div>';
+}
+
+function addCallLog(){
+  const note=document.getElementById('lm-call-note').value.trim();
+  const outcome=document.getElementById('lm-call-outcome').value;
+  if(!leadCallLogs[currentLeadId]) leadCallLogs[currentLeadId]=[];
+  leadCallLogs[currentLeadId].push({note:note||'—',outcome,by:currentUser?.name||'Admin',ts:new Date().toLocaleString()});
+  saveLeadData(); document.getElementById('lm-call-note').value=''; renderLeadCallLog(); toast('Call logged','ok');
+}
+
+async function updateLeadStage(stage){
+  if (!currentLeadId) return;
+  const l = allLeads.find(x=>String(lv(x,'id','SL NO'))===String(currentLeadId));
+  if (l){ l.stage=stage; l['Stage']=stage; }
+  try {
+    await fetch(API.leadsUpdate,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:currentLeadId,fields:{'Stage':stage}})});
+    toast('Stage updated to '+stage,'ok'); renderLeadsTable(); renderKanban(); renderToday();
+  } catch(e){ toast('Update failed — check n8n','err'); }
+}
+
+async function saveLeadEdits(){
+  if (!currentLeadId) return;
+  const fields = {
+    'Boat_Assigned':  document.getElementById('edit-boat').value,
+    'Quoted_Amount':  document.getElementById('edit-quoted').value,
+    'Paid_Amount':    document.getElementById('edit-paid').value,
+    'Payment_Method': document.getElementById('edit-payment-method').value,
+    'Occasion':       document.getElementById('edit-occasion').value,
+    'Food_Pref':      document.getElementById('edit-food').value,
+  };
+  const l = allLeads.find(x=>String(lv(x,'id','SL NO'))===String(currentLeadId));
+  if(l){ Object.assign(l,{boatAssigned:fields['Boat_Assigned'],quotedAmount:fields['Quoted_Amount'],paidAmount:fields['Paid_Amount'],paymentMethod:fields['Payment_Method'],occasion:fields['Occasion'],foodPref:fields['Food_Pref']}); Object.assign(l,fields); }
+  try {
+    await fetch(API.leadsUpdate,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:currentLeadId,fields})});
+    toast('Saved','ok');
+    // update modal display
+    document.getElementById('lm-boat').textContent = fields['Boat_Assigned']||'—';
+    document.getElementById('lm-quoted').textContent = fields['Quoted_Amount'] ? '₹'+fields['Quoted_Amount'] : '—';
+    document.getElementById('lm-paid').textContent = fields['Paid_Amount'] ? '₹'+fields['Paid_Amount'] : '—';
+    document.getElementById('lm-occasion').textContent = fields['Occasion']||'—';
+    document.getElementById('lm-food').textContent = fields['Food_Pref']||'—';
+    renderLeadsTable(); renderAnalytics();
+  } catch(e){ toast('Save failed','err'); }
+}
+
+async function toggleImages(){
+  if (!currentLeadId) return;
+  const val = document.getElementById('lm-images-sent').checked ? 'Yes' : 'No';
+  try {
+    await fetch(API.leadsUpdate,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:currentLeadId,fields:{'Images_Sent':val}})});
+    toast('Images Sent: '+val,'ok');
+  } catch(e){ toast('Update failed','err'); }
+}
+
+function lmSendWA(){
+  const l = allLeads.find(x=>String(lv(x,'id','SL NO'))===String(currentLeadId));
+  if(!l) return;
+  const phone = lv(l,'phone','Phone');
+  window.open(`https://wa.me/${phone.replace(/\D/g,'')}`, '_blank');
+}
+
+async function lmSendConfirmation(){
+  const l = allLeads.find(x=>String(lv(x,'id','SL NO'))===String(currentLeadId));
+  if(!l){ toast('Lead not found','err'); return; }
+  if(!confirm('Send booking confirmation to '+lv(l,'name','Name')+'?')) return;
+  try {
+    await fetch(API.automation,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'send_confirmation',lead:{id:currentLeadId,phone:lv(l,'phone','Phone'),name:lv(l,'name','Name'),checkin:lv(l,'checkin','check-in date'),checkout:lv(l,'checkout','check-out date'),service:lv(l,'service','Service'),dayType:lv(l,'dayType','Day Type'),adults:lv(l,'adults','Adults'),rooms:lv(l,'rooms','Rooms'),boatAssigned:lv(l,'boatAssigned','Boat_Assigned'),quotedAmount:lv(l,'quotedAmount','Quoted_Amount'),paidAmount:lv(l,'paidAmount','Paid_Amount'),occasion:lv(l,'occasion','Occasion'),foodPref:lv(l,'foodPref','Food_Pref')}})});
+    toast('Confirmation sent','ok');
+  } catch(e){ toast('Send failed','err'); }
+}
+
+async function lmSendReminder(){
+  const l = allLeads.find(x=>String(lv(x,'id','SL NO'))===String(currentLeadId));
+  if(!l){ toast('Lead not found','err'); return; }
+  if(!confirm('Send 24h reminder to '+lv(l,'name','Name')+'?')) return;
+  try {
+    await fetch(API.automation,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'send_reminder',lead:{id:currentLeadId,phone:lv(l,'phone','Phone'),name:lv(l,'name','Name'),checkin:lv(l,'checkin','check-in date'),service:lv(l,'service','Service'),dayType:lv(l,'dayType','Day Type'),boatAssigned:lv(l,'boatAssigned','Boat_Assigned')}})});
+    toast('Reminder sent','ok');
+  } catch(e){ toast('Send failed','err'); }
+}
+
+async function lmSendReview(){
+  const l = allLeads.find(x=>String(lv(x,'id','SL NO'))===String(currentLeadId));
+  if(!l){ toast('Lead not found','err'); return; }
+  if(!confirm('Send review request to '+lv(l,'name','Name')+'?')) return;
+  try {
+    await fetch(API.automation,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'send_review',lead:{id:currentLeadId,phone:lv(l,'phone','Phone'),name:lv(l,'name','Name')}})});
+    toast('Review request sent','ok');
+  } catch(e){ toast('Send failed','err'); }
+}
+
+// ═══════════════════════════════════════
+// CONVERSATIONS
+// ═══════════════════════════════════════
+async function loadConvs(status, btn){
+  if(btn){ document.querySelectorAll('.cmid-tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+  try {
+    const r = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/conversations?status=${status}&inbox_id=${CW_INBOX}`,{headers:{'api_access_token':CW_TOKEN,'Content-Type':'application/json'}});
+    const data = await r.json();
+    const convs = data?.data?.payload || data?.payload || [];
+    allConvs = convs.map(c => ({
+      id: c.id, rawId: c.id, status: c.status,
+      contactName: c.meta?.sender?.name||'Unknown',
+      contactPhone: c.meta?.sender?.phone_number||c.meta?.sender?.identifier||'',
+      unread: c.unread_count||0,
+      lastTs: c.last_activity_at ? new Date(c.last_activity_at*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'',
+      preview: c.last_non_activity_message?.content||'',
+    }));
+    document.getElementById('badge-convs').textContent = allConvs.filter(c=>c.unread>0).length || allConvs.length;
+    document.getElementById('mine-badge').textContent = allConvs.length;
+    renderConvList();
+  } catch(e){ renderConvListFallback(); }
+}
+
+function renderConvListFallback(){
+  document.getElementById('conv-list').innerHTML = `<div style="padding:20px;text-align:center"><div style="font-size:13px;color:var(--muted);margin-bottom:12px">Connect via Chatwoot directly</div><a href="https://app.aiingo.com/app/accounts/8/inbox/9" target="_blank" class="btn primary" style="text-decoration:none">Open Chatwoot Inbox ↗</a></div>`;
+}
+
+function renderConvList(){
+  const el = document.getElementById('conv-list');
+  if (!allConvs.length){ renderConvListFallback(); return; }
+  el.innerHTML = allConvs.map(c => {
+    const avBg = bg(c.contactName);
+    return `<div class="conv-item${selectedConvId===c.id?' selected':''}" data-id="${c.id}" onclick="openConv(${c.id})">
+      <div class="conv-item-top">
+        <div class="conv-item-avatar" style="background:${avBg}">${c.contactName.charAt(0).toUpperCase()}</div>
+        <div class="conv-item-content">
+          <div class="conv-item-header">
+            <span class="conv-item-name">${c.contactName}</span>
+            <span class="conv-item-time">${c.lastTs}</span>
+          </div>
+          <div class="conv-item-preview">${c.preview||'—'}</div>
+        </div>
+        ${c.unread>0?`<div class="unread-dot"></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function openConv(id){
+  selectedConvId = id;
+  document.querySelectorAll('.conv-item').forEach(el=>el.classList.toggle('selected',Number(el.dataset.id)===id));
+  document.getElementById('chat-empty').style.display='none';
+  document.getElementById('chat-active').style.display='flex';
+  const conv = allConvs.find(c=>c.id===id);
+  const name = conv?.contactName||'Unknown';
+  const phone = conv?.contactPhone||'';
+  document.getElementById('chat-av').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('chat-av').style.background = bg(name);
+  document.getElementById('chat-name').textContent = name;
+  document.getElementById('cw-link').href = `${CW_BASE}/app/accounts/${CW_ACCOUNT}/conversations/${id}`;
+  document.getElementById('resolve-btn').textContent = conv?.status==='resolved'?'↩ Reopen':'✓ Resolve';
+  document.getElementById('cp-avatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('cp-avatar').style.background = bg(name);
+  document.getElementById('cp-name').textContent = name;
+  document.getElementById('cp-company').textContent = phone;
+  renderCpFields(phone);
+  document.getElementById('chat-messages').innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Loading messages…</div>';
+  try {
+    const r = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/conversations/${id}/messages`,{headers:{'api_access_token':CW_TOKEN}});
+    const data = await r.json();
+    renderMessages(Array.isArray(data)?data:(data.payload||[]));
+  } catch(e){ document.getElementById('chat-messages').innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Open in <a href="${CW_BASE}/app/accounts/${CW_ACCOUNT}/conversations/${id}" target="_blank" style="color:var(--accent)">Chatwoot ↗</a></div>`; }
+}
+
+function renderMessages(msgs){
+  const el = document.getElementById('chat-messages');
+  if(!msgs.length){ el.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted);font-size:12px">No messages yet</div>'; return; }
+  el.innerHTML = msgs.filter(m=>m.message_type!==undefined&&m.content).map(m => {
+    const isOut = m.message_type===1;
+    const time = m.created_at ? new Date(m.created_at*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
+    return `<div class="msg-row ${isOut?'out':'in'}">
+      <div style="width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;background:${isOut?'#1f93ff':'#7c3aed'}">${isOut?'A':'U'}</div>
+      <div><div class="msg-bubble">${m.content}</div><div class="msg-meta">${time}${isOut?' ✓✓':''}</div></div>
+    </div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function renderCpFields(phone){
+  const m = allLeads.find(l => { const lp=lv(l,'phone','Phone').replace(/\D/g,''); const sp=phone.replace(/\D/g,''); return lp&&sp&&(lp.endsWith(sp)||sp.endsWith(lp)); });
+  const el = document.getElementById('cp-fields');
+  if(!m){ el.innerHTML=`<div class="cp-field"><span class="cp-field-icon">📞</span><div><div class="cp-field-label">Phone</div><div class="cp-field-val">${phone||'—'}</div></div></div>`; return; }
+  el.innerHTML = [
+    ['📞','Phone',lv(m,'phone','Phone')],
+    ['📍','State',lv(m,'state','State')],
+    ['🌐','Language',lv(m,'language','Language')],
+    ['📊','Stage',lv(m,'stage','Stage')||'New'],
+  ].map(([icon,label,val])=>`<div class="cp-field"><span class="cp-field-icon">${icon}</span><div><div class="cp-field-label">${label}</div><div class="cp-field-val">${val||'—'}</div></div></div>`).join('');
+  document.getElementById('cp-booking').innerHTML = [
+    ['⛵','Service',lv(m,'service','Service')],
+    ['⏱','Day Type',lv(m,'dayType','Day Type')],
+    ['📅','Check-in',lv(m,'checkin','check-in date')],
+    ['👥','Adults',lv(m,'adults','Adults')],
+    ['💰','Quoted',lv(m,'quotedAmount','Quoted_Amount') ? '₹'+lv(m,'quotedAmount','Quoted_Amount') : '—'],
+  ].map(([icon,label,val])=>`<div class="cp-field"><span class="cp-field-icon">${icon}</span><div><div class="cp-field-label">${label}</div><div class="cp-field-val">${val||'—'}</div></div></div>`).join('');
+}
+
+function cpTab(btn,tab){
+  document.querySelectorAll('.cp-tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+  document.getElementById('cp-contact').style.display=tab==='contact'?'block':'none';
+  document.getElementById('cp-booking-tab').style.display=tab==='booking'?'block':'none';
+}
+
+async function sendReply(){
+  if(!selectedConvId){ toast('Select a conversation','err'); return; }
+  const input=document.getElementById('chat-reply'); const msg=input.value.trim(); if(!msg) return; input.value='';
+  try {
+    await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/conversations/${selectedConvId}/messages`,{method:'POST',headers:{'api_access_token':CW_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({content:msg,message_type:'outgoing',private:false})});
+    toast('Sent','ok'); openConv(selectedConvId);
+  } catch(e){ toast('Send failed','err'); }
+}
+document.getElementById('chat-reply').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendReply();} });
+
+async function resolveConv(){
+  if(!selectedConvId) return;
+  const conv=allConvs.find(c=>c.id===selectedConvId);
+  const ns=conv?.status==='resolved'?'open':'resolved';
+  try {
+    await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/conversations/${selectedConvId}/toggle_status`,{method:'POST',headers:{'api_access_token':CW_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({status:ns})});
+    toast(`Conversation ${ns}`,'ok'); loadConvs('open');
+  } catch(e){ toast('Failed','err'); }
+}
+
+// ═══════════════════════════════════════
+// KANBAN
+// ═══════════════════════════════════════
+let kanbanFilter = 'all';
+function filterKanban(stage){ showPage('kanban',null); }
+function kFilter(f, btn){
+  kanbanFilter=f;
+  document.querySelectorAll('[onclick^="kFilter"]').forEach(b=>b.classList.remove('primary'));
+  btn?.classList.add('primary');
+  renderKanban();
+}
+
+function renderKanban(){
+  const board = document.getElementById('kanban-board'); if(!board) return;
+  const leads = allLeads.filter(l => {
+    if (kanbanFilter==='all') return true;
+    if (kanbanFilter==='Sharing') return lv(l,'dayType','Day Type').toLowerCase().includes('sharing');
+    return lv(l,'dayType','Day Type') === kanbanFilter;
+  });
+  board.innerHTML = STAGES.map(stage => {
+    const cards = leads.filter(l => (lv(l,'stage','Stage')||'New') === stage);
+    const sc = STAGE_COLORS[stage]||'grey';
+    return `<div class="kanban-col" ondragover="event.preventDefault();this.querySelector('.kanban-cards').classList.add('drag-over')" ondragleave="this.querySelector('.kanban-cards').classList.remove('drag-over')" ondrop="dropCard(event,'${stage}')">
+      <div class="kanban-col-head">
+        <span class="kanban-col-title">${stage}</span>
+        <span class="kanban-col-count badge ${sc}">${cards.length}</span>
+      </div>
+      <div class="kanban-cards" data-stage="${stage}">
+        ${cards.map(l => {
+          const id = lv(l,'id','SL NO');
+          const name = lv(l,'name','Name')||'—';
+          const phone = lv(l,'phone','Phone')||'';
+          const checkin = lv(l,'checkin','check-in date')||'—';
+          const service = lv(l,'service','Service')||'—';
+          const daytype = lv(l,'dayType','Day Type')||'';
+          const adults = lv(l,'adults','Adults')||'';
+          const quoted = lv(l,'quotedAmount','Quoted_Amount');
+          return `<div class="kcard" draggable="true" data-id="${id}" ondragstart="dragCard(event,'${id}')">
+            <div class="kcard-name">${name}</div>
+            <div class="kcard-meta">
+              ${checkin !== '—' ? `📅 ${checkin}<br>` : ''}
+              ${service} ${daytype ? `· ${daytype}` : ''}<br>
+              ${adults ? `👥 ${adults} adults` : ''}
+              ${quoted ? `<br>💰 ₹${quoted}` : ''}
+            </div>
+            <div class="kcard-actions">
+              <button class="kcard-btn" onclick="openLeadModal('${id}')">View</button>
+              <a class="kcard-btn" href="https://wa.me/${phone.replace(/\D/g,'')}" target="_blank">📱</a>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+let dragId = null;
+function dragCard(e, id){ dragId=id; e.dataTransfer.effectAllowed='move'; }
+async function dropCard(e, stage){
+  e.preventDefault();
+  document.querySelectorAll('.kanban-cards').forEach(el=>el.classList.remove('drag-over'));
+  if (!dragId) return;
+  const l = allLeads.find(x=>String(lv(x,'id','SL NO'))===String(dragId));
+  if (l){ l.stage=stage; l['Stage']=stage; }
+  renderKanban();
+  try {
+    await fetch(API.leadsUpdate,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:dragId,fields:{'Stage':stage}})});
+    toast(`Moved to ${stage}`,'ok'); renderToday(); renderLeadsTable();
+  } catch(ex){ toast('Sync failed','err'); }
+  dragId = null;
+}
+
+// ═══════════════════════════════════════
+// TODAY PAGE
+// ═══════════════════════════════════════
+function renderToday(){
+  const hour = new Date().getHours();
+  const greet = hour<12?'Good morning':hour<17?'Good afternoon':'Good evening';
+  const name = currentUser?.name?.split(' ')[0]||'there';
+  const el = document.getElementById('today-greeting');
+  if(el) el.textContent = `${greet}, ${name} 👋`;
+  const sub = document.getElementById('today-sub');
+  if(sub) sub.textContent = `Here's your Pearl Spot Tours pipeline — ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}`;
+
+  // Pipeline counts
+  const stageCounts = {};
+  allLeads.forEach(l => { const s=lv(l,'stage','Stage')||'New'; stageCounts[s]=(stageCounts[s]||0)+1; });
+  ['new','quoted','confirmed','paid','checkedin','completed','cancelled'].forEach((id,i) => {
+    const stages = [['New'],['Quoted'],['Confirmed'],['Paid'],['Checked-In'],['Completed'],['Cancelled']][i];
+    const el2 = document.getElementById('ps-'+id);
+    if(el2) el2.textContent = stages.reduce((a,s)=>a+(stageCounts[s]||0),0);
+  });
+
+  const today = new Date().toISOString().split('T')[0];
+
+  // Today's check-ins
+  const checkins = allLeads.filter(l => { const ci=lv(l,'checkin','check-in date'); return ci&&ci.split('T')[0]===today; });
+  document.getElementById('checkins-count').textContent = checkins.length+' today';
+  document.getElementById('today-checkins').innerHTML = checkins.length ?
+    checkins.map(l=>`<div class="call-item"><div class="call-avatar" style="background:${bg(lv(l,'name','Name')||'A')}">${(lv(l,'name','Name')||'?').charAt(0)}</div><div><div class="call-name">${lv(l,'name','Name')||'—'}</div><div class="call-meta">${lv(l,'service','Service')} · ${lv(l,'dayType','Day Type')}</div></div><button class="btn sm" style="margin-left:auto" onclick="openLeadModal('${lv(l,'id','SL NO')}')">View</button></div>`).join('') :
+    '<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No check-ins today</div>';
+
+  // New enquiries (last 10)
+  const recent = allLeads.slice(-10).reverse();
+  document.getElementById('new-enq-count').textContent = recent.length+' recent';
+  document.getElementById('today-new-enq').innerHTML = recent.length ?
+    recent.map(l=>`<div class="call-item"><div class="call-avatar" style="background:${bg(lv(l,'name','Name')||'A')}">${(lv(l,'name','Name')||'?').charAt(0)}</div><div><div class="call-name">${lv(l,'name','Name')||'—'}</div><div class="call-meta">${lv(l,'service','Service')||'—'} · ${lv(l,'source','Source')||'Unknown'}</div></div><span class="badge ${STAGE_COLORS[lv(l,'stage','Stage')||'New']||'grey'}" style="margin-left:auto;font-size:9px">${lv(l,'stage','Stage')||'New'}</span></div>`).join('') :
+    '<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No recent enquiries</div>';
+
+  // Pending quotes
+  const pendingQ = allLeads.filter(l => !lv(l,'quotedAmount','Quoted_Amount') && (lv(l,'stage','Stage')||'New')==='New');
+  document.getElementById('pending-q-count').textContent = pendingQ.length+' pending';
+  document.getElementById('today-pending-q').innerHTML = pendingQ.slice(0,5).map(l=>`<div class="call-item"><div class="call-avatar" style="background:${bg(lv(l,'name','Name')||'A')}">${(lv(l,'name','Name')||'?').charAt(0)}</div><div><div class="call-name">${lv(l,'name','Name')||'—'}</div><div class="call-meta">${lv(l,'checkin','check-in date')||'No date'}</div></div><button class="btn sm primary" style="margin-left:auto" onclick="openLeadModal('${lv(l,'id','SL NO')}')">Quote</button></div>`).join('') ||
+    '<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">All enquiries quoted ✅</div>';
+
+  // Confirmation pending
+  const confPending = allLeads.filter(l => ['Confirmed','Paid'].includes(lv(l,'stage','Stage')) && lv(l,'confirmationSent','Confirmation_Sent').toLowerCase()!=='yes');
+  document.getElementById('today-conf-pending').innerHTML = confPending.slice(0,5).map(l=>`<div class="call-item"><div class="call-avatar" style="background:${bg(lv(l,'name','Name')||'A')}">${(lv(l,'name','Name')||'?').charAt(0)}</div><div><div class="call-name">${lv(l,'name','Name')||'—'}</div><div class="call-meta">${lv(l,'checkin','check-in date')||'—'}</div></div><button class="btn sm success" style="margin-left:auto" onclick="openLeadModal('${lv(l,'id','SL NO')}')">Send</button></div>`).join('') ||
+    '<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">All confirmations sent ✅</div>';
+
+  // Review pending
+  const reviewPending = allLeads.filter(l => lv(l,'stage','Stage')==='Completed' && lv(l,'reviewSent','Review_Sent').toLowerCase()!=='yes');
+  document.getElementById('today-review-pending').innerHTML = reviewPending.slice(0,5).map(l=>`<div class="call-item"><div class="call-avatar" style="background:${bg(lv(l,'name','Name')||'A')}">${(lv(l,'name','Name')||'?').charAt(0)}</div><div><div class="call-name">${lv(l,'name','Name')||'—'}</div><div class="call-meta">Completed trip</div></div><button class="btn sm" style="margin-left:auto" onclick="openLeadModal('${lv(l,'id','SL NO')}')">Send ⭐</button></div>`).join('') ||
+    '<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No reviews pending ✅</div>';
+
+  // Notifications badge
+  const nCount = pendingQ.length + confPending.length + reviewPending.length;
+  const nb = document.getElementById('notif-count');
+  if(nb) nb.textContent = nCount;
+  if(nCount>0){
+    const nl = document.getElementById('notif-list');
+    if(nl && nl.children.length<=1){
+      nl.innerHTML = [
+        pendingQ.length>0?`<div class="notif-item"><div class="notif-dot"></div><div><div class="notif-title">${pendingQ.length} enquiries need quoting</div><div class="notif-sub">No quoted amount set</div></div></div>`:'',
+        confPending.length>0?`<div class="notif-item"><div class="notif-dot"></div><div><div class="notif-title">${confPending.length} confirmations pending</div><div class="notif-sub">Confirmed/Paid but no confirmation sent</div></div></div>`:'',
+        reviewPending.length>0?`<div class="notif-item"><div class="notif-dot"></div><div><div class="notif-title">${reviewPending.length} review requests pending</div><div class="notif-sub">Completed trips — ask for review</div></div></div>`:'',
+        checkins.length>0?`<div class="notif-item"><div class="notif-dot"></div><div><div class="notif-title">${checkins.length} check-in(s) today</div><div class="notif-sub">Guests arriving today</div></div></div>`:'',
+      ].filter(Boolean).join('');
+    }
+  }
+}
+
+// ═══════════════════════════════════════
+// WA COMPOSER
+// ═══════════════════════════════════════
+const WA_TEMPLATES = {
+  followup: `Hi {{name}}! 👋\n\nWelcome to *⛵ Pearl Spot Tours Houseboats ⛵*\n\nThank you for your enquiry. We'd love to help you plan the perfect backwater experience on the serene waters of Alappuzha!\n\nYour booking summary:\n📦 Service: {{service}}\n⏱ Type: {{dayType}}\n📅 Arrival: {{checkin}}\n👥 Guests: {{adults}} adults\n\nOur team will send you the best available rates shortly.\n\n📞 For immediate assistance:\nCall/WhatsApp Baiju: *+91 75590 31555*\n\n_Pearl Spot Tours — A Legacy on the Backwaters since 1998_ 🌴`,
+  quote: `Dear {{name}},\n\nThank you for choosing Pearl Spot Tours! 🛥️\n\nHere's your personalised quote:\n\n📦 Package: {{service}}\n⏱ Type: {{dayType}}\n📅 Check-in: {{checkin}}\n📅 Check-out: {{checkout}}\n👥 Adults: {{adults}}\n🚪 Rooms: {{rooms}}\n🚢 Boat: {{boat}}\n\n💰 *Total Amount: ₹{{price}}*\n\nIncludes: Breakfast, Lunch, Dinner, Cruise, Welcome drink\n\nTo confirm your booking, please transfer the advance amount.\n\n📞 Baiju: +91 75590 31555\n✅ Book now — limited availability!\n\n_Pearl Spot Tours, Alappuzha since 1998_ 🌴`,
+  confirmation: `✅ *Booking Confirmed — Pearl Spot Tours*\n\nDear {{name}},\n\nYour houseboat booking is confirmed! 🎉\n\n🚢 Boat: {{boat}}\n📦 Package: {{service}} ({{dayType}})\n📅 Check-in: {{checkin}}\n📅 Check-out: {{checkout}}\n👥 Adults: {{adults}}\n\n💵 Amount: ₹{{price}}\n\n📍 *Punnamada Jetty, Alappuzha*\nCheck-in time: 12:00 PM\n\n📞 Any questions? Call: +91 75590 31555\n\nSee you soon! 🌴`,
+  reminder: `⏰ *Reminder — Pearl Spot Tours*\n\nDear {{name}},\n\nYour houseboat trip is *tomorrow!* 🛥️🌴\n\n🚢 Boat: {{boat}}\n📦 {{service}} ({{dayType}})\n📅 Check-in: {{checkin}}\n\n📍 Punnamada Jetty, Alappuzha\nPlease arrive by *11:30 AM*\n\n📞 Baiju: +91 75590 31555\n\nSee you tomorrow! 🌊`,
+  review: `🌟 *Thank You — Pearl Spot Tours*\n\nDear {{name}},\n\nThank you for choosing Pearl Spot Tours! We hope you had a wonderful backwater experience. 🛥️🌴\n\nWe'd love your feedback! Please leave us a Google review:\n👉 https://g.page/r/PearlSpotToursAlappuzha/review\n\n📸 Tag us on Instagram:\n@pearlspot_houseboats_alappuzha\n\nHope to see you again! 🙏\n— Baiju & Team`,
+};
+
+function initWcFilters(){
+  const services = [...new Set(allLeads.map(l=>lv(l,'service','Service')).filter(Boolean))].sort();
+  const el = document.getElementById('wc-service'); if(!el) return;
+  const cur = el.value;
+  el.innerHTML = `<option value="">All Services</option>`+services.map(s=>`<option value="${s}">${s}</option>`).join('');
+  el.value = cur;
+  updateWcCount();
+}
+
+function updateWcCount(){
+  const stage = document.getElementById('wc-stage')?.value||'';
+  const service = document.getElementById('wc-service')?.value||'';
+  const daytype = document.getElementById('wc-daytype')?.value||'';
+  const filtered = allLeads.filter(l => {
+    if(stage && lv(l,'stage','Stage')!==stage) return false;
+    if(service && lv(l,'service','Service')!==service) return false;
+    if(daytype && lv(l,'dayType','Day Type')!==daytype) return false;
+    return !!lv(l,'phone','Phone');
+  });
+  const el = document.getElementById('wc-count'); if(el) el.textContent = filtered.length+' leads';
+  return filtered;
+}
+
+function subVars(text, lead){
+  return text
+    .replace(/{{name}}/g, lv(lead,'name','Name')||'Guest')
+    .replace(/{{checkin}}/g, lv(lead,'checkin','check-in date')||'—')
+    .replace(/{{checkout}}/g, lv(lead,'checkout','check-out date')||'—')
+    .replace(/{{service}}/g, lv(lead,'service','Service')||'—')
+    .replace(/{{dayType}}/g, lv(lead,'dayType','Day Type')||'—')
+    .replace(/{{adults}}/g, lv(lead,'adults','Adults')||'—')
+    .replace(/{{rooms}}/g, lv(lead,'rooms','Rooms')||'—')
+    .replace(/{{price}}/g, lv(lead,'quotedAmount','Quoted_Amount')||'—')
+    .replace(/{{boat}}/g, lv(lead,'boatAssigned','Boat_Assigned')||'Pearl Houseboat');
+}
+
+function loadTpl(tpl, btn){
+  document.querySelectorAll('.tpl-btn').forEach(b=>b.classList.remove('active'));
+  btn?.classList.add('active');
+  const t = WA_TEMPLATES[tpl]||'';
+  document.getElementById('wc-body').value = t;
+  updateWcPreview();
+}
+
+function updateWcPreview(){
+  const body = document.getElementById('wc-body')?.value||'';
+  const sample = allLeads[0]||{name:'Rahul Thomas',service:'Premium Overnight','Day Type':'Overnight','check-in date':'2026-06-10',adults:'2',rooms:'1'};
+  document.getElementById('wc-preview-body').textContent = subVars(body, sample);
+}
+
+async function sendComposerWA(){
+  const filtered = updateWcCount();
+  const body = document.getElementById('wc-body').value.trim();
+  if(!body){ toast('Enter a message','err'); return; }
+  if(!filtered.length){ toast('No leads match filters','warn'); return; }
+  if(!confirm(`Send to ${filtered.length} lead(s)?`)) return;
+  const el = document.getElementById('wc-result');
+  el.style.cssText='display:block;margin-top:10px;padding:10px 12px;border-radius:6px;font-size:12px;font-weight:600;background:var(--yellow-bg);border:1px solid #fde68a;color:var(--yellow)';
+  el.textContent = `Sending to ${filtered.length} leads…`;
+  try {
+    await fetch(API.automation,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'bulk_whatsapp',leads:filtered.map(l=>({phone:lv(l,'phone','Phone'),name:lv(l,'name','Name'),message:subVars(body,l)}))})});
+    el.style.cssText='display:block;margin-top:10px;padding:10px 12px;border-radius:6px;font-size:12px;font-weight:600;background:var(--green-bg);border:1px solid #a7f3d0;color:var(--green)';
+    el.innerHTML = `✅ Queued for ${filtered.length} lead(s)`; toast('Campaign queued','ok');
+  } catch(e){
+    el.style.cssText='display:block;margin-top:10px;padding:10px 12px;border-radius:6px;font-size:12px;font-weight:600;background:var(--red-bg);border:1px solid #fecaca;color:var(--red)';
+    el.innerHTML = `❌ ${e.message}`;
+  }
+}
+
+// ═══════════════════════════════════════
+// CAMPAIGNS
+// ═══════════════════════════════════════
+function updateCampCount(){
+  const stage = document.getElementById('camp-stage')?.value||'';
+  const service = document.getElementById('camp-service')?.value||'';
+  const daytype = document.getElementById('camp-daytype')?.value||'';
+  const source = document.getElementById('camp-source')?.value||'';
+  const filtered = allLeads.filter(l => {
+    if(stage && lv(l,'stage','Stage')!==stage) return false;
+    if(service && lv(l,'service','Service')!==service) return false;
+    if(daytype && lv(l,'dayType','Day Type')!==daytype) return false;
+    if(source && lv(l,'source','Source')!==source) return false;
+    return !!lv(l,'phone','Phone');
+  });
+  const cc = document.getElementById('camp-count'); if(cc) cc.textContent = filtered.length+' leads';
+  const mc = document.getElementById('camp-match-count'); if(mc) mc.textContent = filtered.length+' matched';
+  const prev = document.getElementById('camp-preview');
+  if(prev) prev.innerHTML = filtered.slice(0,50).map(l=>`<tr><td><strong>${lv(l,'name','Name')||'—'}</strong></td><td>${lv(l,'phone','Phone')||'—'}</td><td>${lv(l,'service','Service')||'—'}</td><td><span class="badge ${STAGE_COLORS[lv(l,'stage','Stage')||'New']||'grey'}">${lv(l,'stage','Stage')||'New'}</span></td></tr>`).join('');
+  return filtered;
+}
+
+async function sendCampaign(){
+  const filtered = updateCampCount();
+  const msg = document.getElementById('camp-msg')?.value.trim();
+  if(!msg){ toast('Enter a message','err'); return; }
+  if(!filtered.length){ toast('No matching leads','warn'); return; }
+  if(!confirm(`Send to ${filtered.length} leads?`)) return;
+  const el = document.getElementById('camp-result');
+  el.style.cssText='display:block;margin-top:10px;padding:10px 12px;border-radius:6px;font-size:12px;font-weight:600;background:var(--yellow-bg);border:1px solid #fde68a;color:var(--yellow)';
+  el.textContent = `Queuing ${filtered.length} messages…`;
+  try {
+    await fetch(API.automation,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'bulk_whatsapp',leads:filtered.map(l=>({phone:lv(l,'phone','Phone'),name:lv(l,'name','Name'),message:msg.replace(/{{name}}/g,lv(l,'name','Name')||'Guest')}))})});
+    el.style.cssText='display:block;margin-top:10px;padding:10px 12px;border-radius:6px;font-size:12px;font-weight:600;background:var(--green-bg);border:1px solid #a7f3d0;color:var(--green)';
+    el.innerHTML = `✅ Campaign queued for ${filtered.length} leads`; toast('Campaign sent','ok');
+  } catch(e){
+    el.style.cssText='display:block;margin-top:10px;padding:10px 12px;border-radius:6px;font-size:12px;font-weight:600;background:var(--red-bg);border:1px solid #fecaca;color:var(--red)';
+    el.innerHTML = `❌ ${e.message}`;
+  }
+}
+
+// ═══════════════════════════════════════
+// ANALYTICS
+// ═══════════════════════════════════════
+function renderAnalytics(){
+  const leads = allLeads;
+  const total = leads.length;
+  const pct = (n,d) => d ? Math.round(n/d*100) : 0;
+
+  let totalRev=0, paidCount=0;
+  leads.forEach(l => { const p=parseFloat(lv(l,'paidAmount','Paid_Amount')||0); if(p>0){ totalRev+=p; paidCount++; } });
+
+  const confirmed = leads.filter(l=>['Confirmed','Paid','Checked-In','Completed'].includes(lv(l,'stage','Stage'))).length;
+  const pending = leads.filter(l=>!lv(l,'quotedAmount','Quoted_Amount')&&(lv(l,'stage','Stage')||'New')==='New').length;
+  const conv = pct(confirmed,total);
+  const avg = paidCount>0?Math.round(totalRev/paidCount):0;
+
+  const setText=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  setText('an-total',total);
+  setText('an-confirmed',confirmed);
+  setText('an-conf-pct',pct(confirmed,total)+'% conversion');
+  setText('an-revenue',totalRev>0?'₹'+totalRev.toLocaleString('en-IN'):'₹0');
+  setText('an-conversion',conv+'%');
+  setText('an-avg',avg>0?'₹'+avg.toLocaleString('en-IN'):'—');
+  setText('an-pending',pending);
+
+  const renderBars = (id, data, colorClass) => {
+    const el = document.getElementById(id); if(!el) return;
+    const max = Math.max(...Object.values(data),1);
+    el.innerHTML = Object.entries(data).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
+      <div class="prog-item"><div class="prog-row"><span>${k}</span><span style="font-weight:700;color:var(--text)">${v} <span style="color:var(--muted);font-weight:400">(${pct(v,total)}%)</span></span></div>
+      <div class="prog-track"><div class="prog-fill ${colorClass}" style="width:${pct(v,max)}%"></div></div></div>`).join('');
+  };
+
+  const byStage={}, byService={}, bySource={}, byDayType={};
+  leads.forEach(l=>{
+    const s=lv(l,'stage','Stage')||'New'; byStage[s]=(byStage[s]||0)+1;
+    const sv=lv(l,'service','Service'); if(sv) byService[sv]=(byService[sv]||0)+1;
+    const so=lv(l,'source','Source'); if(so) bySource[so]=(bySource[so]||0)+1;
+    const dt=lv(l,'dayType','Day Type'); if(dt) byDayType[dt]=(byDayType[dt]||0)+1;
+  });
+  renderBars('an-stage-bars', byStage, '');
+  renderBars('an-service-bars', byService, 'green');
+  renderBars('an-source-bars', bySource, 'teal');
+  renderBars('an-daytype-bars', byDayType, 'yellow');
+
+  // Monthly trend bars
+  const byMonth={};
+  leads.forEach(l=>{ const d=lv(l,'date','Date'); if(d){ const m=d.substring(0,7); byMonth[m]=(byMonth[m]||0)+1; } });
+  const today2 = new Date();
+  const months = {};
+  for(let i=5;i>=0;i--){ const d=new Date(today2.getFullYear(),today2.getMonth()-i,1); const k=d.toISOString().substring(0,7); months[k]=byMonth[k]||0; }
+  const mMax = Math.max(...Object.values(months),1);
+  const mbEl = document.getElementById('an-monthly-bars');
+  if(mbEl) mbEl.innerHTML = Object.entries(months).map(([k,v])=>`<div class="mini-bar-col"><div class="mini-bar" style="height:${Math.max(4,Math.round(v/mMax*56))}px" title="${k}: ${v}"></div><div class="mini-bar-label">${k.substring(5)}</div></div>`).join('');
+}
+
+// ═══════════════════════════════════════
+// USERS
+// ═══════════════════════════════════════
+function saveUsers(){ localStorage.setItem('ps_users',JSON.stringify(USERS)); }
+
+function renderUsersTable(){
+  const el = document.getElementById('users-table'); if(!el) return;
+  el.innerHTML = USERS.map(u=>`<tr>
+    <td><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:${bg(u.name)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff">${u.name.charAt(0)}</div><strong>${u.name}</strong></div></td>
+    <td style="color:var(--muted)">${u.email}</td>
+    <td><span class="badge ${u.role==='admin'?'blue':u.role==='agent'?'green':'grey'}">${u.role}</span></td>
+    <td><span class="badge ${u.active?'green':'red'}">${u.active?'Active':'Inactive'}</span></td>
+    <td style="color:var(--muted)">${u.lastLogin||'—'}</td>
+    <td style="display:flex;gap:4px">
+      <button class="btn sm" onclick="openEditUser('${u.id}')">Edit</button>
+      <button class="btn sm" onclick="openChangePwd('${u.id}')">🔑 Pwd</button>
+      ${u.id!==currentUser?.id?`<button class="btn sm ${u.active?'danger':''}" onclick="toggleUser('${u.id}')">${u.active?'Deactivate':'Activate'}</button>`:''}
+    </td>
+  </tr>`).join('');
+}
+
+function openAddUser(){ document.getElementById('modal-user-title').textContent='Add User'; document.getElementById('edit-user-id').value=''; ['user-name-input','user-email-input','user-pwd-input'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''}); document.getElementById('user-role-input').value='agent'; openModal('modal-add-user'); }
+function openEditUser(id){ const u=USERS.find(x=>x.id===id); if(!u) return; document.getElementById('modal-user-title').textContent='Edit User'; document.getElementById('edit-user-id').value=id; document.getElementById('user-name-input').value=u.name; document.getElementById('user-email-input').value=u.email; document.getElementById('user-pwd-input').value=''; document.getElementById('user-role-input').value=u.role; openModal('modal-add-user'); }
+function saveUser(){ const id=document.getElementById('edit-user-id').value; const name=document.getElementById('user-name-input').value.trim(); const email=document.getElementById('user-email-input').value.trim(); const pwd=document.getElementById('user-pwd-input').value; const role=document.getElementById('user-role-input').value; if(!name||!email){toast('Name and email required','err');return;} if(id){const u=USERS.find(x=>x.id===id);if(!u)return;u.name=name;u.email=email;u.role=role;if(pwd)u.pwd=pwd;}else{if(!pwd){toast('Password required','err');return;}USERS.push({id:'u'+Date.now(),name,email,pwd,role,lastLogin:'—',active:true});} saveUsers();closeModal('modal-add-user');renderUsersTable();toast(id?'User updated':'User added','ok'); }
+function openChangePwd(id){ document.getElementById('cpwd-user-id').value=id; document.getElementById('cpwd-new').value=''; document.getElementById('cpwd-confirm').value=''; openModal('modal-change-pwd'); }
+function doChangePwd(){ const id=document.getElementById('cpwd-user-id').value; const np=document.getElementById('cpwd-new').value; const cp=document.getElementById('cpwd-confirm').value; if(!np||np.length<8){toast('Min 8 characters','err');return;} if(np!==cp){toast('Passwords do not match','err');return;} const u=USERS.find(x=>x.id===id);if(!u)return; u.pwd=np;saveUsers();closeModal('modal-change-pwd');toast('Password updated','ok'); }
+function toggleUser(id){ const u=USERS.find(x=>x.id===id);if(u){u.active=!u.active;saveUsers();renderUsersTable();toast(`User ${u.active?'activated':'deactivated'}`,'ok');} }
+
+// ═══════════════════════════════════════
+// MODALS + UTILS
+// ═══════════════════════════════════════
+function openModal(id){ document.getElementById(id)?.classList.add('open'); }
+function closeModal(id){ document.getElementById(id)?.classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el) el.classList.remove('open');}));
+function toast(msg,type='ok'){ const el=document.getElementById('toast'); el.textContent=msg; el.className='toast '+type; setTimeout(()=>el.classList.add('show'),10); setTimeout(()=>el.classList.remove('show'),3000); }
+
+// Notifications
+function toggleNotif(){ document.getElementById('notif-panel').classList.toggle('open'); }
+function clearNotifs(){ document.getElementById('notif-list').innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No notifications</div>'; document.getElementById('notif-count').textContent='0'; document.getElementById('notif-panel').classList.remove('open'); }
+document.addEventListener('click',e=>{ if(!e.target.closest('#notif-toggle')&&!e.target.closest('#notif-panel')) document.getElementById('notif-panel')?.classList.remove('open'); });
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  pearlspot-crm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pearlspot-crm
+    restart: unless-stopped
+    ports:
+      - "3210:80"
+    labels:
+      # Coolify / Traefik labels — update domain as needed
+      - "traefik.enable=true"
+      - "traefik.http.routers.pearlspot.rule=Host(`pearlspot.aiingo.com`)"
+      - "traefik.http.routers.pearlspot.entrypoints=websecure"
+      - "traefik.http.routers.pearlspot.tls=true"
+      - "traefik.http.routers.pearlspot.tls.certresolver=letsencrypt"
+      - "traefik.http.services.pearlspot.loadbalancer.server.port=80"
+    networks:
+      - coolify
+
+networks:
+  coolify:
+    external: true
