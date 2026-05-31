@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Pearl Spot Tours · Sign In</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#0f1923;
-  --surface:#ffffff;
+  --surface:#fff;
   --surface2:#f8fafc;
   --border:#e2e8f0;
   --accent:#0ea5e9;
@@ -24,262 +24,217 @@
   --muted2:#94a3b8;
   --font:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
 }
-html,body{height:100%;font-family:var(--font);font-size:14px}
+html,body{height:100%;font-family:var(--font);font-size:14px;-webkit-font-smoothing:antialiased}
 body{
   background:var(--bg);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  min-height:100vh;
-  position:relative;
-  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;position:relative;overflow:hidden;
 }
 
-/* ── Animated background ── */
-.bg-canvas{position:absolute;inset:0;z-index:0;overflow:hidden}
-.bg-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.18;animation:drift 18s ease-in-out infinite alternate}
-.bg-orb.o1{width:600px;height:600px;background:radial-gradient(circle,#0ea5e9,transparent);top:-200px;left:-200px;animation-delay:0s}
-.bg-orb.o2{width:500px;height:500px;background:radial-gradient(circle,#22d3ee,transparent);bottom:-150px;right:-100px;animation-delay:-6s}
-.bg-orb.o3{width:400px;height:400px;background:radial-gradient(circle,#8b5cf6,transparent);top:50%;right:20%;animation-delay:-12s;opacity:.1}
+/* Background */
+.bg-grid{
+  position:fixed;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(14,165,233,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(14,165,233,.04) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+.bg-orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:.18;animation:drift 18s ease-in-out infinite alternate;pointer-events:none}
+.bg-orb.o1{width:600px;height:600px;background:radial-gradient(circle,#0ea5e9,transparent);top:-200px;left:-200px}
+.bg-orb.o2{width:500px;height:500px;background:radial-gradient(circle,#22d3ee,transparent);bottom:-150px;right:-100px;animation-delay:-8s}
+.bg-orb.o3{width:350px;height:350px;background:radial-gradient(circle,#8b5cf6,transparent);top:40%;right:25%;animation-delay:-14s;opacity:.09}
 @keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(40px,30px) scale(1.08)}}
 
-/* Wave divider at bottom of card area */
-.bg-grid{
-  position:absolute;inset:0;
-  background-image:
-    linear-gradient(rgba(14,165,233,.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(14,165,233,.04) 1px, transparent 1px);
-  background-size:40px 40px;
-  z-index:0
-}
-
-/* ── Card ── */
+/* Card wrapper */
 .login-wrap{
   position:relative;z-index:10;
-  display:flex;
-  width:100%;
-  max-width:960px;
-  min-height:540px;
-  border-radius:20px;
-  overflow:hidden;
-  box-shadow:0 32px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.06);
-  margin:20px;
+  display:flex;width:100%;max-width:940px;
+  border-radius:20px;overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06);
+  margin:16px;
 }
 
-/* Left panel — branding */
+/* ─── LEFT PANEL ─── */
 .login-left{
-  flex:1;
-  background:linear-gradient(145deg,#0f1e2d 0%,#0c1a28 60%,#071118 100%);
+  flex:1;min-width:0;
+  background:linear-gradient(145deg,#0f1e2d,#0c1a28 60%,#071118);
   padding:48px 44px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  position:relative;
-  overflow:hidden;
+  display:flex;flex-direction:column;justify-content:space-between;
+  position:relative;overflow:hidden;
   border-right:1px solid rgba(255,255,255,.07);
 }
-.login-left::before{
-  content:"";position:absolute;inset:0;
-  background:radial-gradient(ellipse at 20% 30%,rgba(14,165,233,.12),transparent 60%);
-  pointer-events:none
-}
-.ll-brand{display:flex;align-items:center;gap:14px}
-.ll-icon{
-  width:48px;height:48px;border-radius:14px;
-  background:linear-gradient(135deg,#0ea5e9,#22d3ee);
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 8px 24px rgba(14,165,233,.5);
-  flex-shrink:0
-}
+.login-left::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 20% 30%,rgba(14,165,233,.12),transparent 60%);pointer-events:none}
+.ll-brand{display:flex;align-items:center;gap:14px;position:relative}
+.ll-icon{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#0ea5e9,#22d3ee);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(14,165,233,.5);flex-shrink:0}
 .ll-icon svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.ll-brand-name{font-size:18px;font-weight:800;color:#fff;letter-spacing:-.4px;line-height:1.2}
-.ll-brand-tag{font-size:11px;color:rgba(255,255,255,.35);font-weight:500;letter-spacing:.6px;text-transform:uppercase}
-
-.ll-hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px 0}
-.ll-headline{font-size:32px;font-weight:800;color:#fff;letter-spacing:-.8px;line-height:1.2;margin-bottom:14px}
+.ll-brand-name{font-size:18px;font-weight:800;color:#fff;letter-spacing:-.4px}
+.ll-brand-sub{font-size:11px;color:rgba(255,255,255,.35);font-weight:500;letter-spacing:.7px;text-transform:uppercase;margin-top:2px}
+.ll-hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:28px 0;position:relative}
+.ll-headline{font-size:33px;font-weight:800;color:#fff;letter-spacing:-.8px;line-height:1.2;margin-bottom:14px}
 .ll-headline span{background:linear-gradient(90deg,#38bdf8,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.ll-sub{font-size:14px;color:rgba(255,255,255,.45);line-height:1.7;font-weight:400;max-width:320px}
+.ll-sub{font-size:13.5px;color:rgba(255,255,255,.42);line-height:1.75;max-width:300px}
+.ll-stats{display:flex;gap:24px;position:relative}
+.ll-stat-val{font-size:24px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.ll-stat-label{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.7px;font-weight:600;margin-top:2px}
+.ll-footer{font-size:11px;color:rgba(255,255,255,.18);font-weight:500;position:relative}
 
-.ll-stats{display:flex;gap:20px}
-.ll-stat{text-align:center}
-.ll-stat-val{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.5px}
-.ll-stat-label{font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.6px;font-weight:600;margin-top:2px}
-
-.ll-footer{font-size:11px;color:rgba(255,255,255,.2);font-weight:500}
-
-/* Right panel — form */
+/* ─── RIGHT PANEL ─── */
 .login-right{
-  width:420px;
-  flex-shrink:0;
+  width:400px;flex-shrink:0;
   background:#fff;
-  padding:48px 44px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
+  padding:48px 40px;
+  display:flex;flex-direction:column;justify-content:center;
+  overflow-y:auto;
 }
-.lr-title{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:6px}
-.lr-sub{font-size:13px;color:var(--muted);margin-bottom:32px;font-weight:500}
+.lr-title{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:5px}
+.lr-sub{font-size:13px;color:var(--muted);margin-bottom:28px;font-weight:500}
 
-/* Form */
-.form-group{margin-bottom:18px}
+/* Form elements */
+.form-group{margin-bottom:16px}
 .form-label{display:block;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px}
 .form-input{
-  width:100%;
-  background:var(--surface2);
-  border:1.5px solid var(--border);
-  color:var(--text);
-  padding:11px 14px;
-  border-radius:10px;
-  font-size:14px;
-  font-family:inherit;
-  outline:none;
-  transition:.15s;
-  font-weight:500;
+  width:100%;background:var(--surface2);
+  border:1.5px solid var(--border);color:var(--text);
+  padding:12px 14px;border-radius:10px;
+  font-size:14px;font-family:inherit;outline:none;
+  transition:.15s;font-weight:500;
+  -webkit-appearance:none;
 }
-.form-input:focus{
-  border-color:var(--accent);
-  box-shadow:0 0 0 3px rgba(14,165,233,.1);
-  background:#fff;
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,165,233,.1);background:#fff}
+.form-input.shake{animation:shake .35s ease}
+/* Disable browser autofill yellow background */
+.form-input:-webkit-autofill,
+.form-input:-webkit-autofill:hover,
+.form-input:-webkit-autofill:focus{
+  -webkit-box-shadow:0 0 0 30px #f8fafc inset !important;
+  -webkit-text-fill-color:var(--text) !important;
+  transition:background-color 9999s ease-in-out 0s;
 }
-.form-input.error{border-color:var(--red);box-shadow:0 0 0 3px rgba(239,68,68,.1)}
 .form-input::placeholder{color:var(--muted2);font-weight:400}
 
-/* Password wrapper */
+/* Password row */
 .pwd-wrap{position:relative}
-.pwd-wrap .form-input{padding-right:44px}
+.pwd-wrap .form-input{padding-right:48px}
 .pwd-toggle{
-  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  position:absolute;right:13px;top:50%;transform:translateY(-50%);
   background:none;border:none;cursor:pointer;
-  color:var(--muted2);font-size:16px;padding:4px;border-radius:4px;
-  transition:.12s;line-height:1
+  color:var(--muted2);font-size:16px;padding:4px;
+  border-radius:4px;transition:.12s;line-height:1;
+  -webkit-tap-highlight-color:transparent;
 }
-.pwd-toggle:hover{color:var(--text2)}
+.pwd-toggle:hover{color:var(--muted)}
 
-/* Error message */
+/* Error banner */
 .form-error{
-  display:none;
-  background:var(--red-bg);
-  border:1.5px solid #fecaca;
-  border-radius:8px;
-  padding:10px 14px;
-  font-size:12px;
-  font-weight:600;
-  color:var(--red);
-  margin-bottom:18px;
-  align-items:center;
-  gap:8px;
+  display:none;align-items:center;gap:10px;
+  background:var(--red-bg);border:1.5px solid #fecaca;
+  border-radius:9px;padding:11px 14px;
+  font-size:12px;font-weight:600;color:var(--red);
+  margin-bottom:16px;
 }
 .form-error.show{display:flex}
 
-/* Submit button */
+/* Submit */
 .submit-btn{
   width:100%;
-  background:linear-gradient(135deg,var(--accent),var(--accent-dark));
-  border:none;
-  border-radius:10px;
-  padding:13px;
-  font-size:14px;
-  font-weight:700;
-  color:#fff;
-  cursor:pointer;
-  font-family:inherit;
-  letter-spacing:-.1px;
+  background:linear-gradient(135deg,#0ea5e9,#0284c7);
+  border:none;border-radius:10px;padding:13px;
+  font-size:14px;font-weight:700;color:#fff;
+  cursor:pointer;font-family:inherit;letter-spacing:-.1px;
   transition:.2s;
-  box-shadow:0 4px 14px rgba(14,165,233,.4);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  position:relative;
-  overflow:hidden;
+  box-shadow:0 4px 14px rgba(14,165,233,.38);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  -webkit-tap-highlight-color:transparent;
 }
-.submit-btn:hover{
-  transform:translateY(-2px);
-  box-shadow:0 8px 24px rgba(14,165,233,.5);
-}
-.submit-btn:active{transform:translateY(0)}
-.submit-btn:disabled{opacity:.65;cursor:not-allowed;transform:none}
-.submit-btn .spinner{
-  width:16px;height:16px;border:2px solid rgba(255,255,255,.3);
-  border-top-color:#fff;border-radius:50%;
-  animation:spin .6s linear infinite;display:none
-}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(14,165,233,.48)}
+.submit-btn:active{transform:translateY(0);box-shadow:0 2px 8px rgba(14,165,233,.3)}
+.submit-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+.spinner{width:17px;height:17px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none;flex-shrink:0}
 .submit-btn.loading .btn-text{display:none}
 .submit-btn.loading .spinner{display:block}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* Remember me */
-.remember-row{display:flex;align-items:center;gap:8px;margin-bottom:20px}
-.remember-row input[type=checkbox]{
-  width:16px;height:16px;accent-color:var(--accent);cursor:pointer;border-radius:4px;flex-shrink:0
-}
-.remember-row label{font-size:12px;color:var(--muted);font-weight:500;cursor:pointer}
-
-/* Forgot password */
-.forgot-link{
-  display:block;text-align:center;margin-top:16px;
-  font-size:12px;color:var(--accent);font-weight:600;
-  text-decoration:none;transition:.12s
-}
-.forgot-link:hover{color:var(--accent-dark)}
-
-/* User chips (quick login) */
-.quick-title{font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;margin-top:28px}
-.quick-users{display:flex;flex-wrap:wrap;gap:7px}
+/* Quick access */
+.quick-title{font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.7px;margin:24px 0 10px}
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .quick-chip{
-  display:flex;align-items:center;gap:6px;
-  padding:5px 10px;
-  background:var(--surface2);
-  border:1.5px solid var(--border);
-  border-radius:20px;
-  font-size:11px;font-weight:600;color:var(--text2);
-  cursor:pointer;transition:.12s;
+  display:flex;align-items:center;gap:8px;
+  padding:9px 12px;
+  background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:10px;cursor:pointer;transition:.12s;
+  -webkit-tap-highlight-color:transparent;
 }
-.quick-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
-.quick-chip-av{
-  width:20px;height:20px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:9px;font-weight:700;color:#fff;flex-shrink:0
-}
-.quick-chip-role{font-size:9px;color:var(--muted2);font-weight:500;margin-left:1px}
+.quick-chip:hover{border-color:var(--accent);background:var(--accent-bg)}
+.quick-chip:active{transform:scale(.98)}
+.qc-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.qc-info{min-width:0;overflow:hidden}
+.qc-name{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qc-role{font-size:10px;color:var(--muted2);font-weight:500;margin-top:1px}
 
-/* Footer */
-.lr-footer{margin-top:28px;font-size:11px;color:var(--muted2);text-align:center;font-weight:500}
-
-/* Success state */
-.login-success{
-  display:none;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;gap:14px
+/* Success overlay */
+.success-state{
+  display:none;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;gap:12px;
+  padding:20px;
 }
-.success-icon{font-size:52px;animation:pop .4s cubic-bezier(.175,.885,.32,1.275) forwards}
-@keyframes pop{0%{transform:scale(0)}100%{transform:scale(1)}}
+.success-icon{font-size:54px;animation:pop .4s cubic-bezier(.175,.885,.32,1.275)}
 .success-name{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-.4px}
 .success-sub{font-size:13px;color:var(--muted)}
-.redirect-bar{width:200px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:4px}
-.redirect-fill{height:100%;background:var(--accent);border-radius:4px;width:0;transition:width 1.6s linear}
+.prog-bar{width:180px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:4px}
+.prog-fill{height:100%;background:var(--accent);border-radius:4px;width:0;transition:width 1.6s linear}
+@keyframes pop{0%{transform:scale(0)}100%{transform:scale(1)}}
 
-@media(max-width:720px){
-  .login-left{display:none}
-  .login-right{width:100%;padding:36px 28px}
-  .login-wrap{max-width:440px;border-radius:16px}
+/* Footer */
+.lr-footer{margin-top:22px;font-size:11px;color:var(--muted2);text-align:center}
+
+/* ─── ANIMATIONS ─── */
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.login-right{animation:fadeIn .4s ease both}
+
+/* ─── MOBILE ─── */
+@media(max-width:700px){
+  body{align-items:flex-start;background:#fff;overflow-y:auto}
+  .bg-grid,.bg-orb{display:none}
+  .login-wrap{
+    flex-direction:column;max-width:100%;margin:0;border-radius:0;
+    box-shadow:none;min-height:100vh;
+  }
+  /* Top brand strip on mobile */
+  .login-left{
+    flex:none;padding:28px 24px 24px;
+    border-right:none;border-bottom:1px solid rgba(255,255,255,.07);
+  }
+  .ll-hero,.ll-stats,.ll-footer{display:none}
+  .login-right{
+    width:100%;flex:1;padding:28px 24px 40px;
+    animation:none;
+  }
+  .lr-title{font-size:20px}
+  .quick-grid{grid-template-columns:1fr 1fr}
 }
-@media(max-width:400px){
-  .login-right{padding:28px 20px}
+@media(max-width:380px){
+  .login-right{padding:24px 18px 36px}
+  .quick-grid{grid-template-columns:1fr}
+  .login-left{padding:22px 18px 20px}
+}
+/* Tall phones — allow scroll */
+@media(max-height:700px) and (min-width:701px){
+  .login-right{padding:32px 36px}
+  .ll-headline{font-size:26px}
 }
 </style>
 </head>
 <body>
 
 <div class="bg-grid"></div>
-<div class="bg-canvas">
-  <div class="bg-orb o1"></div>
-  <div class="bg-orb o2"></div>
-  <div class="bg-orb o3"></div>
-</div>
+<div class="bg-orb o1"></div>
+<div class="bg-orb o2"></div>
+<div class="bg-orb o3"></div>
 
 <div class="login-wrap">
 
-  <!-- LEFT — Brand panel -->
+  <!-- LEFT — Brand -->
   <div class="login-left">
     <div class="ll-brand">
       <div class="ll-icon">
@@ -287,36 +242,33 @@ body{
       </div>
       <div>
         <div class="ll-brand-name">Pearl Spot Tours</div>
-        <div class="ll-brand-tag">Backwater CRM</div>
+        <div class="ll-brand-sub">Backwater CRM</div>
       </div>
     </div>
-
     <div class="ll-hero">
       <div class="ll-headline">Your <span>backwater</span><br>pipeline, organised.</div>
-      <div class="ll-sub">Manage houseboat enquiries, track bookings, send WhatsApp messages, and close more guests — all from one place.</div>
+      <div class="ll-sub">Manage houseboat enquiries, track bookings, send WhatsApp messages, and close more guests — all from one dashboard.</div>
     </div>
-
     <div style="margin-bottom:32px">
       <div class="ll-stats">
-        <div class="ll-stat"><div class="ll-stat-val">7</div><div class="ll-stat-label">Stages</div></div>
-        <div class="ll-stat"><div class="ll-stat-val">5</div><div class="ll-stat-label">Templates</div></div>
-        <div class="ll-stat"><div class="ll-stat-val">∞</div><div class="ll-stat-label">Bookings</div></div>
+        <div><div class="ll-stat-val">7</div><div class="ll-stat-label">Stages</div></div>
+        <div><div class="ll-stat-val">5</div><div class="ll-stat-label">Templates</div></div>
+        <div><div class="ll-stat-val">∞</div><div class="ll-stat-label">Bookings</div></div>
       </div>
     </div>
-
     <div class="ll-footer">© 2026 Pearl Spot Tours · Powered by Aiingo Technologies</div>
   </div>
 
-  <!-- RIGHT — Login form -->
+  <!-- RIGHT — Form -->
   <div class="login-right">
 
-    <!-- Normal form state -->
+    <!-- FORM STATE -->
     <div id="form-state">
       <div class="lr-title">Welcome back 👋</div>
       <div class="lr-sub">Sign in to your CRM account</div>
 
       <div class="form-error" id="login-error">
-        <span>🔒</span>
+        <span style="font-size:16px;flex-shrink:0">🔒</span>
         <span id="error-msg">Invalid email or password</span>
       </div>
 
@@ -326,8 +278,12 @@ body{
           id="email-input"
           class="form-input"
           type="email"
+          inputmode="email"
+          autocomplete="username"
+          autocorrect="off"
+          autocapitalize="none"
+          spellcheck="false"
           placeholder="you@pearlspottours.com"
-          autocomplete="email"
           oninput="clearError()"
           onkeydown="if(event.key==='Enter')document.getElementById('pwd-input').focus()"
         >
@@ -340,47 +296,68 @@ body{
             id="pwd-input"
             class="form-input"
             type="password"
-            placeholder="••••••••"
-            autocomplete="current-password"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="none"
+            spellcheck="false"
+            placeholder="Enter your password"
             oninput="clearError()"
             onkeydown="if(event.key==='Enter')doLogin()"
           >
-          <button class="pwd-toggle" onclick="togglePwd()" type="button" id="pwd-eye" title="Show/hide password">👁</button>
+          <button class="pwd-toggle" id="pwd-eye" onclick="togglePwd()" type="button" tabindex="-1" aria-label="Toggle password visibility">
+            <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
         </div>
       </div>
 
-      <div class="remember-row">
-        <input type="checkbox" id="remember-me" checked>
-        <label for="remember-me">Keep me signed in on this device</label>
-      </div>
-
-      <button class="submit-btn" id="login-btn" onclick="doLogin()">
+      <button class="submit-btn" id="login-btn" onclick="doLogin()" type="button">
         <span class="btn-text">Sign In →</span>
-        <span class="spinner"></span>
+        <div class="spinner"></div>
       </button>
 
-      <!-- Quick-login chips -->
+      <!-- Quick access chips -->
       <div class="quick-title">Quick access</div>
-      <div class="quick-users" id="quick-users"></div>
+      <div class="quick-grid" id="quick-users"></div>
 
       <div class="lr-footer">
-        Pearl Spot Tours CRM v2 · <a href="https://aiingo.com" target="_blank" style="color:inherit">Aiingo Technologies</a>
+        Pearl Spot Tours CRM v2 &nbsp;·&nbsp;
+        <a href="https://aiingo.com" target="_blank" style="color:var(--muted2);text-decoration:none">Aiingo Technologies</a>
       </div>
     </div>
 
-    <!-- Success state -->
-    <div class="login-success" id="success-state">
+    <!-- SUCCESS STATE -->
+    <div class="success-state" id="success-state">
       <div class="success-icon">✅</div>
-      <div class="success-name" id="success-name">Welcome back, Baiju!</div>
+      <div class="success-name" id="success-name">Welcome!</div>
       <div class="success-sub">Taking you to your dashboard…</div>
-      <div class="redirect-bar"><div class="redirect-fill" id="redirect-fill"></div></div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
     </div>
 
-  </div>
-</div>
+  </div><!-- /login-right -->
+</div><!-- /login-wrap -->
 
 <script>
-// ── PS_Store (inline copy so login.html works standalone) ──────────────────
+// ─────────────────────────────────────────────────────────────────
+// CONFIG — change CRM_PAGE to match your actual filename/path
+// e.g. 'index.html' | 'dashboard.html' | 'crm.html' | '/crm/'
+// ─────────────────────────────────────────────────────────────────
+const CRM_PAGE = (function(){
+  // Auto-detect: if a file called 'index.html' is in the same dir use it,
+  // otherwise fall back to the known filename. Override here if needed.
+  const candidates = [
+    'pearlspot-crm-v2.html',
+    'index.html',
+    'dashboard.html',
+    'crm.html',
+  ];
+  // Return first one that makes sense (we can't check existence in JS without
+  // a request, so we just use the first. Adjust if your deploy renames it.)
+  return candidates[0];
+})();
+
+// ─────────────────────────────────────────────────────────────────
+// PS_Store — inline copy (login.html is standalone)
+// ─────────────────────────────────────────────────────────────────
 const PS_Store = {
   _NS: 'ps:',
   read(key, fallback = null) {
@@ -395,188 +372,204 @@ const PS_Store = {
   },
 };
 
-// ── Default users (seeded once if ps:users is empty) ──────────────────────
+// ─────────────────────────────────────────────────────────────────
+// Default users — seeded once into ps:users if not present
+// ─────────────────────────────────────────────────────────────────
 const DEFAULT_USERS = [
-  {id:'u1', name:'Baiju',     email:'baiju@pearlspottours.com',    pwd:'Pearl@Baiju26', role:'admin',  active:true},
-  {id:'u2', name:'Admin',     email:'admin@pearlspottours.com',     pwd:'Pearl@Admin26', role:'admin',  active:true},
-  {id:'u3', name:'Hussain',   email:'hussain@aiingo.com',           pwd:'Aiingo@2026',   role:'admin',  active:true},
-  {id:'u4', name:'Reception', email:'reception@pearlspottours.com', pwd:'Pearl@Recep26', role:'agent',  active:true},
-  {id:'u5', name:'Boat Staff',email:'staff@pearlspottours.com',     pwd:'Pearl@Staff26', role:'viewer', active:true},
+  {id:'u1',name:'Baiju',     email:'baiju@pearlspottours.com',    role:'admin', active:true},
+  {id:'u2',name:'Admin',     email:'admin@pearlspottours.com',     role:'admin', active:true},
+  {id:'u3',name:'Hussain',   email:'hussain@aiingo.com',           role:'admin', active:true},
+  {id:'u4',name:'Reception', email:'reception@pearlspottours.com', role:'agent', active:true},
+  {id:'u5',name:'Boat Staff',email:'staff@pearlspottours.com',     role:'viewer',active:true},
 ];
+// Passwords stored separately, never in HTML attributes or DOM
+// Key: email → hashed or plain (plain for now, can swap to bcrypt later)
+const USER_PWDS = {
+  'baiju@pearlspottours.com':    'Pearl@Baiju26',
+  'admin@pearlspottours.com':    'Pearl@Admin26',
+  'hussain@aiingo.com':          'Aiingo@2026',
+  'reception@pearlspottours.com':'Pearl@Recep26',
+  'staff@pearlspottours.com':    'Pearl@Staff26',
+};
 
 function getUsers() {
   const stored = PS_Store.read('users', null);
-  if (!stored) { PS_Store.write('users', DEFAULT_USERS); return DEFAULT_USERS; }
+  if (!stored) {
+    // Seed users without passwords in the store (passwords live in USER_PWDS above)
+    PS_Store.write('users', DEFAULT_USERS);
+    return DEFAULT_USERS;
+  }
   return stored;
 }
 
-// Avatar background colours — matches CRM
-const AVBG = ['#0ea5e9','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#f97316'];
-const bg = n => AVBG[(n||'A').charCodeAt(0) % AVBG.length];
-const roleLabel = r => r === 'admin' ? 'Admin' : r === 'agent' ? 'Agent' : 'Viewer';
+function authenticate(email, pwd) {
+  const e = email.toLowerCase().trim();
+  const users = getUsers();
+  const user  = users.find(u => u.email.toLowerCase() === e && u.active);
+  if (!user) return null;
+  // Check password: first look in ps:userpwds (for passwords set via CRM),
+  // then fall back to USER_PWDS (hardcoded defaults)
+  const storedPwds = PS_Store.read('userpwds', {});
+  const correctPwd = storedPwds[e] || USER_PWDS[e] || '';
+  return correctPwd && pwd === correctPwd ? user : null;
+}
 
-// ── Render quick-login chips ───────────────────────────────────────────────
+// Avatar colours — matches CRM
+const AVBG = ['#0ea5e9','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#f97316'];
+const bgColor = n => AVBG[(n||'A').charCodeAt(0) % AVBG.length];
+const roleLabel = r => ({admin:'Admin',agent:'Agent',viewer:'Viewer'}[r] || r);
+
+// ─────────────────────────────────────────────────────────────────
+// Render quick-access chips (NAME + ROLE only — NO password in DOM)
+// ─────────────────────────────────────────────────────────────────
 function renderQuickChips() {
   const users = getUsers().filter(u => u.active);
-  const wrap = document.getElementById('quick-users');
-  wrap.innerHTML = users.map(u => `
-    <div class="quick-chip" onclick="quickLogin('${u.email}','${u.pwd}')">
-      <div class="quick-chip-av" style="background:${bg(u.name)}">${u.name.charAt(0)}</div>
-      <span>${u.name}</span>
-      <span class="quick-chip-role">${roleLabel(u.role)}</span>
-    </div>
-  `).join('');
+  const wrap  = document.getElementById('quick-users');
+  wrap.innerHTML = users.map((u, i) =>
+    `<div class="quick-chip" data-idx="${i}" onclick="handleChipClick(${i})">
+      <div class="qc-av" style="background:${bgColor(u.name)}">${u.name.charAt(0)}</div>
+      <div class="qc-info">
+        <div class="qc-name">${u.name}</div>
+        <div class="qc-role">${roleLabel(u.role)}</div>
+      </div>
+    </div>`
+  ).join('');
 }
 
-function quickLogin(email, pwd) {
-  document.getElementById('email-input').value = email;
-  document.getElementById('pwd-input').value   = pwd;
+// Chip fills email only — user must still type their password
+function handleChipClick(idx) {
+  const users = getUsers().filter(u => u.active);
+  const u = users[idx];
+  if (!u) return;
+  document.getElementById('email-input').value = u.email;
   clearError();
-  doLogin();
+  // Focus password field so user types it
+  const pwdInput = document.getElementById('pwd-input');
+  pwdInput.value = '';
+  pwdInput.focus();
+  // Highlight the selected chip
+  document.querySelectorAll('.quick-chip').forEach(c => c.style.borderColor = '');
+  document.querySelector(`.quick-chip[data-idx="${idx}"]`).style.borderColor = 'var(--accent)';
 }
 
-// ── Auth ──────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// Login
+// ─────────────────────────────────────────────────────────────────
 function doLogin() {
-  const email = document.getElementById('email-input').value.trim().toLowerCase();
+  const email = document.getElementById('email-input').value.trim();
   const pwd   = document.getElementById('pwd-input').value;
   const btn   = document.getElementById('login-btn');
 
   clearError();
 
   if (!email) { showError('Please enter your email address.'); document.getElementById('email-input').focus(); return; }
-  if (!pwd)   { showError('Please enter your password.'); document.getElementById('pwd-input').focus(); return; }
+  if (!pwd)   { showError('Please enter your password.');      document.getElementById('pwd-input').focus();   return; }
 
-  // Loading state
   btn.classList.add('loading');
   btn.disabled = true;
 
-  // Slight delay for UX feel
+  // Small delay for UX feedback
   setTimeout(() => {
-    const users = getUsers();
-    const user  = users.find(u =>
-      u.email.toLowerCase() === email &&
-      u.pwd === pwd &&
-      u.active
-    );
+    const user = authenticate(email, pwd);
 
     if (!user) {
       btn.classList.remove('loading');
       btn.disabled = false;
-      showError('Incorrect email or password. Please try again.');
+      showError('Incorrect email or password.');
+      // Clear password but NOT email
       document.getElementById('pwd-input').value = '';
-      document.getElementById('pwd-input').classList.add('error');
-      document.getElementById('email-input').classList.add('error');
-      // Shake animation
-      const wrap = document.querySelector('.login-right');
-      wrap.style.animation = 'shake .35s ease';
-      setTimeout(() => wrap.style.animation = '', 400);
+      // Shake the form
+      document.getElementById('pwd-input').classList.add('shake');
+      document.getElementById('email-input').classList.add('shake');
+      setTimeout(() => {
+        document.getElementById('pwd-input').classList.remove('shake');
+        document.getElementById('email-input').classList.remove('shake');
+      }, 400);
+      document.getElementById('pwd-input').focus();
       return;
     }
 
-    // Success — write session
+    // Write session (never includes password)
     const session = {
-      id:       user.id,
-      name:     user.name,
-      email:    user.email,
-      role:     user.role,
-      loginAt:  new Date().toISOString(),
+      id:      user.id,
+      name:    user.name,
+      email:   user.email,
+      role:    user.role,
+      loginAt: new Date().toISOString(),
     };
-
-    // sessionStorage always (tab-scoped)
     sessionStorage.setItem('ps_user', JSON.stringify(session));
 
-    // Also write to localStorage if "remember me" checked
-    if (document.getElementById('remember-me').checked) {
-      localStorage.setItem('ps_user', JSON.stringify(session));
-    } else {
-      localStorage.removeItem('ps_user');
-    }
-
-    // Update last login timestamp in users store
+    // Update lastLogin in ps:users
     const allUsers = PS_Store.read('users', DEFAULT_USERS);
     const u = allUsers.find(x => x.id === user.id);
     if (u) {
-      u.lastLogin = new Date().toLocaleString();
+      u.lastLogin = new Date().toLocaleString('en-IN', {
+        day:'2-digit', month:'short', year:'numeric',
+        hour:'2-digit', minute:'2-digit'
+      });
       PS_Store.write('users', allUsers);
     }
 
     showSuccess(user.name);
-
-  }, 420);
+  }, 380);
 }
 
 function showSuccess(name) {
-  document.getElementById('form-state').style.display = 'none';
+  document.getElementById('form-state').style.display   = 'none';
   const ss = document.getElementById('success-state');
   ss.style.display = 'flex';
-  document.getElementById('success-name').textContent = 'Welcome back, ' + name + '!';
-
-  // Animate progress bar then redirect
-  setTimeout(() => {
-    document.getElementById('redirect-fill').style.width = '100%';
-  }, 80);
-  setTimeout(() => {
-    window.location.replace('pearlspot-crm-v2.html');
-  }, 1800);
+  document.getElementById('success-name').textContent = 'Welcome back, ' + name.split(' ')[0] + '!';
+  setTimeout(() => { document.getElementById('prog-fill').style.width = '100%'; }, 60);
+  setTimeout(() => { window.location.replace(CRM_PAGE); }, 1700);
 }
 
+// ─────────────────────────────────────────────────────────────────
+// Error helpers
+// ─────────────────────────────────────────────────────────────────
 function showError(msg) {
   const el = document.getElementById('login-error');
   document.getElementById('error-msg').textContent = msg;
   el.classList.add('show');
 }
-
 function clearError() {
   document.getElementById('login-error').classList.remove('show');
-  document.getElementById('pwd-input').classList.remove('error');
-  document.getElementById('email-input').classList.remove('error');
 }
 
+// ─────────────────────────────────────────────────────────────────
+// Password visibility toggle (SVG swap — no emoji)
+// ─────────────────────────────────────────────────────────────────
+const EYE_OPEN  = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+const EYE_SLASH = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+let pwdVisible = false;
 function togglePwd() {
   const input = document.getElementById('pwd-input');
-  const eye   = document.getElementById('pwd-eye');
-  if (input.type === 'password') {
-    input.type = 'text';
-    eye.textContent = '🙈';
-  } else {
-    input.type = 'password';
-    eye.textContent = '👁';
-  }
+  const icon  = document.getElementById('eye-icon');
+  pwdVisible = !pwdVisible;
+  input.type  = pwdVisible ? 'text' : 'password';
+  icon.innerHTML = pwdVisible ? EYE_SLASH : EYE_OPEN;
 }
 
-// ── Check if already logged in (session still valid) ──────────────────────
+// ─────────────────────────────────────────────────────────────────
+// Init
+// ─────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-  // If already logged in, skip straight to CRM
+
+  // If already have a valid session, skip login
   try {
     const existing = JSON.parse(sessionStorage.getItem('ps_user') || 'null');
     if (existing && existing.email) {
-      window.location.replace('pearlspot-crm-v2.html');
+      window.location.replace(CRM_PAGE);
       return;
     }
   } catch(e){}
 
-  // Pre-fill email if "remember me" was used last time
-  try {
-    const remembered = JSON.parse(localStorage.getItem('ps_user') || 'null');
-    if (remembered && remembered.email) {
-      document.getElementById('email-input').value = remembered.email;
-      document.getElementById('pwd-input').focus();
-    }
-  } catch(e){}
-
   renderQuickChips();
+
+  // Focus email on load (desktop), but NOT on mobile to avoid keyboard popup
+  if (window.innerWidth > 700) {
+    document.getElementById('email-input').focus();
+  }
 });
 </script>
-
-<style>
-/* Shake animation for wrong password */
-@keyframes shake {
-  0%,100%{transform:translateX(0)}
-  20%    {transform:translateX(-10px)}
-  40%    {transform:translateX(10px)}
-  60%    {transform:translateX(-7px)}
-  80%    {transform:translateX(7px)}
-}
-</style>
 </body>
 </html>
