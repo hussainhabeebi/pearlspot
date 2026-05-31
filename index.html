@@ -546,7 +546,7 @@ tr:last-child td{border-bottom:none}
   </div>
 
   <!-- ───────── TODAY PAGE ───────── -->
-  <div id="page-today" class="page-content" style="display:flex;flex:1;overflow-y:auto">
+  <div id="page-today" class="page-content" style="flex:1;overflow-y:auto">
     <div class="tab-pane" style="width:100%;padding:22px">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px">
         <div class="today-greeting" id="today-greeting">Good morning, Baiju 👋</div>
@@ -613,7 +613,7 @@ tr:last-child td{border-bottom:none}
   </div>
 
   <!-- ───────── CONVERSATIONS PAGE ───────── -->
-  <div id="page-conversations" class="page-content" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+  <div id="page-conversations" class="page-content" style="flex:1;flex-direction:column;overflow:hidden">
     <div class="conv-3col" style="flex:1">
       <div class="conv-mid">
         <div class="conv-mid-head">
@@ -702,7 +702,7 @@ tr:last-child td{border-bottom:none}
   </div>
 
   <!-- ───────── ENQUIRIES PAGE ───────── -->
-  <div id="page-enquiries" class="page-content" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+  <div id="page-enquiries" class="page-content" style="flex:1;flex-direction:column;overflow:hidden">
     <div style="flex:1;overflow-y:auto;padding:22px;width:100%">
       <div class="page-header">
         <div><div class="page-title">Enquiries</div><div class="page-sub">All houseboat booking enquiries from Google Sheets</div></div>
@@ -735,7 +735,7 @@ tr:last-child td{border-bottom:none}
   </div>
 
   <!-- ───────── KANBAN PAGE (localStorage powered) ───────── -->
-  <div id="page-kanban" class="page-content" style="display:none;flex:1;overflow:hidden;flex-direction:column">
+  <div id="page-kanban" class="page-content" style="flex:1;overflow:hidden;flex-direction:column">
     <div class="kanban-wrapper">
       <div class="kanban-toolbar">
         <div>
@@ -761,7 +761,7 @@ tr:last-child td{border-bottom:none}
   </div>
 
   <!-- ───────── WA COMPOSER ───────── -->
-  <div id="page-composer" class="page-content" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+  <div id="page-composer" class="page-content" style="flex:1;flex-direction:column;overflow:hidden">
     <div style="flex:1;overflow:hidden;display:flex;flex-direction:column">
       <div style="padding:14px 20px;border-bottom:1.5px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap">
         <div class="page-title" style="font-size:15px">📱 WhatsApp Composer</div>
@@ -808,7 +808,7 @@ tr:last-child td{border-bottom:none}
   </div>
 
   <!-- ───────── CAMPAIGNS PAGE ───────── -->
-  <div id="page-campaigns" class="page-content" style="display:none;flex:1;overflow-y:auto">
+  <div id="page-campaigns" class="page-content" style="flex:1;overflow-y:auto">
     <div style="padding:22px;width:100%">
       <div class="page-header">
         <div><div class="page-title">Bulk Campaigns</div><div class="page-sub">Send WhatsApp blasts to filtered lead segments</div></div>
@@ -845,7 +845,7 @@ tr:last-child td{border-bottom:none}
   </div>
 
   <!-- ───────── ANALYTICS PAGE ───────── -->
-  <div id="page-analytics" class="page-content" style="display:none;flex:1;overflow-y:auto">
+  <div id="page-analytics" class="page-content" style="flex:1;overflow-y:auto">
     <div style="padding:22px;width:100%">
       <div class="page-header">
         <div><div class="page-title">Analytics</div><div class="page-sub">Pearl Spot Tours booking intelligence</div></div>
@@ -883,7 +883,7 @@ tr:last-child td{border-bottom:none}
   </div>
 
   <!-- ───────── INTEGRATIONS PAGE ───────── -->
-  <div id="page-integrations" class="page-content" style="display:none;flex:1;overflow-y:auto">
+  <div id="page-integrations" class="page-content" style="flex:1;overflow-y:auto">
     <div style="padding:22px;width:100%">
       <div class="page-header">
         <div><div class="page-title">Integrations</div><div class="page-sub">Connected tools and external services</div></div>
@@ -1022,7 +1022,7 @@ tr:last-child td{border-bottom:none}
   </div>
 
   <!-- ───────── USERS PAGE ───────── -->
-  <div id="page-users" class="page-content" style="display:none;flex:1;overflow-y:auto">
+  <div id="page-users" class="page-content" style="flex:1;overflow-y:auto">
     <div style="padding:22px;width:100%">
       <div class="page-header">
         <div><div class="page-title">User Management</div><div class="page-sub">Manage CRM access</div></div>
@@ -1038,7 +1038,7 @@ tr:last-child td{border-bottom:none}
   </div>
 
   <!-- ───────── PRICING PAGE ───────── -->
-  <div id="page-pricing" class="page-content" style="display:none;flex:1;overflow-y:auto">
+  <div id="page-pricing" class="page-content" style="flex:1;overflow-y:auto">
     <div style="padding:22px;width:100%">
       <div style="text-align:center;padding:30px 0 28px">
         <h2 style="font-size:26px;font-weight:800;color:var(--text);margin-bottom:6px;letter-spacing:-.5px">Choose Your Plan</h2>
@@ -1240,11 +1240,8 @@ try {
   }
 } catch(e) { currentUser = null; }
 
-// Redirect to login if no session at all
-if (!currentUser || !currentUser.email) {
-  window.location.replace('login.html');
-}
-// Safety fallback so JS doesn't crash during the redirect
+// Safety fallback — real redirect happens in DOMContentLoaded below
+// so ALL functions are defined before any redirect fires
 if (!currentUser) currentUser = {name:'Admin',email:'admin@pearlspottours.com',role:'admin'};
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1339,6 +1336,13 @@ const saveLeadData = () => {
 // INIT
 // ═══════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
+  // Auth guard — redirect to login if no valid session
+  // Runs here so all JS functions are defined first
+  if (!currentUser || !currentUser.email) {
+    window.location.replace('login.html');
+    return;
+  }
+
   if (currentUser) {
     const av = document.getElementById('sb-avatar');
     document.getElementById('sb-name').textContent = currentUser.name;
@@ -1364,13 +1368,15 @@ function showPage(page, linkEl) {
   if (el) el.style.display = 'flex';
   document.querySelectorAll('.slink').forEach(l => l.classList.remove('active'));
   if (linkEl) linkEl.classList.add('active');
-  document.getElementById('tb-page').textContent = PAGE_NAMES[page]||page;
-  if (page==='analytics') renderAnalytics();
-  if (page==='users') renderUsersTable();
-  if (page==='today') renderToday();
-  if (page==='kanban') renderKanban();
-  if (page==='composer') { initWcFilters(); updateWcPreview(); }
-  if (page==='campaigns') updateCampCount();
+  const tb = document.getElementById('tb-page');
+  if (tb) tb.textContent = PAGE_NAMES[page]||page;
+  if (page==='analytics')    renderAnalytics();
+  if (page==='users')        renderUsersTable();
+  if (page==='today')        renderToday();
+  if (page==='kanban')       renderKanban();
+  if (page==='composer')     { initWcFilters(); updateWcPreview(); }
+  if (page==='campaigns')    updateCampCount();
+  if (page==='integrations') setTimeout(refreshStorageStats, 100);
 }
 function mobileNav(page, btn) {
   document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('active'));
@@ -2310,12 +2316,7 @@ function clearKanbanConfirm() {
   toast('Kanban board cleared', 'warn');
 }
 
-// Auto-refresh stats when integrations page loads
-const _origShowPage = showPage;
-function showPage(page, linkEl) {
-  _origShowPage(page, linkEl);
-  if (page === 'integrations') setTimeout(refreshStorageStats, 100);
-}
+// (integrations stats refresh merged into main showPage above)
 </script>
 </body>
 </html>
