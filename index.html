@@ -1585,6 +1585,7 @@ function showPage(page, linkEl) {
   if (linkEl) linkEl.classList.add('active');
   const tb = document.getElementById('tb-page');
   if (tb) tb.textContent = PAGE_NAMES[page]||page;
+  // ── built-in pages ──
   if (page==='analytics')    renderAnalytics();
   if (page==='users')        renderUsersTable();
   if (page==='today')        renderToday();
@@ -1592,7 +1593,24 @@ function showPage(page, linkEl) {
   if (page==='composer')     { initWcFilters(); updateWcPreview(); }
   if (page==='campaigns')    updateCampCount();
   if (page==='integrations') setTimeout(refreshStorageStats, 100);
+  // ── new pages ──
+  if (page==='customers') renderCustomers();
+  if (page==='reminders') {
+    const ed = document.getElementById('rtpl-editor');
+    if (ed) { ed.value = reminderTpls[_currentRtpl] || ''; updateRtplPreview(); }
+    renderReminders();
+  }
+  if (page==='reviews') {
+    const ed = document.getElementById('review-tpl-editor');
+    if (ed) { ed.value = reviewTpl || DEFAULT_REVIEW_TPL; updateReviewTplPreview(); }
+    renderReviewQueue();
+  }
 }
+// Re-render kanban on resize (mobile vs desktop card buttons differ)
+window.addEventListener('resize', () => {
+  const kb = document.getElementById('page-kanban');
+  if (kb && kb.style.display !== 'none') renderKanban();
+});
 function mobileNav(page, btn) {
   document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
@@ -3040,36 +3058,6 @@ async function sendAllReviewRequests() {
   for (const c of pending) await sendReviewRequest(c.id);
   toast(`Sent ${pending.length} review requests`,'ok');
 }
-
-// ═══════════════════════════════════════════════════════════════════
-// INIT NEW PAGES when shown
-// ═══════════════════════════════════════════════════════════════════
-// Patch showPage to handle new pages
-const _baseShowPage = showPage;
-function showPage(page, linkEl) {
-  _baseShowPage(page, linkEl);
-  if (page === 'customers') { renderCustomers(); }
-  if (page === 'reminders') {
-    if (document.getElementById('rtpl-editor')) {
-      document.getElementById('rtpl-editor').value = reminderTpls[_currentRtpl] || '';
-      updateRtplPreview();
-    }
-    renderReminders();
-  }
-  if (page === 'reviews') {
-    if (document.getElementById('review-tpl-editor')) {
-      document.getElementById('review-tpl-editor').value = reviewTpl || DEFAULT_REVIEW_TPL;
-      updateReviewTplPreview();
-    }
-    renderReviewQueue();
-  }
-}
-// Re-render kanban on resize (mobile vs desktop changes kcard buttons)
-window.addEventListener('resize', () => {
-  if (document.getElementById('page-kanban')?.style.display !== 'none') {
-    renderKanban();
-  }
-});
 
 </script>
 </body>
