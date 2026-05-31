@@ -515,12 +515,13 @@ tr:last-child td{border-bottom:none}
     <a class="slink" onclick="showPage('pricing',this)"><span class="sicon">💳</span> <span>Pricing</span></a>
   </div>
   <div class="sidebar-bottom">
-    <div class="user-row">
+    <div class="user-row" onclick="showPage('users',null)">
       <div class="user-avatar" id="sb-avatar" style="background:#0ea5e9">B<div class="user-status-dot"></div></div>
       <div style="flex:1;min-width:0">
         <div class="user-name" id="sb-name">Baiju</div>
         <div class="user-role" id="sb-role">Administrator</div>
       </div>
+      <button onclick="event.stopPropagation();doLogout()" title="Sign out" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;padding:5px;border-radius:5px;font-size:14px;transition:.12s;flex-shrink:0" onmouseover="this.style.color='#ef4444';this.style.background='rgba(239,68,68,.12)'" onmouseout="this.style.color='rgba(255,255,255,.3)';this.style.background='none'">⏏</button>
     </div>
   </div>
 </aside>
@@ -941,6 +942,48 @@ tr:last-child td{border-bottom:none}
         </a>
       </div>
 
+      <!-- Data Management section -->
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:24px 0 12px">Data & Storage</div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-head">
+          <span class="card-title">💾 Local Storage Manager</span>
+          <span id="storage-usage-badge" style="font-size:11px;color:var(--muted);font-family:var(--mono)">—</span>
+        </div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px" id="storage-stats">
+            <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+              <div style="font-size:24px;font-weight:800;color:var(--accent)" id="st-cards">—</div>
+              <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Kanban Cards</div>
+            </div>
+            <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+              <div style="font-size:24px;font-weight:800;color:var(--green)" id="st-notes">—</div>
+              <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Notes</div>
+            </div>
+            <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+              <div style="font-size:24px;font-weight:800;color:var(--purple)" id="st-calls">—</div>
+              <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Call Logs</div>
+            </div>
+            <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+              <div style="font-size:24px;font-weight:800;color:var(--teal)" id="st-users">—</div>
+              <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Users</div>
+            </div>
+          </div>
+          <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:11px;color:var(--muted);line-height:1.7">
+            <strong style="color:var(--text2)">Storage Rules:</strong><br>
+            🔒 Kanban board is the <strong>sole source of truth</strong> — sheet sync only adds NEW cards, never updates existing ones.<br>
+            📥 Each Google Sheet sync imports only rows not already in the board (matched by ID or phone).<br>
+            💡 All data is stored in <code style="background:var(--bg);padding:1px 5px;border-radius:4px;font-family:var(--mono)">localStorage</code> under <code style="background:var(--bg);padding:1px 5px;border-radius:4px;font-family:var(--mono)">ps:</code> namespace keys.
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn primary sm" onclick="backupData()">⬇ Download Backup</button>
+            <button class="btn sm" onclick="restoreData()">⬆ Restore Backup</button>
+            <button class="btn sm" onclick="refreshStorageStats()">⟳ Refresh Stats</button>
+            <button class="btn danger sm" onclick="clearKanbanConfirm()" style="margin-left:auto">🗑 Clear Kanban Board</button>
+          </div>
+          <input type="file" id="restore-file-input" accept=".json" style="display:none" onchange="doRestoreData(this)">
+        </div>
+      </div>
+
       <!-- Map embed section -->
       <div id="map-section" style="display:none;margin-top:16px">
         <div class="card">
@@ -1177,20 +1220,86 @@ const PAGE_NAMES = {today:'Today',conversations:'Conversations',kanban:'Pipeline
 const PAGE_SIZE = 25;
 
 // ═══════════════════════════════════════════════
-// AUTH
+// AUTH  — reads session written by login.html
 // ═══════════════════════════════════════════════
 let currentUser = null;
-try { currentUser = JSON.parse(sessionStorage.getItem('ps_user') || localStorage.getItem('ps_user') || 'null'); } catch(e){}
-if (!currentUser) currentUser = {name:'Baiju',email:'baiju@pearlspottours.com',role:'admin'};
+try { currentUser = JSON.parse(sessionStorage.getItem('ps_user') || 'null'); } catch(e){}
+// Redirect to login if no active session
+if (!currentUser || !currentUser.email) {
+  window.location.replace('login.html');
+}
+// Fallback so the rest of the JS doesn't crash before redirect fires
+if (!currentUser) currentUser = {name:'Admin',email:'admin@pearlspottours.com',role:'admin'};
 
-let USERS = [];
-try { USERS = JSON.parse(localStorage.getItem('ps_users') || '[]'); } catch(e){}
-if (!USERS.length) USERS = [
-  {id:'u1',name:'Baiju',email:'baiju@pearlspottours.com',pwd:'Pearl@Baiju26',role:'admin',active:true},
-  {id:'u2',name:'Admin',email:'admin@pearlspottours.com',pwd:'Pearl@Admin26',role:'admin',active:true},
-  {id:'u3',name:'Hussain',email:'hussain@aiingo.com',pwd:'Aiingo@2026',role:'admin',active:true},
-  {id:'u4',name:'Reception',email:'reception@pearlspottours.com',pwd:'Pearl@Recep26',role:'agent',active:true},
+// ═══════════════════════════════════════════════════════════════════
+// PS_STORE — Centralised localStorage abstraction
+// All CRM data lives under 'ps:' namespaced keys:
+//
+//   ps:kanban    → kanbanCards[]          (pipeline board, sole source of truth)
+//   ps:notes     → { [id]: [{text,by,ts}] }
+//   ps:calllogs  → { [id]: [{note,outcome,by,ts}] }
+//   ps:users     → users[]
+//   ps:meta      → { lastSync, version, … }
+//
+// RULE: Sheet sync is append-only. Existing cards are NEVER touched by sync.
+// ═══════════════════════════════════════════════════════════════════
+const PS_Store = {
+  _NS: 'ps:',
+  read(key, fallback) {
+    try {
+      const raw = localStorage.getItem(this._NS + key);
+      return raw !== null ? JSON.parse(raw) : fallback;
+    } catch(e) { return fallback; }
+  },
+  write(key, value) {
+    try {
+      localStorage.setItem(this._NS + key, JSON.stringify(value));
+      // Update meta timestamp
+      const meta = this.read('meta', {});
+      meta[key + '_saved'] = new Date().toISOString();
+      meta.lastWrite = new Date().toISOString();
+      localStorage.setItem(this._NS + 'meta', JSON.stringify(meta));
+      return true;
+    } catch(e) { console.warn('PS_Store.write failed:', key, e); return false; }
+  },
+  clear(key) { localStorage.removeItem(this._NS + key); },
+  // Export all ps: keys as JSON blob (for backup / download)
+  exportAll() {
+    const out = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(this._NS)) {
+        try { out[k] = JSON.parse(localStorage.getItem(k)); } catch(e){ out[k] = localStorage.getItem(k); }
+      }
+    }
+    return out;
+  },
+  // Restore from a backup blob
+  importAll(blob) {
+    Object.entries(blob).forEach(([k, v]) => {
+      if (k.startsWith(this._NS)) localStorage.setItem(k, JSON.stringify(v));
+    });
+  },
+  // How much space are we using?
+  usage() {
+    let bytes = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(this._NS)) bytes += (localStorage.getItem(k)||'').length * 2;
+    }
+    return { bytes, kb: Math.round(bytes / 1024 * 10) / 10 };
+  }
+};
+
+// ── Default users seeded only if ps:users doesn't exist yet ──
+const DEFAULT_USERS = [
+  {id:'u1',name:'Baiju',    email:'baiju@pearlspottours.com',   pwd:'Pearl@Baiju26', role:'admin',active:true},
+  {id:'u2',name:'Admin',    email:'admin@pearlspottours.com',    pwd:'Pearl@Admin26', role:'admin',active:true},
+  {id:'u3',name:'Hussain',  email:'hussain@aiingo.com',          pwd:'Aiingo@2026',   role:'admin',active:true},
+  {id:'u4',name:'Reception',email:'reception@pearlspottours.com',pwd:'Pearl@Recep26', role:'agent',active:true},
 ];
+let USERS = PS_Store.read('users', null);
+if (!USERS) { USERS = DEFAULT_USERS; PS_Store.write('users', USERS); }
 
 // ═══════════════════════════════════════════════
 // STATE
@@ -1198,17 +1307,17 @@ if (!USERS.length) USERS = [
 let allLeads = [], allConvs = [], selectedConvId = null, leadsPage = 1, currentLeadId = null;
 let leadNotes = {}, leadCallLogs = {};
 
-// ── KANBAN LOCAL STORE ──
-// kanbanCards: { id, name, phone, checkin, service, dayType, adults, rooms, quotedAmount, paidAmount, stage, source, boat, priority, createdAt }
-let kanbanCards = [];
-const KANBAN_KEY = 'ps_kanban_v2';
-const loadKanbanStore = () => { try { kanbanCards = JSON.parse(localStorage.getItem(KANBAN_KEY) || '[]'); } catch(e){ kanbanCards = []; } };
-const saveKanbanStore = () => localStorage.setItem(KANBAN_KEY, JSON.stringify(kanbanCards));
-loadKanbanStore();
+// ── Kanban — localStorage is the ONLY store ──
+let kanbanCards = PS_Store.read('kanban', []);
+const loadKanbanStore = () => { kanbanCards = PS_Store.read('kanban', []); };
+const saveKanbanStore = () => { PS_Store.write('kanban', kanbanCards); };
 
-try { leadNotes = JSON.parse(localStorage.getItem('ps_notes') || '{}'); } catch(e){}
-try { leadCallLogs = JSON.parse(localStorage.getItem('ps_calllogs') || '{}'); } catch(e){}
-const saveLeadData = () => { localStorage.setItem('ps_notes',JSON.stringify(leadNotes)); localStorage.setItem('ps_calllogs',JSON.stringify(leadCallLogs)); };
+leadNotes    = PS_Store.read('notes',    {});
+leadCallLogs = PS_Store.read('calllogs', {});
+const saveLeadData = () => {
+  PS_Store.write('notes',    leadNotes);
+  PS_Store.write('calllogs', leadCallLogs);
+};
 
 // ═══════════════════════════════════════════════
 // INIT
@@ -1308,43 +1417,53 @@ async function loadLeads() {
   }
 }
 
+// ── SHEET SYNC RULES ──────────────────────────────────────────────────────
+// The Kanban board is the single source of truth for ALL existing cards.
+// Google Sheet sync is ONE-WAY, APPEND-ONLY:
+//   • New row in sheet that doesn't exist locally → create card (stage = 'New')
+//   • Row already exists (matched by id OR phone) → NEVER touch it, not stage,
+//     not amounts, not anything. Local edits always win.
+// This means once a card is on the board, only the CRM user can move it.
+// ──────────────────────────────────────────────────────────────────────────
 function mergeLeadsToKanban(leads) {
-  let changed = false;
+  let newCount = 0;
   leads.forEach(l => {
-    const id = String(lv(l,'id','SL NO'));
+    const id    = String(lv(l,'id','SL NO'));
     const phone = lv(l,'phone','Phone');
-    const existing = kanbanCards.find(c => c.id === id || (phone && c.phone === phone));
-    if (!existing) {
-      kanbanCards.push({
-        id, name: lv(l,'name','Name'), phone,
-        checkin: lv(l,'checkin','check-in date'),
-        checkout: lv(l,'checkout','check-out date'),
-        service: lv(l,'service','Service'),
-        dayType: lv(l,'dayType','Day Type'),
-        adults: lv(l,'adults','Adults'),
-        rooms: lv(l,'rooms','Rooms'),
-        quotedAmount: lv(l,'quotedAmount','Quoted_Amount'),
-        paidAmount: lv(l,'paidAmount','Paid_Amount'),
-        stage: lv(l,'stage','Stage') || 'New',
-        source: lv(l,'source','Source'),
-        boat: lv(l,'boatAssigned','Boat_Assigned'),
-        occasion: lv(l,'occasion','Occasion'),
-        priority: 'normal',
-        createdAt: Date.now(),
-      });
-      changed = true;
-    } else {
-      // Update stage from sheet only if sheet has explicit stage
-      const sheetStage = lv(l,'stage','Stage');
-      if (sheetStage && sheetStage !== existing.stage) {
-        existing.stage = sheetStage; changed = true;
-      }
-      if (!existing.quotedAmount && lv(l,'quotedAmount','Quoted_Amount')) {
-        existing.quotedAmount = lv(l,'quotedAmount','Quoted_Amount'); changed = true;
-      }
-    }
+    // Match by id first, then by phone as fallback
+    const exists = kanbanCards.find(c =>
+      (id && c.id === id) ||
+      (phone && c.phone && c.phone.replace(/\D/g,'') === phone.replace(/\D/g,''))
+    );
+    if (exists) return; // ← hard stop: never overwrite anything
+    // Truly new lead from sheet — create a fresh card
+    kanbanCards.push({
+      id,
+      name:         lv(l,'name','Name'),
+      phone,
+      checkin:      lv(l,'checkin','check-in date'),
+      checkout:     lv(l,'checkout','check-out date'),
+      service:      lv(l,'service','Service'),
+      dayType:      lv(l,'dayType','Day Type'),
+      adults:       lv(l,'adults','Adults'),
+      rooms:        lv(l,'rooms','Rooms'),
+      quotedAmount: lv(l,'quotedAmount','Quoted_Amount'),
+      paidAmount:   lv(l,'paidAmount','Paid_Amount'),
+      stage:        'New',          // ← always start at New, user decides rest
+      source:       lv(l,'source','Source'),
+      boat:         lv(l,'boatAssigned','Boat_Assigned'),
+      occasion:     lv(l,'occasion','Occasion'),
+      priority:     'normal',
+      fromSheet:    true,           // flag: imported from Google Sheet
+      createdAt:    Date.now(),
+      importedAt:   new Date().toISOString(),
+    });
+    newCount++;
   });
-  if (changed) saveKanbanStore();
+  if (newCount > 0) {
+    saveKanbanStore();
+    toast(`${newCount} new lead(s) imported from Sheet`, 'ok');
+  }
 }
 
 const lv = (l, ...keys) => { for(const k of keys){ const v=l[k]; if(v!==undefined&&v!==null&&v!=='') return String(v); } return ''; };
@@ -2039,7 +2158,7 @@ function renderAnalytics() {
 // ═══════════════════════════════════════════════
 // USERS
 // ═══════════════════════════════════════════════
-const saveUsers = () => localStorage.setItem('ps_users',JSON.stringify(USERS));
+const saveUsers = () => PS_Store.write('users', USERS);
 
 function renderUsersTable() {
   const el=document.getElementById('users-table');if(!el)return;
@@ -2094,6 +2213,92 @@ function toast(msg, type='ok') {
 function toggleNotif(){ document.getElementById('notif-panel').classList.toggle('open'); }
 function clearNotifs(){ document.getElementById('notif-list').innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">All clear ✅</div>'; document.getElementById('notif-count').textContent='0'; document.getElementById('notif-panel').classList.remove('open'); }
 document.addEventListener('click',e=>{ if(!e.target.closest('#notif-toggle')&&!e.target.closest('#notif-panel')) document.getElementById('notif-panel')?.classList.remove('open'); });
+
+function doLogout() {
+  if (!confirm('Sign out of Pearl Spot Tours CRM?')) return;
+  sessionStorage.removeItem('ps_user');
+  window.location.replace('login.html');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// STORAGE MANAGEMENT
+// ═══════════════════════════════════════════════════════════════════
+
+function refreshStorageStats() {
+  const usage = PS_Store.usage();
+  const noteCount = Object.values(leadNotes).reduce((s,arr)=>s+(arr?.length||0), 0);
+  const callCount = Object.values(leadCallLogs).reduce((s,arr)=>s+(arr?.length||0), 0);
+  const setText = (id, v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  setText('st-cards',  kanbanCards.length);
+  setText('st-notes',  noteCount);
+  setText('st-calls',  callCount);
+  setText('st-users',  USERS.length);
+  const badge = document.getElementById('storage-usage-badge');
+  if(badge) badge.textContent = `${usage.kb} KB used`;
+}
+
+function backupData() {
+  const blob = PS_Store.exportAll();
+  blob['_backup_info'] = {
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    exportedBy: currentUser?.name || 'Unknown',
+    cardCount: kanbanCards.length,
+  };
+  const json = JSON.stringify(blob, null, 2);
+  const url  = URL.createObjectURL(new Blob([json], {type:'application/json'}));
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `pearlspot-backup-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Backup downloaded ✅', 'ok');
+}
+
+function restoreData() {
+  if (!confirm('Restore from backup? This will OVERWRITE all local data.')) return;
+  document.getElementById('restore-file-input').click();
+}
+
+function doRestoreData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const blob = JSON.parse(e.target.result);
+      PS_Store.importAll(blob);
+      // Reload all stores from newly written data
+      loadKanbanStore();
+      leadNotes    = PS_Store.read('notes',    {});
+      leadCallLogs = PS_Store.read('calllogs', {});
+      USERS        = PS_Store.read('users',    DEFAULT_USERS);
+      renderKanban(); renderToday(); renderUsersTable(); refreshStorageStats();
+      toast(`Restored from backup: ${blob['_backup_info']?.exportedAt||'unknown date'}`, 'ok');
+    } catch(err) {
+      toast('Restore failed — invalid file', 'err');
+    }
+  };
+  reader.readAsText(file);
+  input.value = ''; // reset so same file can be re-selected
+}
+
+function clearKanbanConfirm() {
+  if (!confirm('⚠ Delete ALL kanban cards? This cannot be undone.\n\nDownload a backup first!')) return;
+  if (!confirm('Are you SURE? Type OK to confirm.')) return;
+  kanbanCards = [];
+  saveKanbanStore();
+  renderKanban(); renderToday();
+  refreshStorageStats();
+  toast('Kanban board cleared', 'warn');
+}
+
+// Auto-refresh stats when integrations page loads
+const _origShowPage = showPage;
+function showPage(page, linkEl) {
+  _origShowPage(page, linkEl);
+  if (page === 'integrations') setTimeout(refreshStorageStats, 100);
+}
 </script>
 </body>
 </html>
