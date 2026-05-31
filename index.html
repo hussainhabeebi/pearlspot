@@ -1221,14 +1221,30 @@ const PAGE_SIZE = 25;
 
 // ═══════════════════════════════════════════════
 // AUTH  — reads session written by login.html
+// Checks sessionStorage first, falls back to
+// localStorage (written when "remember me" was on)
 // ═══════════════════════════════════════════════
 let currentUser = null;
-try { currentUser = JSON.parse(sessionStorage.getItem('ps_user') || 'null'); } catch(e){}
-// Redirect to login if no active session
+try {
+  // sessionStorage: set by login on same tab navigation
+  const fromSession = sessionStorage.getItem('ps_user');
+  // localStorage: set by login when "remember me" checked
+  const fromLocal   = localStorage.getItem('ps_user');
+  const raw = fromSession || fromLocal;
+  if (raw) {
+    currentUser = JSON.parse(raw);
+    // If came from localStorage, write into sessionStorage so it persists this tab
+    if (!fromSession && fromLocal) {
+      sessionStorage.setItem('ps_user', fromLocal);
+    }
+  }
+} catch(e) { currentUser = null; }
+
+// Redirect to login if no session at all
 if (!currentUser || !currentUser.email) {
   window.location.replace('login.html');
 }
-// Fallback so the rest of the JS doesn't crash before redirect fires
+// Safety fallback so JS doesn't crash during the redirect
 if (!currentUser) currentUser = {name:'Admin',email:'admin@pearlspottours.com',role:'admin'};
 
 // ═══════════════════════════════════════════════════════════════════
@@ -2217,6 +2233,7 @@ document.addEventListener('click',e=>{ if(!e.target.closest('#notif-toggle')&&!e
 function doLogout() {
   if (!confirm('Sign out of Pearl Spot Tours CRM?')) return;
   sessionStorage.removeItem('ps_user');
+  localStorage.removeItem('ps_user');
   window.location.replace('login.html');
 }
 

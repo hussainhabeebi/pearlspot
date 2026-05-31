@@ -341,19 +341,11 @@ body{
 // CONFIG — change CRM_PAGE to match your actual filename/path
 // e.g. 'index.html' | 'dashboard.html' | 'crm.html' | '/crm/'
 // ─────────────────────────────────────────────────────────────────
-const CRM_PAGE = (function(){
-  // Auto-detect: if a file called 'index.html' is in the same dir use it,
-  // otherwise fall back to the known filename. Override here if needed.
-  const candidates = [
-    'pearlspot-crm-v2.html',
-    'index.html',
-    'dashboard.html',
-    'crm.html',
-  ];
-  // Return first one that makes sense (we can't check existence in JS without
-  // a request, so we just use the first. Adjust if your deploy renames it.)
-  return candidates[0];
-})();
+// ── DEPLOY NOTE ──────────────────────────────────────────────────
+// This file should live in the same folder as index.html (the CRM).
+// If your server names the CRM file differently, change CRM_PAGE below.
+// ─────────────────────────────────────────────────────────────────
+const CRM_PAGE = 'index.html';
 
 // ─────────────────────────────────────────────────────────────────
 // PS_Store — inline copy (login.html is standalone)
@@ -497,7 +489,18 @@ function doLogin() {
       role:    user.role,
       loginAt: new Date().toISOString(),
     };
+    // Always write to BOTH storages:
+    //   sessionStorage → survives tab navigation within same tab
+    //   localStorage   → survives page reload and replace() navigation
+    // "Remember me" only controls whether localStorage is CLEARED on next visit
     sessionStorage.setItem('ps_user', JSON.stringify(session));
+    localStorage.setItem('ps_user', JSON.stringify(session));
+
+    // If "remember me" is OFF, mark it so the CRM clears it on logout
+    if (!document.getElementById('remember-me').checked) {
+      session._noRemember = true;
+      localStorage.setItem('ps_user', JSON.stringify(session));
+    }
 
     // Update lastLogin in ps:users
     const allUsers = PS_Store.read('users', DEFAULT_USERS);
@@ -555,9 +558,13 @@ function togglePwd() {
 window.addEventListener('DOMContentLoaded', () => {
 
   // If already have a valid session, skip login
+  // Check both sessionStorage and localStorage
   try {
-    const existing = JSON.parse(sessionStorage.getItem('ps_user') || 'null');
+    const raw = sessionStorage.getItem('ps_user') || localStorage.getItem('ps_user');
+    const existing = raw ? JSON.parse(raw) : null;
     if (existing && existing.email) {
+      // Refresh sessionStorage so the CRM finds it after replace()
+      sessionStorage.setItem('ps_user', JSON.stringify(existing));
       window.location.replace(CRM_PAGE);
       return;
     }
