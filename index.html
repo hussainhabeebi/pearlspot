@@ -470,6 +470,86 @@ tr:last-child td{border-bottom:none}
   .kanban-board-scroll{padding:12px}
   .kanban-col{width:180px;min-width:180px}
 }
+
+/* ── CARD AGE & OVERDUE ── */
+.kcard-age{font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;white-space:nowrap}
+.kcard-age.fresh{background:#dcfce7;color:#15803d}
+.kcard-age.normal{background:#f1f5f9;color:#64748b}
+.kcard-age.old{background:#fef3c7;color:#92400e}
+.kcard-age.overdue{background:#fee2e2;color:#b91c1c;animation:pulse-badge 1.5s ease infinite}
+@keyframes pulse-badge{0%,100%{opacity:1}50%{opacity:.6}}
+.kcard-overdue-bar{height:3px;border-radius:0 0 8px 8px;background:linear-gradient(90deg,#ef4444,#f97316);margin:-1px -1px 0;opacity:.8}
+
+/* ── BOTTOM SHEET (mobile stage picker) ── */
+.bottom-sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:800;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(2px)}
+.bottom-sheet-overlay.open{opacity:1;pointer-events:all}
+.bottom-sheet{position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:20px 20px 0 0;z-index:801;padding:0 0 env(safe-area-inset-bottom,16px);transform:translateY(100%);transition:transform .3s cubic-bezier(.32,0,.67,0);max-height:85vh;overflow-y:auto}
+.bottom-sheet.open{transform:translateY(0)}
+.bs-handle{width:40px;height:4px;border-radius:4px;background:#e2e8f0;margin:12px auto 0}
+.bs-title{font-size:15px;font-weight:800;color:var(--text);padding:14px 20px 10px;letter-spacing:-.3px;border-bottom:1px solid var(--border)}
+.bs-card-info{padding:12px 20px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.bs-card-name{font-size:14px;font-weight:700;color:var(--text)}
+.bs-card-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.bs-stage-list{padding:10px 12px 8px}
+.bs-stage-btn{display:flex;align-items:center;gap:12px;width:100%;padding:13px 16px;border:none;background:none;font-family:inherit;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;border-radius:10px;transition:.12s;margin-bottom:4px;-webkit-tap-highlight-color:transparent}
+.bs-stage-btn:hover,.bs-stage-btn:active{background:var(--accent-bg);color:var(--accent)}
+.bs-stage-btn.current{background:var(--accent-bg);color:var(--accent)}
+.bs-stage-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.bs-stage-chevron{margin-left:auto;color:var(--muted2);font-size:12px}
+
+/* ── SWIPE FEEDBACK ── */
+.kcard.swiping-right{background:linear-gradient(135deg,#dcfce7,#fff) !important;border-color:#10b981 !important}
+.kcard.swiping-left{background:linear-gradient(135deg,#fee2e2,#fff) !important;border-color:#ef4444 !important}
+.swipe-hint{position:absolute;top:50%;transform:translateY(-50%);font-size:20px;opacity:.7;pointer-events:none;transition:.15s}
+.swipe-hint.right{right:10px}.swipe-hint.left{left:10px}
+
+/* ── KANBAN MOBILE SNAP ── */
+@media(max-width:768px){
+  .kanban-board-scroll{
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+    padding:12px 8px;
+    scrollbar-width:none;
+  }
+  .kanban-board-scroll::-webkit-scrollbar{display:none}
+  .kanban-col{
+    scroll-snap-align:start;
+    width:calc(100vw - 60px) !important;
+    min-width:calc(100vw - 60px) !important;
+    max-height:calc(100vh - 200px);
+  }
+  .kanban-board{padding-right:20px}
+  .kcard{touch-action:pan-y}
+}
+
+/* ── CUSTOMERS PAGE ── */
+.cust-card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px;display:flex;align-items:flex-start;gap:12px;transition:.15s;cursor:pointer;box-shadow:var(--shadow)}
+.cust-card:hover{border-color:var(--accent);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.cust-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#fff;flex-shrink:0}
+.cust-name{font-size:14px;font-weight:700;color:var(--text);letter-spacing:-.2px}
+.cust-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.cust-stats{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap}
+.cust-stat{font-size:11px;font-weight:600;color:var(--text3)}
+.cust-stat span{color:var(--muted);font-weight:400}
+.cust-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:20px}
+@media(max-width:768px){.cust-grid{grid-template-columns:1fr}}
+
+/* ── REMINDER / REVIEW QUEUE BADGES ── */
+.queue-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);transition:.12s}
+.queue-item:hover{background:var(--bg)}
+.queue-item:last-child{border-bottom:none}
+.queue-item-left{flex:1;min-width:0}
+.queue-item-name{font-size:13px;font-weight:700;color:var(--text)}
+.queue-item-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.queue-item-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0}
+.queue-item-badge.urgent{background:#fee2e2;color:#b91c1c}
+.queue-item-badge.soon{background:#fef3c7;color:#92400e}
+.queue-item-badge.due{background:#dbeafe;color:#1d4ed8}
+
+/* ── FAB (mobile) ── */
+.fab{position:fixed;bottom:72px;right:16px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-dark));border:none;color:#fff;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(14,165,233,.45);z-index:300;display:none;align-items:center;justify-content:center;transition:.2s;-webkit-tap-highlight-color:transparent}
+.fab:active{transform:scale(.93)}
+@media(max-width:768px){.fab{display:flex}}
 </style>
 </head>
 <body>
@@ -502,6 +582,9 @@ tr:last-child td{border-bottom:none}
 
     <div class="sidebar-section">Insights</div>
     <a class="slink" onclick="showPage('analytics',this)"><span class="sicon">📊</span> <span>Analytics</span></a>
+    <a class="slink" onclick="showPage('reminders',this)"><span class="sicon">⏰</span> <span>Reminders</span> <span class="sbadge red" id="badge-reminders">0</span></a>
+    <a class="slink" onclick="showPage('reviews',this)"><span class="sicon">⭐</span> <span>Review Queue</span> <span class="sbadge grey" id="badge-reviews">0</span></a>
+    <a class="slink" onclick="showPage('customers',this)"><span class="sicon">👤</span> <span>Customers</span></a>
     <a class="slink" onclick="showPage('integrations',this)"><span class="sicon">🔗</span> <span>Integrations</span></a>
 
     <div class="sidebar-section">Chatwoot</div>
@@ -1187,11 +1270,137 @@ tr:last-child td{border-bottom:none}
 <!-- ── MOBILE NAV ── -->
 <nav class="mobile-nav">
   <button class="mobile-nav-btn active" onclick="mobileNav('today',this)"><span>🏠</span><span>Today</span></button>
-  <button class="mobile-nav-btn" onclick="mobileNav('conversations',this)"><span>💬</span><span>Chats</span></button>
   <button class="mobile-nav-btn" onclick="mobileNav('kanban',this)"><span>📋</span><span>Board</span></button>
-  <button class="mobile-nav-btn" onclick="mobileNav('enquiries',this)"><span>⛵</span><span>Enquiries</span></button>
+  <button class="mobile-nav-btn" onclick="mobileNav('customers',this)"><span>👤</span><span>Guests</span></button>
+  <button class="mobile-nav-btn" onclick="mobileNav('reminders',this)"><span>⏰</span><span>Remind</span></button>
   <button class="mobile-nav-btn" onclick="mobileNav('analytics',this)"><span>📊</span><span>Reports</span></button>
 </nav>
+<!-- FAB for mobile quick-add -->
+<button class="fab" onclick="kanbanAddCard()" title="Add new guest">+</button>
+
+
+  <!-- ───────── CUSTOMERS PAGE (localStorage only) ───────── -->
+  <div id="page-customers" class="page-content" style="flex:1;overflow-y:auto">
+    <div style="padding:22px;width:100%">
+      <div class="page-header">
+        <div><div class="page-title">Guests / Customers</div><div class="page-sub">All guests stored in local memory · never sent to Google Sheet</div></div>
+        <div style="display:flex;gap:8px">
+          <input id="cust-search" class="f-input" placeholder="🔍 Search name / phone…" oninput="renderCustomers()" style="min-width:180px">
+          <button class="btn primary" onclick="openAddCustomer()">+ Add Guest</button>
+        </div>
+      </div>
+      <div class="quick-stat-row" id="cust-stats-row"></div>
+      <div class="cust-grid" id="cust-grid">
+        <div style="text-align:center;padding:40px;color:var(--muted);grid-column:1/-1">No guests yet. Add your first guest!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── REMINDERS PAGE ───────── -->
+  <div id="page-reminders" class="page-content" style="flex:1;overflow-y:auto">
+    <div style="padding:22px;width:100%">
+      <div class="page-header">
+        <div><div class="page-title">⏰ Reminder Queue</div><div class="page-sub">Auto check-in reminders — 48h · 24h · 2h before check-in</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn sm" onclick="renderReminders()">⟳ Refresh</button>
+          <button class="btn primary sm" onclick="sendAllDueReminders()">📱 Send All Due</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-head">
+          <span class="card-title">📝 Reminder Templates</span>
+          <div style="display:flex;gap:6px">
+            <button class="tpl-btn active" id="rtpl-btn-48h" onclick="showReminderTpl('48h',this)">48h Before</button>
+            <button class="tpl-btn" id="rtpl-btn-24h" onclick="showReminderTpl('24h',this)">24h Before</button>
+            <button class="tpl-btn" id="rtpl-btn-2h" onclick="showReminderTpl('2h',this)">2h Before</button>
+          </div>
+        </div>
+        <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px">Edit Template</div>
+            <textarea id="rtpl-editor" class="form-textarea" rows="8" oninput="saveReminderTpl()"></textarea>
+            <div style="font-size:11px;color:var(--muted);margin-top:6px">Variables: {{name}} {{checkin}} {{boat}} {{service}} {{jetty}}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px">Preview</div>
+            <div class="ec-preview-frame" id="rtpl-preview" style="min-height:160px;font-size:12px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Upcoming Check-ins — Reminder Status</span></div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Guest</th><th>Check-in</th><th>Hours Away</th><th>Boat</th><th>48h Sent</th><th>24h Sent</th><th>2h Sent</th><th>Action</th></tr></thead>
+            <tbody id="reminder-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── REVIEW QUEUE PAGE ───────── -->
+  <div id="page-reviews" class="page-content" style="flex:1;overflow-y:auto">
+    <div style="padding:22px;width:100%">
+      <div class="page-header">
+        <div><div class="page-title">⭐ Review Follow-up Queue</div><div class="page-sub">Completed trips sorted by days since checkout</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn sm" onclick="renderReviewQueue()">⟳ Refresh</button>
+          <button class="btn primary sm" onclick="sendAllReviewRequests()">⭐ Send All Pending</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-head"><span class="card-title">📝 Review Request Template</span></div>
+        <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <textarea id="review-tpl-editor" class="form-textarea" rows="7" oninput="saveReviewTpl()"></textarea>
+            <div style="font-size:11px;color:var(--muted);margin-top:6px">Variables: {{name}} {{service}} {{reviewLink}}</div>
+          </div>
+          <div><div class="ec-preview-frame" id="review-tpl-preview" style="min-height:140px;font-size:12px"></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Completed Trips — Review Status</span></div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Guest</th><th>Checkout</th><th>Days Since</th><th>Service</th><th>Review Sent</th><th></th></tr></thead>
+            <tbody id="review-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── BOTTOM SHEET (mobile stage picker) ───────── -->
+  <div class="bottom-sheet-overlay" id="bs-overlay" onclick="closeBottomSheet()"></div>
+  <div class="bottom-sheet" id="bottom-sheet">
+    <div class="bs-handle"></div>
+    <div class="bs-title">Move to Stage</div>
+    <div class="bs-card-info" id="bs-card-info"></div>
+    <div class="bs-stage-list" id="bs-stage-list"></div>
+  </div>
+
+  <!-- ───────── ADD CUSTOMER MODAL ───────── -->
+  <div class="modal-overlay" id="modal-add-customer">
+    <div class="modal" style="width:500px">
+      <div class="modal-head"><span class="modal-title" id="cust-modal-title">Add Guest</span><button class="modal-close" onclick="closeModal('modal-add-customer')">✕</button></div>
+      <div class="modal-body">
+        <input type="hidden" id="edit-cust-id">
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">Full Name *</label><input id="cust-name" class="form-input" placeholder="Guest name"></div>
+          <div class="form-group"><label class="form-label">Phone *</label><input id="cust-phone" class="form-input" placeholder="+91…" inputmode="tel"></div>
+          <div class="form-group"><label class="form-label">Email</label><input id="cust-email" class="form-input" type="email" placeholder="guest@email.com"></div>
+          <div class="form-group"><label class="form-label">State / City</label><input id="cust-city" class="form-input" placeholder="e.g. Kerala"></div>
+          <div class="form-group"><label class="form-label">Occasion</label><input id="cust-occasion" class="form-input" placeholder="Honeymoon, Anniversary…"></div>
+          <div class="form-group"><label class="form-label">Food Pref</label>
+            <select id="cust-food" class="form-select"><option value="">—</option><option>Veg</option><option>Non-Veg</option><option>Jain</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Notes</label><textarea id="cust-notes" class="form-textarea" rows="2" placeholder="Any special requirements…"></textarea></div>
+      </div>
+      <div class="modal-foot"><button class="btn" onclick="closeModal('modal-add-customer')">Cancel</button><button class="btn primary" onclick="saveCustomer()">Save Guest</button></div>
+    </div>
+  </div>
 
 <div class="toast" id="toast"></div>
 
@@ -1205,18 +1414,24 @@ const CW_ACCOUNT = 8;
 const CW_INBOX = 9;
 const CW_TOKEN = 'rcbgwbfThHKajjyG1VBWgkBL';
 const API = {
-  leads:        `${N8N}/pearlspot/leads`,
-  leadsUpdate:  `${N8N}/pearlspot/leads/update`,
-  convs:        `${N8N}/pearlspot/conversations`,
-  sendReply:    `${N8N}/pearlspot/send-reply`,
-  automation:   `${N8N}/pearlspot/automation/trigger`,
+  leads:          `${N8N}/pearlspot/leads`,
+  leadsUpdate:    `${N8N}/pearlspot/leads/update`,
+  convs:          `${N8N}/pearlspot/conversations`,
+  sendReply:      `${N8N}/pearlspot/send-reply`,
+  automation:     `${N8N}/pearlspot/automation/trigger`,
+  reminder:       `${N8N}/pearlspot/reminder/send`,
+  reviewRequest:  `${N8N}/pearlspot/review/send`,
 };
+// WhatsApp Graph API (direct)
+const WA_PHONE_ID = '762209663648254';  // update to Pearl Spot's Phone Number ID
+const WA_TOKEN    = '';                  // set via PS_Store or env — never hardcode
+
 const STAGES = ['New','Quoted','Confirmed','Paid','Checked-In','Completed','Cancelled'];
 const STAGE_COLORS = {New:'grey',Quoted:'blue',Confirmed:'green',Paid:'purple','Checked-In':'teal',Completed:'yellow',Cancelled:'red'};
 const STAGE_PALETTE = {New:'#94a3b8',Quoted:'#0ea5e9',Confirmed:'#10b981',Paid:'#8b5cf6','Checked-In':'#06b6d4',Completed:'#f59e0b',Cancelled:'#ef4444'};
 const AVBG = ['#0ea5e9','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#f97316'];
 const bg = n => AVBG[(n||'A').charCodeAt(0) % AVBG.length];
-const PAGE_NAMES = {today:'Today',conversations:'Conversations',kanban:'Pipeline',enquiries:'Enquiries',composer:'WA Composer',campaigns:'Campaigns',analytics:'Analytics',integrations:'Integrations',users:'Users',pricing:'Pricing'};
+const PAGE_NAMES = {today:'Today',conversations:'Conversations',kanban:'Pipeline',enquiries:'Enquiries',composer:'WA Composer',campaigns:'Campaigns',analytics:'Analytics',integrations:'Integrations',users:'Users',pricing:'Pricing',customers:'Customers',reminders:'Reminders',reviews:'Review Queue'};
 const PAGE_SIZE = 25;
 
 // ═══════════════════════════════════════════════
@@ -2317,6 +2532,545 @@ function clearKanbanConfirm() {
 }
 
 // (integrations stats refresh merged into main showPage above)
+
+// ═══════════════════════════════════════════════════════════════════
+// CARD AGE & OVERDUE HELPERS
+// ═══════════════════════════════════════════════════════════════════
+function daysSince(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (isNaN(d)) return null;
+  return Math.floor((Date.now() - d) / 86400000);
+}
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (isNaN(d)) return null;
+  return Math.ceil((d - Date.now()) / 86400000);
+}
+function hoursUntil(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (isNaN(d)) return null;
+  return (d - Date.now()) / 3600000;
+}
+function cardAgeBadge(card) {
+  const age = daysSince(card.importedAt || new Date(card.createdAt||Date.now()).toISOString());
+  if (age === null) return '';
+  if (age <= 1) return `<span class="kcard-age fresh">New</span>`;
+  if (age <= 3) return `<span class="kcard-age normal">${age}d old</span>`;
+  if (age <= 7) return `<span class="kcard-age old">${age}d old</span>`;
+  return `<span class="kcard-age overdue">${age}d old</span>`;
+}
+function isOverdue(card) {
+  if (!['New','Quoted'].includes(card.stage)) return false;
+  const d = daysUntil(card.checkin);
+  return d !== null && d < 0;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ENHANCED renderKcard — age badge, overdue bar, tap-to-move
+// ═══════════════════════════════════════════════════════════════════
+function renderKcard(c) {
+  const priorityColor = {high:'#ef4444',normal:'#10b981',low:'#94a3b8'}[c.priority||'normal'];
+  const overdue = isOverdue(c);
+  const isMobile = window.innerWidth <= 768;
+  return `<div class="kcard${overdue?' kcard-overdue':''}"
+      draggable="${!isMobile}"
+      data-id="${c.id}"
+      ondragstart="kcDragStart(event,'${c.id}')"
+      ondragend="kcDragEnd(event)"
+      ontouchstart="kcTouchStart(event,'${c.id}')"
+      ontouchmove="kcTouchMove(event)"
+      ontouchend="kcTouchEnd(event,'${c.id}')">
+    ${overdue ? '<div class="kcard-overdue-bar"></div>' : ''}
+    <div class="kcard-header">
+      <div class="kcard-avatar" style="background:${bg(c.name||'A')}">${(c.name||'?').charAt(0)}</div>
+      <div class="kcard-name">${c.name||'—'}</div>
+      <div style="display:flex;gap:4px;align-items:center">
+        ${cardAgeBadge(c)}
+        <div class="kcard-priority" style="background:${priorityColor}" title="${c.priority||'normal'} priority"></div>
+      </div>
+    </div>
+    ${c.checkin?`<div class="kcard-row"><span class="icon">📅</span>${c.checkin}${overdue?' <span style="color:var(--red);font-weight:700;font-size:9px">OVERDUE</span>':''}</div>`:''}
+    ${c.service?`<div class="kcard-row"><span class="icon">⛵</span>${c.service.substring(0,22)}${c.service.length>22?'…':''}</div>`:''}
+    ${c.dayType?`<div class="kcard-row"><span class="icon">⏱</span>${c.dayType}</div>`:''}
+    ${c.adults?`<div class="kcard-row"><span class="icon">👥</span>${c.adults} adults${c.rooms?' · '+c.rooms+' rm':''}</div>`:''}
+    <div class="kcard-footer">
+      <span class="kcard-amount">${c.quotedAmount?'₹'+Number(c.quotedAmount).toLocaleString('en-IN'):(c.paidAmount?'₹'+Number(c.paidAmount).toLocaleString('en-IN'):'No quote')}</span>
+      <div class="kcard-btns">
+        <button class="kcard-btn wa" onclick="event.stopPropagation();kcOpenWA('${c.id}')">📱</button>
+        <button class="kcard-btn" onclick="event.stopPropagation();kcEdit('${c.id}')">✏</button>
+        ${isMobile
+          ? `<button class="kcard-btn" style="background:var(--accent-bg);color:var(--accent);border-color:var(--accent)" onclick="event.stopPropagation();openStageBottomSheet('${c.id}')">⇅ Move</button>`
+          : `<select class="kcard-stage-sel" onchange="event.stopPropagation();kcStageChange('${c.id}',this.value)" onclick="event.stopPropagation()">
+              ${STAGES.map(s=>`<option value="${s}"${s===c.stage?' selected':''}>${s}</option>`).join('')}
+            </select>`
+        }
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// BOTTOM SHEET — mobile stage picker
+// ═══════════════════════════════════════════════════════════════════
+const STAGE_EMOJIS = {New:'🆕',Quoted:'💬',Confirmed:'✅',Paid:'💰','Checked-In':'🛥',Completed:'🏁',Cancelled:'❌'};
+let _bsCardId = null;
+
+function openStageBottomSheet(cardId) {
+  const card = kanbanCards.find(c => c.id === cardId);
+  if (!card) return;
+  _bsCardId = cardId;
+  document.getElementById('bs-card-info').innerHTML = `
+    <div class="bs-card-name">${card.name||'—'}</div>
+    <div class="bs-card-meta">${card.service||''} · ${card.checkin||'No date'} · Currently: <strong>${card.stage}</strong></div>`;
+  document.getElementById('bs-stage-list').innerHTML = STAGES.map(s => `
+    <button class="bs-stage-btn${s===card.stage?' current':''}" onclick="bsMoveCard('${s}')">
+      <span style="font-size:18px">${STAGE_EMOJIS[s]||'•'}</span>
+      <span style="flex:1;text-align:left">${s}</span>
+      ${s===card.stage ? '<span class="badge blue" style="font-size:9px">Current</span>' : '<span class="bs-stage-chevron">›</span>'}
+    </button>`).join('');
+  document.getElementById('bs-overlay').classList.add('open');
+  document.getElementById('bottom-sheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+async function bsMoveCard(stage) {
+  closeBottomSheet();
+  if (!_bsCardId || !stage) return;
+  await kcStageChange(_bsCardId, stage);
+}
+
+function closeBottomSheet() {
+  document.getElementById('bs-overlay').classList.remove('open');
+  document.getElementById('bottom-sheet').classList.remove('open');
+  document.body.style.overflow = '';
+  _bsCardId = null;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TOUCH SWIPE — right = next stage, left = previous stage
+// ═══════════════════════════════════════════════════════════════════
+let _touchStartX = 0, _touchCardId = null;
+function kcTouchStart(e, id) {
+  _touchStartX = e.touches[0].clientX;
+  _touchCardId = id;
+}
+function kcTouchMove(e) {
+  if (!_touchCardId) return;
+  const dx = e.touches[0].clientX - _touchStartX;
+  const card = e.currentTarget;
+  if (Math.abs(dx) > 20) {
+    card.classList.toggle('swiping-right', dx > 30);
+    card.classList.toggle('swiping-left', dx < -30);
+    // Prevent column scroll when swiping card
+    if (Math.abs(dx) > 40) e.stopPropagation();
+  }
+}
+async function kcTouchEnd(e, id) {
+  const dx = e.changedTouches[0].clientX - _touchStartX;
+  const card = e.currentTarget;
+  card.classList.remove('swiping-right','swiping-left');
+  _touchCardId = null;
+  if (Math.abs(dx) < 60) return; // not enough swipe
+  const kc = kanbanCards.find(c => c.id === id);
+  if (!kc) return;
+  const idx = STAGES.indexOf(kc.stage);
+  let newStage = null;
+  if (dx > 60 && idx < STAGES.length - 1) newStage = STAGES[idx + 1]; // swipe right = advance
+  if (dx < -60 && idx > 0) newStage = STAGES[idx - 1];               // swipe left = go back
+  if (newStage) {
+    toast(`${kc.name} → ${newStage}`, 'ok');
+    await kcStageChange(id, newStage);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CUSTOMERS — localStorage only, never Google Sheets
+// ═══════════════════════════════════════════════════════════════════
+let customers = PS_Store.read('customers', []);
+const saveCustomers = () => PS_Store.write('customers', customers);
+
+function renderCustomers() {
+  const q = (document.getElementById('cust-search')?.value||'').toLowerCase();
+  const list = customers.filter(c =>
+    !q || c.name.toLowerCase().includes(q) || (c.phone||'').includes(q)
+  );
+  // Stats
+  const statEl = document.getElementById('cust-stats-row');
+  if (statEl) statEl.innerHTML = [
+    ['Total Guests', customers.length, '#0ea5e9'],
+    ['Repeat Guests', customers.filter(c=>c.trips>1).length, '#8b5cf6'],
+    ['VIP (3+ trips)', customers.filter(c=>c.trips>=3).length, '#f59e0b'],
+  ].map(([l,v,col])=>`<div class="qs-pill"><div class="qs-dot" style="background:${col}"></div>${v} ${l}</div>`).join('');
+
+  const grid = document.getElementById('cust-grid');
+  if (!grid) return;
+  grid.innerHTML = list.length ? list.map(cust => {
+    const trips = cust.trips || 0;
+    const last  = cust.lastVisit || '—';
+    return `<div class="cust-card" onclick="openCustomerDetail('${cust.id}')">
+      <div class="cust-avatar" style="background:${bg(cust.name)}">${cust.name.charAt(0)}</div>
+      <div style="flex:1;min-width:0">
+        <div class="cust-name">${cust.name}</div>
+        <div class="cust-meta">📱 ${cust.phone||'—'} ${cust.city?'· '+cust.city:''}</div>
+        <div class="cust-stats">
+          <div class="cust-stat">${trips} <span>trip${trips!==1?'s':''}</span></div>
+          ${cust.occasion?`<div class="cust-stat">${cust.occasion}</div>`:''}
+          <div class="cust-stat">Last: <span>${last}</span></div>
+        </div>
+        ${cust.notes?`<div style="font-size:11px;color:var(--muted);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${cust.notes}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+        <a href="https://wa.me/${(cust.phone||'').replace(/\D/g,'')}" target="_blank" class="btn sm" style="text-decoration:none">📱</a>
+        <button class="btn sm" onclick="event.stopPropagation();openEditCustomer('${cust.id}')">✏</button>
+      </div>
+    </div>`;
+  }).join('') : `<div style="text-align:center;padding:40px;color:var(--muted);grid-column:1/-1">No guests found</div>`;
+}
+
+function openAddCustomer() {
+  window._editCustId = null;
+  document.getElementById('cust-modal-title').textContent = 'Add Guest';
+  ['cust-name','cust-phone','cust-email','cust-city','cust-occasion','cust-notes'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  document.getElementById('cust-food').value = '';
+  openModal('modal-add-customer');
+}
+
+function openEditCustomer(id) {
+  const cust = customers.find(c => c.id === id);
+  if (!cust) return;
+  window._editCustId = id;
+  document.getElementById('cust-modal-title').textContent = 'Edit Guest';
+  document.getElementById('cust-name').value    = cust.name    || '';
+  document.getElementById('cust-phone').value   = cust.phone   || '';
+  document.getElementById('cust-email').value   = cust.email   || '';
+  document.getElementById('cust-city').value    = cust.city    || '';
+  document.getElementById('cust-occasion').value= cust.occasion|| '';
+  document.getElementById('cust-food').value    = cust.food    || '';
+  document.getElementById('cust-notes').value   = cust.notes   || '';
+  openModal('modal-add-customer');
+}
+
+function saveCustomer() {
+  const name  = document.getElementById('cust-name').value.trim();
+  const phone = document.getElementById('cust-phone').value.trim();
+  if (!name) { toast('Name required','err'); return; }
+  const data = {
+    name, phone,
+    email:    document.getElementById('cust-email').value.trim(),
+    city:     document.getElementById('cust-city').value.trim(),
+    occasion: document.getElementById('cust-occasion').value.trim(),
+    food:     document.getElementById('cust-food').value,
+    notes:    document.getElementById('cust-notes').value.trim(),
+  };
+  if (window._editCustId) {
+    const cust = customers.find(c => c.id === window._editCustId);
+    if (cust) Object.assign(cust, data);
+  } else {
+    customers.push({ id:'cust_'+Date.now(), trips:0, lastVisit:'—', createdAt:new Date().toISOString(), ...data });
+  }
+  saveCustomers();
+  closeModal('modal-add-customer');
+  renderCustomers();
+  toast(window._editCustId ? 'Guest updated' : 'Guest added','ok');
+}
+
+function openCustomerDetail(id) {
+  const cust = customers.find(c => c.id === id);
+  if (!cust) return;
+  // Find all kanban cards linked to this customer by phone
+  const linked = kanbanCards.filter(k => k.phone && cust.phone && k.phone.replace(/\D/g,'') === cust.phone.replace(/\D/g,''));
+  alert(`${cust.name}\nPhone: ${cust.phone}\nTrips on board: ${linked.length}\n\nOpen guest record to see full details.`);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// REMINDER TEMPLATES — stored in ps:reminder_tpls
+// ═══════════════════════════════════════════════════════════════════
+const DEFAULT_REMINDER_TPLS = {
+  '48h': `⏰ *Reminder — Pearl Spot Tours*
+
+Dear {{name}},
+
+Your houseboat experience is just *2 days away!* 🛥️🌴
+
+🚢 Boat: {{boat}}
+📦 {{service}}
+📅 Check-in: {{checkin}}
+📍 {{jetty}}
+
+Please confirm your arrival by replying to this message.
+
+📞 Any queries? Call Baiju: +91 75590 31555
+
+_Pearl Spot Tours_ 🌊`,
+  '24h': `⏰ *Tomorrow is Your Day! — Pearl Spot Tours*
+
+Dear {{name}},
+
+Get ready — your houseboat trip is *tomorrow!* 🎉
+
+🚢 {{boat}} · {{service}}
+📅 Check-in: {{checkin}}
+📍 {{jetty}}
+⏰ Please arrive by *12:00 PM*
+
+What to bring: light clothing, camera, excitement! 📸
+
+📞 Baiju: +91 75590 31555
+
+See you tomorrow! 🌊`,
+  '2h':  `🚢 *Almost Time! — Pearl Spot Tours*
+
+Dear {{name}},
+
+Your houseboat experience begins in *2 hours!* ⛵
+
+📍 Head to: {{jetty}}
+🚢 Look for: {{boat}}
+
+Our crew is ready and waiting for you!
+
+📞 Need help finding us? Call: +91 75590 31555
+
+See you very soon! 🌴`
+};
+
+let reminderTpls = PS_Store.read('reminder_tpls', DEFAULT_REMINDER_TPLS);
+let _currentRtpl = '48h';
+
+function showReminderTpl(key, btn) {
+  _currentRtpl = key;
+  document.querySelectorAll('[id^="rtpl-btn-"]').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const ed = document.getElementById('rtpl-editor');
+  if (ed) { ed.value = reminderTpls[key] || ''; updateRtplPreview(); }
+}
+function saveReminderTpl() {
+  reminderTpls[_currentRtpl] = document.getElementById('rtpl-editor').value;
+  PS_Store.write('reminder_tpls', reminderTpls);
+  updateRtplPreview();
+}
+function updateRtplPreview() {
+  const text = document.getElementById('rtpl-editor')?.value || '';
+  const sample = kanbanCards.find(c=>c.checkin) || {name:'Rahul Thomas',checkin:'2026-07-10',boat:'KL-02 Pearl',service:'Deluxe Overnight'};
+  const preview = text
+    .replace(/{{name}}/g, sample.name||'Guest')
+    .replace(/{{checkin}}/g, sample.checkin||'—')
+    .replace(/{{boat}}/g, sample.boat||'Pearl Houseboat')
+    .replace(/{{service}}/g, sample.service||'Houseboat')
+    .replace(/{{jetty}}/g, 'Punnamada Jetty, Alappuzha');
+  const el = document.getElementById('rtpl-preview');
+  if (el) el.textContent = preview;
+}
+
+function renderReminders() {
+  const now = Date.now();
+  const upcoming = kanbanCards
+    .filter(c => c.checkin && ['Confirmed','Paid'].includes(c.stage))
+    .map(c => ({ ...c, hoursAway: hoursUntil(c.checkin) }))
+    .filter(c => c.hoursAway !== null && c.hoursAway > -24 && c.hoursAway < 72)
+    .sort((a,b) => a.hoursAway - b.hoursAway);
+
+  // Update badge
+  const due = upcoming.filter(c => {
+    const h = c.hoursAway;
+    if (h <= 2  && !c.reminder2hSent)  return true;
+    if (h <= 24 && !c.reminder24hSent) return true;
+    if (h <= 48 && !c.reminder48hSent) return true;
+    return false;
+  }).length;
+  const badge = document.getElementById('badge-reminders');
+  if (badge) badge.textContent = due;
+
+  const tbody = document.getElementById('reminder-body');
+  if (!tbody) return;
+  tbody.innerHTML = upcoming.length ? upcoming.map(c => {
+    const h = Math.round(c.hoursAway);
+    const urgency = h <= 2 ? 'urgent' : h <= 24 ? 'soon' : 'due';
+    const sent48 = c.reminder48hSent ? '<span class="badge green">✓</span>' : '<span class="badge grey">—</span>';
+    const sent24 = c.reminder24hSent ? '<span class="badge green">✓</span>' : '<span class="badge grey">—</span>';
+    const sent2  = c.reminder2hSent  ? '<span class="badge green">✓</span>' : '<span class="badge grey">—</span>';
+    return `<tr>
+      <td><strong>${c.name||'—'}</strong><div style="font-size:10px;color:var(--muted)">${c.phone||''}</div></td>
+      <td>${c.checkin||'—'}</td>
+      <td><span class="queue-item-badge ${urgency}">${h > 0 ? h+'h away' : 'OVERDUE'}</span></td>
+      <td>${c.boat||'—'}</td>
+      <td>${sent48}</td><td>${sent24}</td><td>${sent2}</td>
+      <td><button class="btn sm primary" onclick="sendReminderForCard('${c.id}')">Send Now</button></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">No upcoming check-ins in next 48h</td></tr>';
+}
+
+async function sendReminderForCard(id) {
+  const card = kanbanCards.find(c => c.id === id);
+  if (!card) return;
+  const h = hoursUntil(card.checkin);
+  const tplKey = h !== null && h <= 2 ? '2h' : h !== null && h <= 24 ? '24h' : '48h';
+  const tpl = reminderTpls[tplKey] || DEFAULT_REMINDER_TPLS[tplKey];
+  const msg = tpl
+    .replace(/{{name}}/g,    card.name||'Guest')
+    .replace(/{{checkin}}/g, card.checkin||'—')
+    .replace(/{{boat}}/g,    card.boat||'Pearl Houseboat')
+    .replace(/{{service}}/g, card.service||'Houseboat')
+    .replace(/{{jetty}}/g,   'Punnamada Jetty, Alappuzha');
+  try {
+    await fetch(API.reminder, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ phone: card.phone, name: card.name, message: msg, cardId: id, tplKey })
+    });
+    // Mark as sent in local store
+    const kc = kanbanCards.find(c => c.id === id);
+    if (kc) {
+      if (tplKey==='48h') kc.reminder48hSent = true;
+      if (tplKey==='24h') kc.reminder24hSent = true;
+      if (tplKey==='2h')  kc.reminder2hSent  = true;
+      saveKanbanStore();
+    }
+    toast(`Reminder sent to ${card.name}`, 'ok');
+    renderReminders();
+  } catch(e) { toast('Send failed — check n8n','err'); }
+}
+
+async function sendAllDueReminders() {
+  const upcoming = kanbanCards
+    .filter(c => c.checkin && ['Confirmed','Paid'].includes(c.stage))
+    .map(c => ({ ...c, hoursAway: hoursUntil(c.checkin) }))
+    .filter(c => c.hoursAway !== null);
+  const due = upcoming.filter(c => {
+    if (c.hoursAway <= 2  && !c.reminder2hSent)  return true;
+    if (c.hoursAway <= 24 && !c.reminder24hSent) return true;
+    if (c.hoursAway <= 48 && !c.reminder48hSent) return true;
+    return false;
+  });
+  if (!due.length) { toast('No reminders due right now','warn'); return; }
+  if (!confirm(`Send reminders to ${due.length} guest(s)?`)) return;
+  for (const c of due) await sendReminderForCard(c.id);
+  toast(`Sent ${due.length} reminders`,'ok');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// REVIEW TEMPLATE
+// ═══════════════════════════════════════════════════════════════════
+const DEFAULT_REVIEW_TPL = `🌟 *Thank You for Choosing Pearl Spot Tours!*
+
+Dear {{name}},
+
+We hope you had an incredible backwater experience with us! 🛥️🌴
+
+Your feedback means the world to us. It takes just 30 seconds:
+
+👉 *Leave us a Google Review:*
+https://g.page/r/PearlSpotToursAlappuzha/review
+
+📸 Share your photos on Instagram:
+@pearlspot_houseboats_alappuzha
+
+Thank you for being part of the Pearl Spot family. We hope to welcome you again! 🙏
+
+— Baiju & the Pearl Spot Team`;
+
+let reviewTpl = PS_Store.read('review_tpl', DEFAULT_REVIEW_TPL);
+
+function saveReviewTpl() {
+  reviewTpl = document.getElementById('review-tpl-editor').value;
+  PS_Store.write('review_tpl', reviewTpl);
+  updateReviewTplPreview();
+}
+function updateReviewTplPreview() {
+  const text = document.getElementById('review-tpl-editor')?.value || '';
+  const sample = {name:'Rahul Thomas', service:'Deluxe Overnight'};
+  const preview = text.replace(/{{name}}/g, sample.name).replace(/{{service}}/g, sample.service).replace(/{{reviewLink}}/g, 'https://g.page/r/...');
+  const el = document.getElementById('review-tpl-preview');
+  if (el) el.textContent = preview;
+}
+
+function renderReviewQueue() {
+  const completed = kanbanCards
+    .filter(c => c.stage === 'Completed' && c.checkout)
+    .map(c => ({ ...c, daysSinceCheckout: daysSince(c.checkout) }))
+    .sort((a,b) => (b.daysSinceCheckout||0) - (a.daysSinceCheckout||0));
+
+  const pending = completed.filter(c => !c.reviewSent).length;
+  const badge = document.getElementById('badge-reviews');
+  if (badge) badge.textContent = pending;
+
+  const tbody = document.getElementById('review-body');
+  if (!tbody) return;
+  tbody.innerHTML = completed.length ? completed.map(c => {
+    const days = c.daysSinceCheckout;
+    const urgency = !c.reviewSent ? (days > 7 ? 'urgent' : days > 3 ? 'soon' : 'due') : '';
+    return `<tr>
+      <td><strong>${c.name||'—'}</strong><div style="font-size:10px;color:var(--muted)">${c.phone||''}</div></td>
+      <td>${c.checkout||'—'}</td>
+      <td><span class="queue-item-badge ${urgency}">${days !== null ? days+'d ago' : '—'}</span></td>
+      <td>${c.service||'—'}</td>
+      <td>${c.reviewSent ? '<span class="badge green">✓ Sent</span>' : '<span class="badge grey">Pending</span>'}</td>
+      <td>${!c.reviewSent ? `<button class="btn sm primary" onclick="sendReviewRequest('${c.id}')">⭐ Send</button>` : `<button class="btn sm" onclick="sendReviewRequest('${c.id}')">Resend</button>`}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No completed trips yet</td></tr>';
+}
+
+async function sendReviewRequest(id) {
+  const card = kanbanCards.find(c => c.id === id);
+  if (!card) return;
+  const msg = reviewTpl
+    .replace(/{{name}}/g,    card.name||'Guest')
+    .replace(/{{service}}/g, card.service||'houseboat experience')
+    .replace(/{{reviewLink}}/g, 'https://g.page/r/PearlSpotToursAlappuzha/review');
+  try {
+    await fetch(API.reviewRequest, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ phone: card.phone, name: card.name, message: msg, cardId: id })
+    });
+    const kc = kanbanCards.find(c => c.id === id);
+    if (kc) { kc.reviewSent = true; kc.reviewSentAt = new Date().toISOString(); saveKanbanStore(); }
+    toast(`Review request sent to ${card.name}`,'ok');
+    renderReviewQueue();
+  } catch(e) { toast('Send failed — check n8n','err'); }
+}
+
+async function sendAllReviewRequests() {
+  const pending = kanbanCards.filter(c => c.stage==='Completed' && !c.reviewSent && c.phone);
+  if (!pending.length) { toast('No pending review requests','warn'); return; }
+  if (!confirm(`Send review requests to ${pending.length} guest(s)?`)) return;
+  for (const c of pending) await sendReviewRequest(c.id);
+  toast(`Sent ${pending.length} review requests`,'ok');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT NEW PAGES when shown
+// ═══════════════════════════════════════════════════════════════════
+// Patch showPage to handle new pages
+const _baseShowPage = showPage;
+function showPage(page, linkEl) {
+  _baseShowPage(page, linkEl);
+  if (page === 'customers') { renderCustomers(); }
+  if (page === 'reminders') {
+    if (document.getElementById('rtpl-editor')) {
+      document.getElementById('rtpl-editor').value = reminderTpls[_currentRtpl] || '';
+      updateRtplPreview();
+    }
+    renderReminders();
+  }
+  if (page === 'reviews') {
+    if (document.getElementById('review-tpl-editor')) {
+      document.getElementById('review-tpl-editor').value = reviewTpl || DEFAULT_REVIEW_TPL;
+      updateReviewTplPreview();
+    }
+    renderReviewQueue();
+  }
+}
+// Re-render kanban on resize (mobile vs desktop changes kcard buttons)
+window.addEventListener('resize', () => {
+  if (document.getElementById('page-kanban')?.style.display !== 'none') {
+    renderKanban();
+  }
+});
+
 </script>
 </body>
 </html>
