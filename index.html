@@ -700,32 +700,13 @@ tr:last-child td{border-bottom:none}
           <div class="card-body" style="padding:0 18px" id="today-checkins"><div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Loading…</div></div>
         </div>
         <div class="card">
-          <div class="card-head"><span class="card-title">✨ New Enquiries</span><span id="new-enq-count" style="font-size:11px;color:var(--accent);font-weight:700"></span></div>
-          <div class="card-body" style="padding:0 18px" id="today-new-enq"><div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Loading…</div></div>
+          <div class="card-head">
+            <span class="card-title">✨ New Enquiries</span>
+            <span id="new-enq-count" style="font-size:11px;color:var(--accent);font-weight:700"></span>
+            <button class="btn sm ghost" onclick="showPage('enquiries',null)" style="margin-left:auto">View All →</button>
+          </div>
+          <div id="today-new-enq"><div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Loading…</div></div>
         </div>
-      </div>
-      <div class="today-grid3">
-        <div class="card">
-          <div class="card-head"><span class="card-title">⚠ Pending Quotes</span><span id="pending-q-count" style="font-size:11px;color:var(--red);font-weight:700"></span></div>
-          <div class="card-body" style="padding:0 18px" id="today-pending-q"><div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Loading…</div></div>
-        </div>
-        <div class="card">
-          <div class="card-head"><span class="card-title">📱 Confirm Pending</span></div>
-          <div class="card-body" style="padding:0 18px" id="today-conf-pending"></div>
-        </div>
-        <div class="card">
-          <div class="card-head"><span class="card-title">⭐ Review Pending</span></div>
-          <div class="card-body" style="padding:0 18px" id="today-review-pending"></div>
-        </div>
-      </div>
-      <!-- Latest Leads section -->
-      <div class="card" style="margin-bottom:16px">
-        <div class="card-head">
-          <span class="card-title">🔔 Latest Leads</span>
-          <span id="latest-leads-count" style="font-size:11px;color:var(--accent);font-weight:700"></span>
-          <button class="btn sm ghost" onclick="showPage('kanban',null)" style="margin-left:auto">View All →</button>
-        </div>
-        <div id="latest-leads-list"></div>
       </div>
 
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -2425,63 +2406,67 @@ function renderToday() {
     checkins.map(c=>makeItem(c,`<span class="badge teal" style="margin-left:auto;font-size:9px">Today</span>`)).join('') :
     '<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No check-ins today ✅</div>';
 
-  // Recent enquiries (latest 8 cards)
-  const recent = [...allCards].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,8);
+  // Recent enquiries — render skeleton rows, then enrich with Chatwoot last message
+  const recent = [...allCards].sort((a,b)=>(b.importedAt||b.createdAt||0)-(a.importedAt||a.createdAt||0)).slice(0,10);
   document.getElementById('new-enq-count').textContent = recent.length+' recent';
-  document.getElementById('today-new-enq').innerHTML = recent.length ?
-    recent.map(c=>makeItem(c,`<span class="badge ${STAGE_COLORS[c.stage||'New']||'grey'}" style="margin-left:auto;font-size:9px">${c.stage||'New'}</span>`)).join('') :
-    '<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No enquiries yet</div>';
-
-  // Pending quotes
-  const pendingQ = allCards.filter(c => !c.quotedAmount && c.stage==='New');
-  document.getElementById('pending-q-count').textContent = pendingQ.length+' pending';
-  document.getElementById('today-pending-q').innerHTML = pendingQ.slice(0,5).map(c=>makeItem(c,`<button class="btn sm primary" style="margin-left:auto" onclick="kcEdit('${c.id}')">Quote</button>`)).join('') ||
-    '<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">All quoted ✅</div>';
-
-  // Confirmation pending
-  const confPending = allCards.filter(c => ['Confirmed','Paid'].includes(c.stage) && !c.confirmationSent);
-  document.getElementById('today-conf-pending').innerHTML = confPending.slice(0,5).map(c=>`<div class="call-item"><div class="call-avatar" style="background:${bg(c.name||'A')}">${(c.name||'?').charAt(0)}</div><div><div class="call-name">${c.name||'—'}</div><div class="call-meta">${c.checkin||'—'}</div></div><button class="btn sm success" style="margin-left:auto" onclick="kcOpenWA('${c.id}')">Send</button></div>`).join('') ||
-    '<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">All confirmations sent ✅</div>';
-
-  // Review pending
-  const reviewPending = allCards.filter(c => c.stage==='Completed' && !c.reviewSent);
-  document.getElementById('today-review-pending').innerHTML = reviewPending.slice(0,5).map(c=>`<div class="call-item"><div class="call-avatar" style="background:${bg(c.name||'A')}">${(c.name||'?').charAt(0)}</div><div><div class="call-name">${c.name||'—'}</div><div class="call-meta">Trip completed</div></div><button class="btn sm" style="margin-left:auto" onclick="kcOpenWA('${c.id}')">⭐ Ask</button></div>`).join('') ||
-    '<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No reviews pending ✅</div>';
-
-  // Latest leads (most recently created/imported, all stages)
-  const latest = [...allCards].sort((a,b)=>(b.importedAt||b.createdAt||0)-(a.importedAt||a.createdAt||0)).slice(0,12);
-  const llCount = document.getElementById('latest-leads-count');
-  if(llCount) llCount.textContent = latest.length + ' recent';
-  const llList = document.getElementById('latest-leads-list');
-  if(llList) {
-    llList.innerHTML = latest.length ? latest.map(c=>`
-      <div class="call-item latest-lead-row" style="padding:12px 18px;cursor:pointer;gap:12px" onclick="kcEdit('${c.id}')">
-        <div class="call-avatar" style="background:${bg(c.name||'A')};flex-shrink:0">${(c.name||'?').charAt(0)}</div>
-        <div style="flex:1;min-width:0">
-          <div class="call-name">${c.name||'—'}</div>
-          <div class="call-meta">${[c.service,c.dayType,c.checkin].filter(Boolean).join(' · ')||'No details'}</div>
-          ${c.quotedAmount?`<div style="font-size:10px;color:var(--green);font-weight:700;font-family:var(--mono);margin-top:2px">₹${c.quotedAmount}</div>`:''}
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-          <span class="badge ${STAGE_COLORS[c.stage||'New']||'grey'}" style="font-size:9px">${c.stage||'New'}</span>
-          ${c.phone?`<a href="https://wa.me/91${c.phone.replace(/\D/g,'').replace(/^91/,'')}" onclick="event.stopPropagation()" target="_blank" style="font-size:16px;text-decoration:none" title="WhatsApp">💬</a>`:''}
-          ${c.phone?`<a href="tel:${c.phone}" onclick="event.stopPropagation()" style="font-size:16px;text-decoration:none" title="Call">📞</a>`:''}
-        </div>
-      </div>`).join('') : '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">No leads yet — sync from Sheet</div>';
+  const enqEl = document.getElementById('today-new-enq');
+  if (enqEl) {
+    if (!recent.length) {
+      enqEl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No enquiries yet</div>';
+    } else {
+      enqEl.innerHTML = recent.map(c => `
+        <div class="call-item" style="padding:12px 18px;align-items:flex-start;gap:10px">
+          <div class="call-avatar" style="background:${bg(c.name||'A')};flex-shrink:0;margin-top:2px">${(c.name||'?').charAt(0)}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px">
+              <span class="call-name" style="cursor:pointer;color:var(--accent)" onclick="kcEdit('${c.id}')">${c.name||'—'}</span>
+              <span class="badge ${STAGE_COLORS[c.stage||'New']||'grey'}" style="font-size:9px">${c.stage||'New'}</span>
+            </div>
+            <div class="call-meta">${[c.service,c.dayType,c.checkin].filter(Boolean).join(' · ')||'No details'}</div>
+            <div id="enq-lastmsg-${c.id}" style="font-size:11px;color:var(--muted);margin-top:4px;font-style:italic">Loading chat…</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+            ${c.phone?`<a href="https://wa.me/91${c.phone.replace(/\D/g,'').replace(/^91/,'')}" target="_blank" style="font-size:15px;text-decoration:none" title="WhatsApp">💬</a>`:''}
+            ${c.phone?`<a href="tel:${c.phone}" style="font-size:15px;text-decoration:none" title="Call">📞</a>`:''}
+          </div>
+        </div>`).join('');
+      // Asynchronously enrich each row with last Chatwoot message
+      recent.forEach(c => enrichEnqWithLastMsg(c));
+    }
   }
 
   // Notifications
-  const nCount = pendingQ.length+confPending.length+reviewPending.length+checkins.length;
-  const nb = document.getElementById('notif-count'); if(nb) nb.textContent=nCount;
+  const nCount = checkins.length;
+  const nb = document.getElementById('notif-count'); if(nb) nb.textContent=nCount||'';
   if(nCount>0) {
     const nl = document.getElementById('notif-list');
     if(nl&&nl.children.length<=1) nl.innerHTML = [
-      pendingQ.length>0?`<div class="notif-item"><div class="notif-dot"></div><div><div class="notif-title">${pendingQ.length} enquiries need quoting</div><div class="notif-sub">No amount quoted yet</div></div></div>`:'',
-      confPending.length>0?`<div class="notif-item"><div class="notif-dot"></div><div><div class="notif-title">${confPending.length} confirmations pending</div><div class="notif-sub">Confirmed/Paid guests</div></div></div>`:'',
-      reviewPending.length>0?`<div class="notif-item"><div class="notif-dot"></div><div><div class="notif-title">${reviewPending.length} reviews pending</div><div class="notif-sub">Completed trips</div></div></div>`:'',
       checkins.length>0?`<div class="notif-item"><div class="notif-dot"></div><div><div class="notif-title">${checkins.length} check-in(s) today</div><div class="notif-sub">Guests arriving</div></div></div>`:'',
     ].filter(Boolean).join('');
   }
+}
+
+async function enrichEnqWithLastMsg(c) {
+  const el = document.getElementById('enq-lastmsg-'+c.id);
+  if (!el) return;
+  const phone = c.phone||'';
+  if (!phone) { el.textContent = ''; return; }
+  try {
+    const digits = phone.replace(/\D/g,'');
+    const sr = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/contacts/search?q=${encodeURIComponent(digits)}&page=1`,{headers:{'api_access_token':CW_TOKEN}});
+    const sd = await sr.json();
+    const contact = (sd?.payload?.contacts||sd?.payload||[])[0];
+    if (!contact) { el.textContent = 'No Chatwoot conversation'; return; }
+    const cr = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/contacts/${contact.id}/conversations`,{headers:{'api_access_token':CW_TOKEN}});
+    const cd = await cr.json();
+    const convs = (cd?.payload||[]).sort((a,b)=>(b.last_activity_at||0)-(a.last_activity_at||0));
+    const latest = convs[0];
+    if (!latest) { el.textContent = 'No messages yet'; return; }
+    const msg = latest.last_non_activity_message?.content||'—';
+    const ts = latest.last_activity_at ? new Date(latest.last_activity_at*1000).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+    const cwUrl = `${CW_BASE}/app/accounts/${CW_ACCOUNT}/conversations/${latest.id}`;
+    el.innerHTML = `<span style="color:var(--text3)">"${msg.length>60?msg.slice(0,60)+'…':msg}"</span> <span style="color:var(--muted2)">· ${ts}</span> <a href="${cwUrl}" target="_blank" style="color:var(--accent);font-style:normal;font-weight:600;margin-left:4px">↗ View</a>`;
+  } catch(e) { el.textContent = ''; }
 }
 
 // ═══════════════════════════════════════════════
