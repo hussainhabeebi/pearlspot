@@ -1264,6 +1264,7 @@ tr:last-child td{border-bottom:none}
         <div class="lm-tabs">
           <button class="lm-tab active" onclick="lmTab(this,'notes')">📝 Notes</button>
           <button class="lm-tab" onclick="lmTab(this,'calllog')">📞 Calls</button>
+          <button class="lm-tab" onclick="lmTab(this,'chats')">💬 Chats</button>
           <button class="lm-tab" onclick="lmTab(this,'edit')">✏ Edit</button>
         </div>
         <div class="lm-tab-content" id="lm-tab-notes">
@@ -1282,6 +1283,12 @@ tr:last-child td{border-bottom:none}
             <button class="btn primary sm" onclick="addCallLog()">Log</button>
           </div>
           <div id="lm-calllog-list"></div>
+        </div>
+        <div class="lm-tab-content" id="lm-tab-chats" style="display:none">
+          <div id="lm-chats-list"><div style="text-align:center;padding:30px;color:var(--muted);font-size:12px">Loading conversations…</div></div>
+          <div style="margin-top:10px;text-align:right">
+            <a id="lm-cw-contacts-link" href="#" target="_blank" class="btn sm ghost" style="font-size:11px">Open in Chatwoot ↗</a>
+          </div>
         </div>
         <div class="lm-tab-content" id="lm-tab-edit" style="display:none">
           <div class="form-grid">
@@ -1861,7 +1868,7 @@ function filterLeads(extra={}) {
     if (service && lv(l,'service','Service') !== service) return false;
     if (daytype && lv(l,'dayType','Day Type') !== daytype) return false;
     return true;
-  });
+  }).sort((a,b) => (parseInt(lv(b,'id','SL NO'))||0) - (parseInt(lv(a,'id','SL NO'))||0));
 }
 
 function renderLeadsTable() {
@@ -1960,7 +1967,8 @@ function openLeadModal(id) {
 function lmTab(btn, tab) {
   document.querySelectorAll('.lm-tab').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  ['notes','calllog','edit'].forEach(t => { const el=document.getElementById('lm-tab-'+t); if(el) el.style.display=t===tab?'block':'none'; });
+  ['notes','calllog','chats','edit'].forEach(t => { const el=document.getElementById('lm-tab-'+t); if(el) el.style.display=t===tab?'block':'none'; });
+  if(tab==='chats') loadLeadChats();
 }
 
 function renderLeadNotes() {
@@ -1982,6 +1990,60 @@ function renderLeadCallLog() {
   document.getElementById('lm-calllog-list').innerHTML = logs.length ?
     logs.slice().reverse().map(c=>`<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="width:30px;height:30px;border-radius:50%;background:var(--green-bg);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">📞</div><div><div style="font-size:12px;font-weight:700;color:var(--text)">${c.outcome} — ${c.note}</div><div style="font-size:11px;color:var(--muted)">${c.by} · ${c.ts}</div></div></div>`).join('') :
     '<div style="text-align:center;color:var(--muted);font-size:12px;padding:20px">No call logs yet</div>';
+}
+
+async function loadLeadChats() {
+  const el = document.getElementById('lm-chats-list');
+  if (!el) return;
+  const l = allLeads.find(x=>String(lv(x,'id','SL NO'))===String(currentLeadId));
+  const phone = (l ? lv(l,'phone','Phone') : '') || (kanbanCards.find(c=>c.id===currentLeadId)||{}).phone || '';
+  if (!phone) { el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">No phone number on this lead</div>'; return; }
+  el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">🔍 Searching Chatwoot…</div>';
+  try {
+    const digits = phone.replace(/\D/g,'');
+    const sr = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/contacts/search?q=${encodeURIComponent(digits)}&page=1&include_contacts=true`,{headers:{'api_access_token':CW_TOKEN}});
+    const sd = await sr.json();
+    const contacts = sd?.payload?.contacts || sd?.payload || [];
+    if (!contacts.length) {
+      el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">No Chatwoot contact found for <strong>${phone}</strong><br><span style="font-size:11px">They may not have messaged yet</span></div>`;
+      return;
+    }
+    const contact = contacts[0];
+    const cwLink = document.getElementById('lm-cw-contacts-link');
+    if (cwLink) cwLink.href = `${CW_BASE}/app/accounts/${CW_ACCOUNT}/contacts/${contact.id}`;
+    const cr = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/contacts/${contact.id}/conversations`,{headers:{'api_access_token':CW_TOKEN}});
+    const cd = await cr.json();
+    const convs = (cd?.payload || []).sort((a,b)=>(b.last_activity_at||0)-(a.last_activity_at||0)).slice(0,3);
+    if (!convs.length) { el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">No conversations found in Chatwoot</div>'; return; }
+    el.innerHTML = convs.map(c => {
+      const lastMsg = c.last_non_activity_message?.content || '—';
+      const ts = c.last_activity_at ? new Date(c.last_activity_at*1000).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+      const statusColor = {open:'var(--accent)',pending:'var(--yellow)',resolved:'var(--green)'}[c.status]||'var(--muted)';
+      const msgs = (c.messages||[]).filter(m=>m.message_type!==2).slice(-3);
+      return `<div style="border:1.5px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden">
+        <div style="padding:10px 13px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="width:8px;height:8px;border-radius:50%;background:${statusColor};display:inline-block"></span>
+            <span style="font-size:12px;font-weight:700;color:var(--text)">#${c.id} · ${c.status}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:10px;color:var(--muted)">${ts}</span>
+            <a href="${CW_BASE}/app/accounts/${CW_ACCOUNT}/conversations/${c.id}" target="_blank" class="btn sm ghost" style="font-size:10px;padding:2px 7px">↗</a>
+          </div>
+        </div>
+        <div style="padding:10px 13px">
+          ${msgs.length ? msgs.map(m=>{
+            const out = m.message_type===1;
+            return `<div style="display:flex;gap:7px;margin-bottom:7px;${out?'flex-direction:row-reverse':''}">
+              <div style="max-width:85%;padding:7px 11px;border-radius:10px;font-size:12px;line-height:1.5;${out?'background:#e0f2fe;border:1.5px solid #bae6fd':'background:var(--surface2);border:1.5px solid var(--border)'}">${m.content||'—'}</div>
+            </div>`;
+          }).join('') : `<div style="font-size:12px;color:var(--muted);padding:4px 0">${lastMsg}</div>`}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Could not reach Chatwoot API<br><a href="${CW_BASE}/app/accounts/${CW_ACCOUNT}/contacts" target="_blank" style="color:var(--accent)">Open Chatwoot Contacts ↗</a></div>`;
+  }
 }
 
 function addCallLog() {
@@ -2196,7 +2258,7 @@ function renderKanban() {
   });
 
   board.innerHTML = STAGES.map(stage => {
-    const stageCards = cards.filter(c => c.stage===stage);
+    const stageCards = cards.filter(c => c.stage===stage).sort((a,b)=>(b.importedAt||b.createdAt||0)-(a.importedAt||a.createdAt||0));
     const sc = STAGE_COLORS[stage]||'grey';
     const rev = colRevenue[stage];
     return `<div class="kanban-col" id="kcol-${stage.replace(/\s+/g,'-')}"
