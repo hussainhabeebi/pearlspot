@@ -455,12 +455,34 @@ tr:last-child td{border-bottom:none}
   #app{flex-direction:column}
   .main{width:100%;min-width:0;padding-bottom:58px}
   .topbar-search{display:none}
+  .topbar{padding:0 12px;gap:6px}
+  .topbar .btn.sm{padding:5px 10px;font-size:11px}
   .conv-3col{grid-template-columns:1fr;height:auto}
   .conv-mid{display:none}
   .contact-panel{display:none}
   .grid2,.grid3{grid-template-columns:1fr}
-  .kpi-row{grid-template-columns:repeat(2,1fr)}
-  .pipeline-summary{grid-template-columns:repeat(4,1fr)}
+  .kpi-row{grid-template-columns:repeat(2,1fr);gap:10px}
+  .kpi-card{padding:14px}
+  .kpi-val{font-size:24px}
+  .pipeline-summary{
+    display:flex;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    gap:8px;
+    padding-bottom:6px;
+    margin-bottom:16px;
+    grid-template-columns:unset;
+  }
+  .pipeline-summary::-webkit-scrollbar{display:none}
+  .ps-card{
+    min-width:80px;
+    flex-shrink:0;
+    scroll-snap-align:start;
+    padding:11px 10px;
+  }
+  .ps-count{font-size:22px}
   .form-grid{grid-template-columns:1fr}
   .modal{width:96vw!important;margin:0 8px}
   .lead-modal .modal-body{grid-template-columns:1fr}
@@ -469,6 +491,14 @@ tr:last-child td{border-bottom:none}
   .integration-grid{grid-template-columns:1fr}
   .kanban-board-scroll{padding:12px}
   .kanban-col{width:180px;min-width:180px}
+  .today-grid,.today-grid3{grid-template-columns:1fr;gap:10px}
+  .today-greeting{font-size:19px}
+  .weather-mini{padding:12px 14px}
+  .weather-temp{font-size:20px}
+  .latest-lead-row{padding:10px 14px !important}
+  .call-item{padding:10px 0;gap:10px}
+  .call-avatar{width:30px;height:30px;font-size:11px}
+  .page-content > div[style*="padding:22px"]{padding:14px !important}
 }
 
 /* ── CARD AGE & OVERDUE ── */
@@ -508,18 +538,22 @@ tr:last-child td{border-bottom:none}
   .kanban-board-scroll{
     scroll-snap-type:x mandatory;
     -webkit-overflow-scrolling:touch;
-    padding:12px 8px;
+    padding:10px 8px;
     scrollbar-width:none;
   }
   .kanban-board-scroll::-webkit-scrollbar{display:none}
   .kanban-col{
     scroll-snap-align:start;
-    width:calc(100vw - 60px) !important;
-    min-width:calc(100vw - 60px) !important;
-    max-height:calc(100vh - 200px);
+    width:calc(100vw - 32px) !important;
+    min-width:calc(100vw - 32px) !important;
+    max-height:calc(100vh - 190px);
   }
-  .kanban-board{padding-right:20px}
-  .kcard{touch-action:pan-y}
+  .kanban-board{padding-right:16px}
+  .kcard{touch-action:pan-y;padding:10px 11px}
+  .kanban-toolbar{padding:12px 14px 10px;flex-wrap:wrap;gap:8px}
+  .kanban-toolbar-title{font-size:14px}
+  .kanban-toolbar-sub{font-size:10px}
+  .kcard-name{font-size:11.5px}
 }
 
 /* ── CUSTOMERS PAGE ── */
@@ -689,9 +723,19 @@ tr:last-child td{border-bottom:none}
           <div class="card-body" style="padding:0 18px" id="today-review-pending"></div>
         </div>
       </div>
-      <div>
+      <!-- Latest Leads section -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-head">
+          <span class="card-title">🔔 Latest Leads</span>
+          <span id="latest-leads-count" style="font-size:11px;color:var(--accent);font-weight:700"></span>
+          <button class="btn sm ghost" onclick="showPage('kanban',null)" style="margin-left:auto">View All →</button>
+        </div>
+        <div id="latest-leads-list"></div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
         <a href="https://app.aiingo.com/app/accounts/8/inbox/9" target="_blank" class="btn primary" style="text-decoration:none">💬 Open Chatwoot Inbox ↗</a>
-        <a href="https://maps.google.com/?q=Alappuzha+Houseboat" target="_blank" class="btn sm" style="text-decoration:none;margin-left:8px">🗺 Punnamada Jetty ↗</a>
+        <a href="https://maps.google.com/?q=Alappuzha+Houseboat" target="_blank" class="btn sm" style="text-decoration:none">🗺 Punnamada Jetty ↗</a>
       </div>
     </div>
   </div>
@@ -1293,8 +1337,8 @@ tr:last-child td{border-bottom:none}
 <nav class="mobile-nav">
   <button class="mobile-nav-btn active" onclick="mobileNav('today',this)"><span>🏠</span><span>Today</span></button>
   <button class="mobile-nav-btn" onclick="mobileNav('kanban',this)"><span>📋</span><span>Board</span></button>
+  <button class="mobile-nav-btn" onclick="mobileNav('enquiries',this)"><span>⛵</span><span>Leads</span></button>
   <button class="mobile-nav-btn" onclick="mobileNav('customers',this)"><span>👤</span><span>Guests</span></button>
-  <button class="mobile-nav-btn" onclick="mobileNav('reminders',this)"><span>⏰</span><span>Remind</span></button>
   <button class="mobile-nav-btn" onclick="mobileNav('analytics',this)"><span>📊</span><span>Reports</span></button>
 </nav>
 <!-- FAB for mobile quick-add -->
@@ -2346,6 +2390,28 @@ function renderToday() {
   const reviewPending = allCards.filter(c => c.stage==='Completed' && !c.reviewSent);
   document.getElementById('today-review-pending').innerHTML = reviewPending.slice(0,5).map(c=>`<div class="call-item"><div class="call-avatar" style="background:${bg(c.name||'A')}">${(c.name||'?').charAt(0)}</div><div><div class="call-name">${c.name||'—'}</div><div class="call-meta">Trip completed</div></div><button class="btn sm" style="margin-left:auto" onclick="kcOpenWA('${c.id}')">⭐ Ask</button></div>`).join('') ||
     '<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No reviews pending ✅</div>';
+
+  // Latest leads (most recently created/imported, all stages)
+  const latest = [...allCards].sort((a,b)=>(b.importedAt||b.createdAt||0)-(a.importedAt||a.createdAt||0)).slice(0,12);
+  const llCount = document.getElementById('latest-leads-count');
+  if(llCount) llCount.textContent = latest.length + ' recent';
+  const llList = document.getElementById('latest-leads-list');
+  if(llList) {
+    llList.innerHTML = latest.length ? latest.map(c=>`
+      <div class="call-item latest-lead-row" style="padding:12px 18px;cursor:pointer;gap:12px" onclick="kcEdit('${c.id}')">
+        <div class="call-avatar" style="background:${bg(c.name||'A')};flex-shrink:0">${(c.name||'?').charAt(0)}</div>
+        <div style="flex:1;min-width:0">
+          <div class="call-name">${c.name||'—'}</div>
+          <div class="call-meta">${[c.service,c.dayType,c.checkin].filter(Boolean).join(' · ')||'No details'}</div>
+          ${c.quotedAmount?`<div style="font-size:10px;color:var(--green);font-weight:700;font-family:var(--mono);margin-top:2px">₹${c.quotedAmount}</div>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <span class="badge ${STAGE_COLORS[c.stage||'New']||'grey'}" style="font-size:9px">${c.stage||'New'}</span>
+          ${c.phone?`<a href="https://wa.me/91${c.phone.replace(/\D/g,'').replace(/^91/,'')}" onclick="event.stopPropagation()" target="_blank" style="font-size:16px;text-decoration:none" title="WhatsApp">💬</a>`:''}
+          ${c.phone?`<a href="tel:${c.phone}" onclick="event.stopPropagation()" style="font-size:16px;text-decoration:none" title="Call">📞</a>`:''}
+        </div>
+      </div>`).join('') : '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">No leads yet — sync from Sheet</div>';
+  }
 
   // Notifications
   const nCount = pendingQ.length+confPending.length+reviewPending.length+checkins.length;
