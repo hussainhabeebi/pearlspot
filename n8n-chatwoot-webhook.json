@@ -1,0 +1,223 @@
+{
+  "name": "Chatwoot → Pearl Spot CRM Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chatwoot-events",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Chatwoot Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "chatwoot-events"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "OK",
+        "options": {}
+      },
+      "id": "respond-200",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [460, 160]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "filter-message-created",
+              "leftValue": "={{ $json.body.event }}",
+              "rightValue": "message_created",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-message-created",
+      "name": "Only New Messages",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.item.json.body;\n\nconst event = body.event;\nconst msgType = body.message_type; // 0=incoming, 1=outgoing\nconst content = body.content || '';\nconst conversationId = body.conversation?.id;\nconst contactName = body.conversation?.meta?.sender?.name || 'Unknown';\nconst contactPhone = body.conversation?.meta?.sender?.phone_number || body.conversation?.meta?.sender?.identifier || '';\nconst inboxName = body.inbox?.name || '';\nconst status = body.conversation?.status || '';\nconst createdAt = body.created_at ? new Date(body.created_at * 1000).toISOString() : new Date().toISOString();\n\nreturn [{\n  json: {\n    event,\n    conversationId,\n    contactName,\n    contactPhone: contactPhone.replace(/\\D/g, ''),\n    content,\n    msgType,          // 0 = inbound from guest, 1 = outbound from agent\n    direction: msgType === 0 ? 'inbound' : 'outbound',\n    inboxName,\n    status,\n    createdAt,\n    chatwootUrl: `https://app.aiingo.com/app/accounts/8/conversations/${conversationId}`\n  }\n}];"
+      },
+      "id": "extract-fields",
+      "name": "Extract Fields",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false
+          },
+          "conditions": [
+            {
+              "id": "only-inbound",
+              "leftValue": "={{ $json.msgType }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "only-inbound",
+      "name": "Only Inbound (from guest)",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://n8n.aiingo.com/webhook/chatwoot-events",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "conversationId",
+              "value": "={{ $json.conversationId }}"
+            },
+            {
+              "name": "contactName",
+              "value": "={{ $json.contactName }}"
+            },
+            {
+              "name": "contactPhone",
+              "value": "={{ $json.contactPhone }}"
+            },
+            {
+              "name": "lastMessage",
+              "value": "={{ $json.content }}"
+            },
+            {
+              "name": "direction",
+              "value": "={{ $json.direction }}"
+            },
+            {
+              "name": "createdAt",
+              "value": "={{ $json.createdAt }}"
+            },
+            {
+              "name": "chatwootUrl",
+              "value": "={{ $json.chatwootUrl }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "forward-to-crm",
+      "name": "Forward to CRM Endpoint (optional)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1120, 180],
+      "notes": "Optional: forward parsed event to another webhook or service"
+    },
+    {
+      "parameters": {
+        "resource": "spreadsheet",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "mode": "list",
+          "value": "YOUR_GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "mode": "list",
+          "value": "Conversations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "conversationId": "={{ $json.conversationId }}",
+            "contactName": "={{ $json.contactName }}",
+            "contactPhone": "={{ $json.contactPhone }}",
+            "lastMessage": "={{ $json.content }}",
+            "direction": "={{ $json.direction }}",
+            "chatwootUrl": "={{ $json.chatwootUrl }}",
+            "updatedAt": "={{ $json.createdAt }}"
+          }
+        },
+        "matchingColumns": ["contactPhone"],
+        "options": {}
+      },
+      "id": "log-to-sheet",
+      "name": "Log to Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [1120, 360],
+      "notes": "Logs/updates last message per contact phone in a Conversations sheet"
+    }
+  ],
+  "connections": {
+    "Chatwoot Webhook": {
+      "main": [
+        [
+          { "node": "Respond 200", "type": "main", "index": 0 },
+          { "node": "Only New Messages", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Only New Messages": {
+      "main": [
+        [
+          { "node": "Extract Fields", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Extract Fields": {
+      "main": [
+        [
+          { "node": "Only Inbound (from guest)", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Only Inbound (from guest)": {
+      "main": [
+        [
+          { "node": "Forward to CRM Endpoint (optional)", "type": "main", "index": 0 },
+          { "node": "Log to Google Sheet", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": ["chatwoot", "crm", "pearlspot"],
+  "pinData": {}
+}
