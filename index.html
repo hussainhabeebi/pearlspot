@@ -1833,6 +1833,14 @@ function populateFilters() {
   ['enq-service','wc-service','camp-service'].forEach(id => fill(id, services));
 }
 
+// Sort cards/leads newest first: numeric id (SL NO) desc, then createdAt desc
+function newestFirst(a, b) {
+  const ia = parseInt(a.id || a['SL NO'] || lv(a,'id','SL NO')) || 0;
+  const ib = parseInt(b.id || b['SL NO'] || lv(b,'id','SL NO')) || 0;
+  if (ia && ib) return ib - ia;
+  return (b.createdAt||0) - (a.createdAt||0);
+}
+
 function filterLeads(extra={}) {
   const q      = (document.getElementById('enq-search')?.value||extra.q||'').toLowerCase();
   const stage  = extra.stage  || document.getElementById('enq-stage')?.value  || '';
@@ -1844,7 +1852,7 @@ function filterLeads(extra={}) {
     if (service && lv(l,'service','Service') !== service) return false;
     if (daytype && lv(l,'dayType','Day Type') !== daytype) return false;
     return true;
-  }).sort((a,b) => (parseInt(lv(b,'id','SL NO'))||0) - (parseInt(lv(a,'id','SL NO'))||0));
+  }).sort(newestFirst);
 }
 
 function renderLeadsTable() {
@@ -2234,7 +2242,7 @@ function renderKanban() {
   });
 
   board.innerHTML = STAGES.map(stage => {
-    const stageCards = cards.filter(c => c.stage===stage).sort((a,b)=>(b.importedAt||b.createdAt||0)-(a.importedAt||a.createdAt||0));
+    const stageCards = cards.filter(c => c.stage===stage).sort(newestFirst);
     const sc = STAGE_COLORS[stage]||'grey';
     const rev = colRevenue[stage];
     return `<div class="kanban-col" id="kcol-${stage.replace(/\s+/g,'-')}"
@@ -2407,7 +2415,7 @@ function renderToday() {
     '<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No check-ins today ✅</div>';
 
   // Recent enquiries — render skeleton rows, then enrich with Chatwoot last message
-  const recent = [...allCards].sort((a,b)=>(b.importedAt||b.createdAt||0)-(a.importedAt||a.createdAt||0)).slice(0,10);
+  const recent = [...allCards].sort(newestFirst).slice(0,10);
   document.getElementById('new-enq-count').textContent = recent.length+' recent';
   const enqEl = document.getElementById('today-new-enq');
   if (enqEl) {
