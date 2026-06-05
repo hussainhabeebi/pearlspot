@@ -1985,25 +1985,17 @@ async function loadLeadChats() {
   el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">🔍 Searching Chatwoot…</div>';
   try {
     const digits = phone.replace(/\D/g,'');
-    const sr = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/contacts/search?q=${encodeURIComponent(digits)}&page=1&include_contacts=true`,{headers:{'api_access_token':CW_TOKEN}});
-    const sd = await sr.json();
-    const contacts = sd?.payload?.contacts || sd?.payload || [];
-    if (!contacts.length) {
-      el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">No Chatwoot contact found for <strong>${phone}</strong><br><span style="font-size:11px">They may not have messaged yet</span></div>`;
+    const r = await fetch(`${N8N}/pearlspot/conversations-by-phone?phone=${encodeURIComponent(digits)}`);
+    const data = await r.json();
+    const convs = data?.conversations || [];
+    const cwLink = document.getElementById('lm-cw-contacts-link');
+    if (cwLink) cwLink.href = `${CW_BASE}/app/accounts/${CW_ACCOUNT}/contacts`;
+    if (!convs.length) {
+      el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">${data.error||'No conversations found'}</div>`;
       return;
     }
-    const contact = contacts[0];
-    const cwLink = document.getElementById('lm-cw-contacts-link');
-    if (cwLink) cwLink.href = `${CW_BASE}/app/accounts/${CW_ACCOUNT}/contacts/${contact.id}`;
-    const cr = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/contacts/${contact.id}/conversations`,{headers:{'api_access_token':CW_TOKEN}});
-    const cd = await cr.json();
-    const convs = (cd?.payload || []).sort((a,b)=>(b.last_activity_at||0)-(a.last_activity_at||0)).slice(0,3);
-    if (!convs.length) { el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">No conversations found in Chatwoot</div>'; return; }
     el.innerHTML = convs.map(c => {
-      const lastMsg = c.last_non_activity_message?.content || '—';
-      const ts = c.last_activity_at ? new Date(c.last_activity_at*1000).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
       const statusColor = {open:'var(--accent)',pending:'var(--yellow)',resolved:'var(--green)'}[c.status]||'var(--muted)';
-      const msgs = (c.messages||[]).filter(m=>m.message_type!==2).slice(-3);
       return `<div style="border:1.5px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden">
         <div style="padding:10px 13px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
           <div style="display:flex;align-items:center;gap:8px">
@@ -2011,22 +2003,22 @@ async function loadLeadChats() {
             <span style="font-size:12px;font-weight:700;color:var(--text)">#${c.id} · ${c.status}</span>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:10px;color:var(--muted)">${ts}</span>
-            <a href="${CW_BASE}/app/accounts/${CW_ACCOUNT}/conversations/${c.id}" target="_blank" class="btn sm ghost" style="font-size:10px;padding:2px 7px">↗</a>
+            <span style="font-size:10px;color:var(--muted)">${c.lastTsFormatted||''}</span>
+            <a href="${c.chatwootUrl}" target="_blank" class="btn sm ghost" style="font-size:10px;padding:2px 7px">↗</a>
           </div>
         </div>
         <div style="padding:10px 13px">
-          ${msgs.length ? msgs.map(m=>{
-            const out = m.message_type===1;
+          ${c.messages?.length ? c.messages.map(m=>{
+            const out = m.direction==='outbound';
             return `<div style="display:flex;gap:7px;margin-bottom:7px;${out?'flex-direction:row-reverse':''}">
               <div style="max-width:85%;padding:7px 11px;border-radius:10px;font-size:12px;line-height:1.5;${out?'background:#e0f2fe;border:1.5px solid #bae6fd':'background:var(--surface2);border:1.5px solid var(--border)'}">${m.content||'—'}</div>
             </div>`;
-          }).join('') : `<div style="font-size:12px;color:var(--muted);padding:4px 0">${lastMsg}</div>`}
+          }).join('') : `<div style="font-size:12px;color:var(--muted)">${c.lastMessage||'—'}</div>`}
         </div>
       </div>`;
     }).join('');
   } catch(e) {
-    el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Could not reach Chatwoot API<br><a href="${CW_BASE}/app/accounts/${CW_ACCOUNT}/contacts" target="_blank" style="color:var(--accent)">Open Chatwoot Contacts ↗</a></div>`;
+    el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Could not reach n8n proxy<br><a href="${CW_BASE}/app/accounts/${CW_ACCOUNT}/contacts" target="_blank" style="color:var(--accent)">Open Chatwoot ↗</a></div>`;
   }
 }
 
@@ -2461,19 +2453,12 @@ async function enrichEnqWithLastMsg(c) {
   if (!phone) { el.textContent = ''; return; }
   try {
     const digits = phone.replace(/\D/g,'');
-    const sr = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/contacts/search?q=${encodeURIComponent(digits)}&page=1`,{headers:{'api_access_token':CW_TOKEN}});
-    const sd = await sr.json();
-    const contact = (sd?.payload?.contacts||sd?.payload||[])[0];
-    if (!contact) { el.textContent = 'No Chatwoot conversation'; return; }
-    const cr = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/contacts/${contact.id}/conversations`,{headers:{'api_access_token':CW_TOKEN}});
-    const cd = await cr.json();
-    const convs = (cd?.payload||[]).sort((a,b)=>(b.last_activity_at||0)-(a.last_activity_at||0));
-    const latest = convs[0];
-    if (!latest) { el.textContent = 'No messages yet'; return; }
-    const msg = latest.last_non_activity_message?.content||'—';
-    const ts = latest.last_activity_at ? new Date(latest.last_activity_at*1000).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
-    const cwUrl = `${CW_BASE}/app/accounts/${CW_ACCOUNT}/conversations/${latest.id}`;
-    el.innerHTML = `<span style="color:var(--text3)">"${msg.length>60?msg.slice(0,60)+'…':msg}"</span> <span style="color:var(--muted2)">· ${ts}</span> <a href="${cwUrl}" target="_blank" style="color:var(--accent);font-style:normal;font-weight:600;margin-left:4px">↗ View</a>`;
+    const r = await fetch(`${N8N}/pearlspot/conversations-by-phone?phone=${encodeURIComponent(digits)}`);
+    const data = await r.json();
+    const latest = (data?.conversations||[])[0];
+    if (!latest) { el.innerHTML = '<span style="color:var(--muted2)">No Chatwoot conversation yet</span>'; return; }
+    const msg = latest.lastMessage||'—';
+    el.innerHTML = `<span style="color:var(--text3)">"${msg.length>60?msg.slice(0,60)+'…':msg}"</span> <span style="color:var(--muted2)">· ${latest.lastTsFormatted||''}</span> <a href="${latest.chatwootUrl}" target="_blank" style="color:var(--accent);font-style:normal;font-weight:600;margin-left:4px">↗ View</a>`;
   } catch(e) { el.textContent = ''; }
 }
 

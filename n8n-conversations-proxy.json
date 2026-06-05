@@ -1,0 +1,160 @@
+{
+  "name": "Pearl Spot — Conversations Proxy",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "pearlspot/conversations-by-phone",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-get",
+      "name": "GET /pearlspot/conversations-by-phone",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "pearlspot-conv-proxy"
+    },
+    {
+      "parameters": {
+        "url": "=https://app.aiingo.com/api/v1/accounts/8/contacts/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "api_access_token", "value": "rcbgwbfThHKajjyG1VBWgkBL" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "q", "value": "={{ $json.query.phone }}" },
+            { "name": "page", "value": "1" },
+            { "name": "include_contacts", "value": "true" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "search-contact",
+      "name": "Search Contact by Phone",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.item.json;\nconst contacts = data?.payload?.contacts || data?.payload || [];\nif (!contacts.length) {\n  return [{ json: { found: false, contactId: null } }];\n}\nreturn [{ json: { found: true, contactId: contacts[0].id, contactName: contacts[0].name } }];"
+      },
+      "id": "extract-contact",
+      "name": "Extract Contact ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "contact-found",
+              "leftValue": "={{ $json.found }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-found",
+      "name": "Contact Found?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ conversations: [], error: 'No Chatwoot contact found for this phone' }) }}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "not-found-response",
+      "name": "Return Empty",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 480]
+    },
+    {
+      "parameters": {
+        "url": "=https://app.aiingo.com/api/v1/accounts/8/contacts/{{ $json.contactId }}/conversations",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "api_access_token", "value": "rcbgwbfThHKajjyG1VBWgkBL" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-conversations",
+      "name": "Get Conversations",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $input.item.json?.payload || [];\n\nconst sorted = [...payload].sort((a,b) => (b.last_activity_at||0) - (a.last_activity_at||0));\nconst top3 = sorted.slice(0, 3);\n\nconst conversations = top3.map(c => {\n  const msgs = (c.messages || []).filter(m => m.message_type !== 2).slice(-5);\n  const lastMsg = c.last_non_activity_message?.content || msgs[msgs.length-1]?.content || '';\n  const lastTs = c.last_activity_at ? new Date(c.last_activity_at * 1000).toISOString() : null;\n  return {\n    id: c.id,\n    status: c.status,\n    lastMessage: lastMsg,\n    lastTs,\n    lastTsFormatted: lastTs ? new Date(lastTs).toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : '',\n    chatwootUrl: `https://app.aiingo.com/app/accounts/8/conversations/${c.id}`,\n    messages: msgs.map(m => ({\n      content: m.content || '',\n      direction: m.message_type === 1 ? 'outbound' : 'inbound',\n      ts: m.created_at ? new Date(m.created_at * 1000).toISOString() : null\n    }))\n  };\n});\n\nreturn [{ json: { conversations, total: sorted.length } }];"
+      },
+      "id": "format-response",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" },
+              { "name": "Content-Type", "value": "application/json" }
+            ]
+          }
+        }
+      },
+      "id": "respond-conversations",
+      "name": "Return Conversations",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1560, 300]
+    }
+  ],
+  "connections": {
+    "GET /pearlspot/conversations-by-phone": {
+      "main": [[{ "node": "Search Contact by Phone", "type": "main", "index": 0 }]]
+    },
+    "Search Contact by Phone": {
+      "main": [[{ "node": "Extract Contact ID", "type": "main", "index": 0 }]]
+    },
+    "Extract Contact ID": {
+      "main": [[{ "node": "Contact Found?", "type": "main", "index": 0 }]]
+    },
+    "Contact Found?": {
+      "main": [
+        [{ "node": "Get Conversations", "type": "main", "index": 0 }],
+        [{ "node": "Return Empty", "type": "main", "index": 0 }]
+      ]
+    },
+    "Get Conversations": {
+      "main": [[{ "node": "Format Response", "type": "main", "index": 0 }]]
+    },
+    "Format Response": {
+      "main": [[{ "node": "Return Conversations", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": ["chatwoot", "crm", "pearlspot"],
+  "pinData": {}
+}
