@@ -3572,32 +3572,15 @@ async function ccSelectCustomer(phone, name) {
     const last10 = digits.slice(-10);
     document.getElementById('cc-convs-wrap').innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">🔍 Loading conversations…</div>`;
 
-    const pr = await fetch(`${N8N}/pearlspot/conversations-by-phone?phone=${encodeURIComponent(digits)}`);
+    const pr = await fetch(`${N8N}/pearlspot/customer-conversations?phone=${encodeURIComponent(digits)}`);
     const pd = await pr.json();
 
-    if (!pr.ok || pd.error) {
-      document.getElementById('cc-convs-wrap').innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:12px">No Chatwoot contact found for <strong>${last10}</strong><br><span style="font-size:11px">They may not have messaged on WhatsApp yet</span></div>`;
+    if (!pr.ok || pd.error || !(pd.conversations||[]).length) {
+      document.getElementById('cc-convs-wrap').innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:12px">No Chatwoot contact found for <strong>${last10}</strong><br><span style="font-size:11px">They may not have messaged on WhatsApp yet</span><br><br><span style="font-size:10px;color:var(--muted2)">${pd.error||''}</span></div>`;
       return;
     }
 
-    const rawConvs = pd.conversations || [];
-
-    // Normalise proxy response into the shape the render code expects
-    const convs = rawConvs.map(c => ({
-      id: c.id,
-      status: c.status,
-      assignedAgent: null,
-      lastMessage: c.lastMessage || '',
-      lastActivityFormatted: c.lastTsFormatted || '',
-      messageCount: (c.messages||[]).length,
-      chatwootUrl: c.chatwootUrl || `${CW_BASE}/app/accounts/${CW_ACCOUNT}/conversations/${c.id}`,
-      recentMessages: (c.messages||[]).map(m=>({
-        content: m.content||'',
-        direction: m.direction||'inbound',
-        agentName: m.agentName||'',
-        ts: m.ts ? new Date(m.ts).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : ''
-      }))
-    }));
+    const convs = pd.conversations || [];
 
     const convSel = document.getElementById('cc-conv-sel');
     convSel.innerHTML = '<option value="">— Select conversation —</option>' +
