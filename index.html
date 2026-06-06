@@ -3568,9 +3568,43 @@ async function ccSelectCustomer(phone, name) {
   if (!ccAgents.length) await ccLoadAgents();
 
   try {
-    const r = await fetch(`${N8N}/pearlspot/customer-conversations?phone=${encodeURIComponent(phone)}`);
-    const data = await r.json();
-    const convs = data?.conversations || [];
+    // Search contact by phone directly via Chatwoot API
+    const digits = phone.replace(/\D/g,'');
+    const sr = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/contacts/search?q=${encodeURIComponent(digits)}&page=1&include_contacts=true`,{headers:{'api_access_token':CW_TOKEN}});
+    const sd = await sr.json();
+    const contact = (sd?.payload?.contacts||sd?.payload||[])[0];
+    if (!contact) {
+      document.getElementById('cc-convs-wrap').innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:12px">No Chatwoot contact found for this phone number</div>';
+      return;
+    }
+    const cwLink = document.getElementById('cc-cw-link');
+    if (cwLink) cwLink.href = `${CW_BASE}/app/accounts/${CW_ACCOUNT}/contacts/${contact.id}`;
+
+    const cr = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/contacts/${contact.id}/conversations`,{headers:{'api_access_token':CW_TOKEN}});
+    const cd = await cr.json();
+    const rawConvs = (cd?.payload||[]).sort((a,b)=>(b.last_activity_at||0)-(a.last_activity_at||0));
+
+    // Normalise into the same shape the render code expects
+    const convs = rawConvs.map(c => {
+      const inbound = (c.messages||[]).filter(m=>m.message_type===0);
+      const allMsgs = (c.messages||[]).filter(m=>m.message_type!==2).slice(-6);
+      const lastTs = c.last_activity_at ? new Date(c.last_activity_at*1000).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+      return {
+        id: c.id,
+        status: c.status,
+        assignedAgent: c.meta?.assignee ? { id: c.meta.assignee.id, name: c.meta.assignee.name } : null,
+        lastMessage: c.last_non_activity_message?.content || '',
+        lastActivityFormatted: lastTs,
+        messageCount: allMsgs.length,
+        chatwootUrl: `${CW_BASE}/app/accounts/${CW_ACCOUNT}/conversations/${c.id}`,
+        recentMessages: inbound.slice(-6).map(m=>({
+          content: m.content||'',
+          direction: 'inbound',
+          agentName: '',
+          ts: m.created_at ? new Date(m.created_at*1000).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : ''
+        }))
+      };
+    });
 
     const convSel = document.getElementById('cc-conv-sel');
     convSel.innerHTML = '<option value="">— Select conversation —</option>' +
@@ -3623,12 +3657,12 @@ async function ccSelectCustomer(phone, name) {
 
 async function ccLoadAgents() {
   try {
-    const r = await fetch(`${N8N}/pearlspot/agents`);
+    const r = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/agents`,{headers:{'api_access_token':CW_TOKEN}});
     const data = await r.json();
-    ccAgents = data?.agents || [];
+    ccAgents = Array.isArray(data) ? data : [];
     const sel = document.getElementById('cc-agent-sel');
     if (sel) sel.innerHTML = '<option value="">— Select agent —</option>' +
-      ccAgents.map(a=>`<option value="${a.id}">${a.name} (${a.availability||'—'})</option>`).join('');
+      ccAgents.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
   } catch(e) { ccAgents = []; }
 }
 
@@ -3639,14 +3673,16 @@ async function ccAssignAgent() {
   if (!agentId || !convId) { if(statusEl) statusEl.textContent='Select agent and conversation first'; return; }
   if(statusEl) statusEl.textContent = 'Assigning…';
   try {
-    const r = await fetch(`${N8N}/pearlspot/assign-agent`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ conversationId: parseInt(convId), agentId: parseInt(agentId) })
+    const r = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/conversations/${convId}/assignments`,{
+      method:'POST',
+      headers:{'api_access_token':CW_TOKEN,'Content-Type':'application/json'},
+      body: JSON.stringify({ assignee_id: parseInt(agentId) })
     });
     const data = await r.json();
-    if (data.success) {
-      if(statusEl) statusEl.textContent = `✓ Assigned to ${data.assignedAgent?.name||'agent'}`;
-      toast(`Assigned to ${data.assignedAgent?.name||'agent'}`,'ok');
+    const agentName = ccAgents.find(a=>String(a.id)===String(agentId))?.name || 'agent';
+    if (data?.id || data?.assignee_id || r.ok) {
+      if(statusEl) statusEl.textContent = `✓ Assigned to ${agentName}`;
+      toast(`Assigned to ${agentName}`,'ok');
       const cust = ccAllCustomers.find(c=>(c.phone||'').replace(/\D/g,'')=== ccSelectedPhone);
       if (cust) setTimeout(()=>ccSelectCustomer(ccSelectedPhone, cust.name), 800);
     } else {
