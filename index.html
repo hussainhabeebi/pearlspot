@@ -2526,34 +2526,43 @@ async function enrichEnqWithLastMsg(c) {
   } catch(e) { el.textContent = ''; }
 }
 
-function enqToggleChats(id) {
+async function enqToggleChats(id) {
   const el = document.getElementById('enq-lastmsg-'+id);
   const expandEl = document.getElementById('enq-expand-'+id);
   if (!el || !expandEl) return;
   if (expandEl.style.display !== 'none') { expandEl.style.display = 'none'; return; }
   const convs = el._convData || [];
   if (!convs.length) return;
-  // Show last 10 messages across the most recent conversation
-  const msgs = convs[0].messages || [];
-  const recent = msgs.slice(-10);
+  const conv = convs[0];
   expandEl.style.display = 'block';
   expandEl.innerHTML = `<div style="margin-top:8px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface2)">
     <div style="padding:6px 10px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between">
-      <span>💬 Conv #${convs[0].id} · ${convs[0].status}</span>
-      <a href="${convs[0].chatwootUrl}" target="_blank" style="color:var(--accent)">Open ↗</a>
+      <span>💬 Conv #${conv.id} · ${conv.status}</span>
+      <a href="${conv.chatwootUrl}" target="_blank" style="color:var(--accent)">Open ↗</a>
     </div>
-    <div style="padding:8px 10px;display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto">
-      ${recent.length ? recent.map(m => {
-        const out = m.direction === 'outbound';
-        return `<div style="display:flex;${out?'justify-content:flex-end':''}">
-          <div style="max-width:85%;padding:6px 10px;border-radius:8px;font-size:11px;line-height:1.5;${out?'background:#e0f2fe;border:1px solid #bae6fd':'background:var(--surface);border:1px solid var(--border)'}">
-            ${m.content||'—'}
-            <div style="font-size:9px;color:var(--muted2);margin-top:2px;text-align:${out?'right':'left'}">${m.ts?new Date(m.ts).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''} ${m.agentName&&out?'· '+m.agentName:''}</div>
-          </div>
-        </div>`;
-      }).join('') : '<div style="font-size:11px;color:var(--muted);padding:4px">No messages</div>'}
+    <div id="enq-msgs-${id}" style="padding:8px 10px;display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto">
+      <div style="text-align:center;font-size:11px;color:var(--muted)">Loading…</div>
     </div>
   </div>`;
+  try {
+    const r = await fetch(`${N8N}/pearlspot/conversation-messages?id=${conv.id}`);
+    const data = await r.json();
+    const msgs = data.messages || [];
+    const msgsEl = document.getElementById('enq-msgs-'+id);
+    if (!msgsEl) return;
+    msgsEl.innerHTML = msgs.length ? msgs.map(m => {
+      const out = m.direction === 'outbound';
+      return `<div style="display:flex;${out?'justify-content:flex-end':''}">
+        <div style="max-width:85%;padding:6px 10px;border-radius:8px;font-size:11px;line-height:1.5;${out?'background:#e0f2fe;border:1px solid #bae6fd':'background:var(--surface);border:1px solid var(--border)'}">
+          ${m.content||'—'}
+          <div style="font-size:9px;color:var(--muted2);margin-top:2px;text-align:${out?'right':'left'}">${m.ts?new Date(m.ts).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''} ${m.agentName&&out?' · '+m.agentName:''}</div>
+        </div>
+      </div>`;
+    }).join('') : '<div style="font-size:11px;color:var(--muted);padding:4px">No messages found</div>';
+  } catch(e) {
+    const msgsEl = document.getElementById('enq-msgs-'+id);
+    if (msgsEl) msgsEl.innerHTML = `<div style="font-size:11px;color:var(--red)">Error loading messages</div>`;
+  }
 }
 
 // ═══════════════════════════════════════════════

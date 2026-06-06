@@ -1,0 +1,79 @@
+{
+  "name": "Pearl Spot — Conversation Messages",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "pearlspot/conversation-messages",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "wh-get-msgs",
+      "name": "GET conversation-messages",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://app.aiingo.com/api/v1/accounts/8/conversations/{{ $json.query.id }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "api_access_token", "value": "rcbgwbfThHKajjyG1VBWgkBL" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-messages",
+      "name": "Get Messages",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.item.json;\nconst payload = raw?.payload || raw || [];\nconst msgs = Array.isArray(payload) ? payload : [];\n\nconst filtered = msgs\n  .filter(m => m.message_type === 0 || m.message_type === 1)\n  .sort((a, b) => (a.created_at || 0) - (b.created_at || 0))\n  .slice(-10)\n  .map(m => ({\n    content: m.content || '',\n    direction: m.message_type === 1 ? 'outbound' : 'inbound',\n    agentName: m.sender?.name || '',\n    ts: m.created_at ? new Date(m.created_at * 1000).toISOString() : null\n  }));\n\nreturn [{ json: { messages: filtered, total: msgs.length } }];"
+      },
+      "id": "format-messages",
+      "name": "Format Messages",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" },
+              { "name": "Content-Type", "value": "application/json" }
+            ]
+          }
+        }
+      },
+      "id": "return-messages",
+      "name": "Return Messages",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "GET conversation-messages": {
+      "main": [[{ "node": "Get Messages", "type": "main", "index": 0 }]]
+    },
+    "Get Messages": {
+      "main": [[{ "node": "Format Messages", "type": "main", "index": 0 }]]
+    },
+    "Format Messages": {
+      "main": [[{ "node": "Return Messages", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": ["chatwoot", "crm", "pearlspot"],
+  "pinData": {}
+}
