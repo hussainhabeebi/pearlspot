@@ -3610,7 +3610,6 @@ async function ccSelectCustomer(phone, name) {
     convSel.innerHTML = '<option value="">— Select conversation —</option>' +
       convs.map(c=>`<option value="${c.id}">#${c.id} · ${c.status} · ${c.lastActivityFormatted||''}</option>`).join('');
 
-    const cwLink = document.getElementById('cc-cw-link');
     if (cwLink && convs[0]) cwLink.href = convs[0].chatwootUrl;
 
     if (!convs.length) {
