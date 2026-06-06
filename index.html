@@ -2519,8 +2519,41 @@ async function enrichEnqWithLastMsg(c) {
     const latest = (data?.conversations||[])[0];
     if (!latest) { el.innerHTML = '<span style="color:var(--muted2)">No Chatwoot conversation yet</span>'; return; }
     const msg = latest.lastMessage||'—';
-    el.innerHTML = `<span style="color:var(--text3)">"${msg.length>60?msg.slice(0,60)+'…':msg}"</span> <span style="color:var(--muted2)">· ${latest.lastTsFormatted||''}</span> <a href="${latest.chatwootUrl}" target="_blank" style="color:var(--accent);font-style:normal;font-weight:600;margin-left:4px">↗ View</a>`;
+    const expandId = 'enq-expand-'+c.id;
+    // Store all conversations on the element for expand use
+    el._convData = data.conversations || [];
+    el.innerHTML = `<span style="color:var(--text3);cursor:pointer" onclick="enqToggleChats('${c.id}')">"${msg.length>60?msg.slice(0,60)+'…':msg}"</span> <span style="color:var(--muted2)">· ${latest.lastTsFormatted||''}</span> <a href="${latest.chatwootUrl}" target="_blank" style="color:var(--accent);font-style:normal;font-weight:600;margin-left:4px">↗</a> <span style="color:var(--accent);font-size:10px;cursor:pointer;font-weight:600" onclick="enqToggleChats('${c.id}')">💬 chats</span><div id="${expandId}" style="display:none"></div>`;
   } catch(e) { el.textContent = ''; }
+}
+
+function enqToggleChats(id) {
+  const el = document.getElementById('enq-lastmsg-'+id);
+  const expandEl = document.getElementById('enq-expand-'+id);
+  if (!el || !expandEl) return;
+  if (expandEl.style.display !== 'none') { expandEl.style.display = 'none'; return; }
+  const convs = el._convData || [];
+  if (!convs.length) return;
+  // Show last 10 messages across the most recent conversation
+  const msgs = convs[0].messages || [];
+  const recent = msgs.slice(-10);
+  expandEl.style.display = 'block';
+  expandEl.innerHTML = `<div style="margin-top:8px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface2)">
+    <div style="padding:6px 10px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between">
+      <span>💬 Conv #${convs[0].id} · ${convs[0].status}</span>
+      <a href="${convs[0].chatwootUrl}" target="_blank" style="color:var(--accent)">Open ↗</a>
+    </div>
+    <div style="padding:8px 10px;display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto">
+      ${recent.length ? recent.map(m => {
+        const out = m.direction === 'outbound';
+        return `<div style="display:flex;${out?'justify-content:flex-end':''}">
+          <div style="max-width:85%;padding:6px 10px;border-radius:8px;font-size:11px;line-height:1.5;${out?'background:#e0f2fe;border:1px solid #bae6fd':'background:var(--surface);border:1px solid var(--border)'}">
+            ${m.content||'—'}
+            <div style="font-size:9px;color:var(--muted2);margin-top:2px;text-align:${out?'right':'left'}">${m.ts?new Date(m.ts).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''} ${m.agentName&&out?'· '+m.agentName:''}</div>
+          </div>
+        </div>`;
+      }).join('') : '<div style="font-size:11px;color:var(--muted);padding:4px">No messages</div>'}
+    </div>
+  </div>`;
 }
 
 // ═══════════════════════════════════════════════
