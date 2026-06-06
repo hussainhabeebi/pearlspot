@@ -3568,13 +3568,25 @@ async function ccSelectCustomer(phone, name) {
   if (!ccAgents.length) await ccLoadAgents();
 
   try {
-    // Search contact by phone directly via Chatwoot API
+    // Search contact by phone — try digits only, then with +91 prefix
     const digits = phone.replace(/\D/g,'');
-    const sr = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/contacts/search?q=${encodeURIComponent(digits)}&page=1&include_contacts=true`,{headers:{'api_access_token':CW_TOKEN}});
-    const sd = await sr.json();
-    const contact = (sd?.payload?.contacts||sd?.payload||[])[0];
+    const last10 = digits.slice(-10);
+    document.getElementById('cc-convs-wrap').innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">🔍 Searching for ${last10}…</div>`;
+
+    let contact = null;
+    for (const q of [last10, '91'+last10, '+91'+last10, digits]) {
+      const sr = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/contacts/search?q=${encodeURIComponent(q)}&page=1&include_contacts=true`,{headers:{'api_access_token':CW_TOKEN}});
+      if (!sr.ok) {
+        document.getElementById('cc-convs-wrap').innerHTML = `<div style="text-align:center;padding:30px;color:var(--red);font-size:12px">Chatwoot API error ${sr.status}<br><span style="font-size:10px;color:var(--muted)">Token may lack contacts permission</span><br><a href="${CW_BASE}/app/accounts/${CW_ACCOUNT}/contacts" target="_blank" style="color:var(--accent)">Open Chatwoot ↗</a></div>`;
+        return;
+      }
+      const sd = await sr.json();
+      contact = (sd?.payload?.contacts||sd?.payload||[])[0];
+      if (contact) break;
+    }
+
     if (!contact) {
-      document.getElementById('cc-convs-wrap').innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:12px">No Chatwoot contact found for this phone number</div>';
+      document.getElementById('cc-convs-wrap').innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:12px">No Chatwoot contact found for <strong>${last10}</strong><br><span style="font-size:11px">They may not have messaged on WhatsApp yet</span></div>`;
       return;
     }
     const cwLink = document.getElementById('cc-cw-link');
@@ -3650,7 +3662,7 @@ async function ccSelectCustomer(phone, name) {
       </div>`;
     }).join('');
   } catch(e) {
-    document.getElementById('cc-convs-wrap').innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:12px">Could not load conversations<br><a href="${CW_BASE}/app/accounts/${CW_ACCOUNT}/contacts" target="_blank" style="color:var(--accent)">Open Chatwoot ↗</a></div>`;
+    document.getElementById('cc-convs-wrap').innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:12px">Error: ${e.message}<br><a href="${CW_BASE}/app/accounts/${CW_ACCOUNT}/contacts" target="_blank" style="color:var(--accent)">Open Chatwoot ↗</a></div>`;
   }
 }
 
