@@ -3568,60 +3568,42 @@ async function ccSelectCustomer(phone, name) {
   if (!ccAgents.length) await ccLoadAgents();
 
   try {
-    // Search contact by phone — try digits only, then with +91 prefix
     const digits = phone.replace(/\D/g,'');
     const last10 = digits.slice(-10);
-    document.getElementById('cc-convs-wrap').innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">🔍 Searching for ${last10}…</div>`;
+    document.getElementById('cc-convs-wrap').innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">🔍 Loading conversations…</div>`;
 
-    let contact = null;
-    for (const q of [last10, '91'+last10, '+91'+last10, digits]) {
-      const sr = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/contacts/search?q=${encodeURIComponent(q)}&page=1&include_contacts=true`,{headers:{'api_access_token':CW_TOKEN}});
-      if (!sr.ok) {
-        document.getElementById('cc-convs-wrap').innerHTML = `<div style="text-align:center;padding:30px;color:var(--red);font-size:12px">Chatwoot API error ${sr.status}<br><span style="font-size:10px;color:var(--muted)">Token may lack contacts permission</span><br><a href="${CW_BASE}/app/accounts/${CW_ACCOUNT}/contacts" target="_blank" style="color:var(--accent)">Open Chatwoot ↗</a></div>`;
-        return;
-      }
-      const sd = await sr.json();
-      contact = (sd?.payload?.contacts||sd?.payload||[])[0];
-      if (contact) break;
-    }
+    const pr = await fetch(`${N8N}/pearlspot/conversations-by-phone?phone=${encodeURIComponent(digits)}`);
+    const pd = await pr.json();
 
-    if (!contact) {
+    if (!pr.ok || pd.error) {
       document.getElementById('cc-convs-wrap').innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:12px">No Chatwoot contact found for <strong>${last10}</strong><br><span style="font-size:11px">They may not have messaged on WhatsApp yet</span></div>`;
       return;
     }
-    const cwLink = document.getElementById('cc-cw-link');
-    if (cwLink) cwLink.href = `${CW_BASE}/app/accounts/${CW_ACCOUNT}/contacts/${contact.id}`;
 
-    const cr = await fetch(`${CW_BASE}/api/v1/accounts/${CW_ACCOUNT}/contacts/${contact.id}/conversations`,{headers:{'api_access_token':CW_TOKEN}});
-    const cd = await cr.json();
-    const rawConvs = (cd?.payload||[]).sort((a,b)=>(b.last_activity_at||0)-(a.last_activity_at||0));
+    const rawConvs = pd.conversations || [];
 
-    // Normalise into the same shape the render code expects
-    const convs = rawConvs.map(c => {
-      const inbound = (c.messages||[]).filter(m=>m.message_type===0);
-      const allMsgs = (c.messages||[]).filter(m=>m.message_type!==2).slice(-6);
-      const lastTs = c.last_activity_at ? new Date(c.last_activity_at*1000).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
-      return {
-        id: c.id,
-        status: c.status,
-        assignedAgent: c.meta?.assignee ? { id: c.meta.assignee.id, name: c.meta.assignee.name } : null,
-        lastMessage: c.last_non_activity_message?.content || '',
-        lastActivityFormatted: lastTs,
-        messageCount: allMsgs.length,
-        chatwootUrl: `${CW_BASE}/app/accounts/${CW_ACCOUNT}/conversations/${c.id}`,
-        recentMessages: inbound.slice(-6).map(m=>({
-          content: m.content||'',
-          direction: 'inbound',
-          agentName: '',
-          ts: m.created_at ? new Date(m.created_at*1000).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : ''
-        }))
-      };
-    });
+    // Normalise proxy response into the shape the render code expects
+    const convs = rawConvs.map(c => ({
+      id: c.id,
+      status: c.status,
+      assignedAgent: null,
+      lastMessage: c.lastMessage || '',
+      lastActivityFormatted: c.lastTsFormatted || '',
+      messageCount: (c.messages||[]).length,
+      chatwootUrl: c.chatwootUrl || `${CW_BASE}/app/accounts/${CW_ACCOUNT}/conversations/${c.id}`,
+      recentMessages: (c.messages||[]).map(m=>({
+        content: m.content||'',
+        direction: m.direction||'inbound',
+        agentName: m.agentName||'',
+        ts: m.ts ? new Date(m.ts).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : ''
+      }))
+    }));
 
     const convSel = document.getElementById('cc-conv-sel');
     convSel.innerHTML = '<option value="">— Select conversation —</option>' +
       convs.map(c=>`<option value="${c.id}">#${c.id} · ${c.status} · ${c.lastActivityFormatted||''}</option>`).join('');
 
+    const cwLink = document.getElementById('cc-cw-link');
     if (cwLink && convs[0]) cwLink.href = convs[0].chatwootUrl;
 
     if (!convs.length) {
