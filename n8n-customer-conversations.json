@@ -1,0 +1,377 @@
+{
+  "name": "Pearl Spot — Customer Conversations + Agent Assignment",
+  "nodes": [
+
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "pearlspot/customer-conversations",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "wh-get-convs",
+      "name": "GET customer-conversations",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 200]
+    },
+
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pearlspot/assign-agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "wh-assign",
+      "name": "POST assign-agent",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 500]
+    },
+
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "pearlspot/agents",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "wh-agents",
+      "name": "GET agents",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 780]
+    },
+
+    {
+      "parameters": {
+        "url": "=https://app.aiingo.com/api/v1/accounts/8/contacts/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "api_access_token", "value": "rcbgwbfThHKajjyG1VBWgkBL" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "q", "value": "={{ $json.query.phone }}" },
+            { "name": "page", "value": "1" },
+            { "name": "include_contacts", "value": "true" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "search-contact",
+      "name": "Search Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [480, 200]
+    },
+
+    {
+      "parameters": {
+        "jsCode": "const data = $input.item.json;\nconst contacts = data?.payload?.contacts || data?.payload || [];\nif (!contacts.length) return [{ json: { found: false } }];\nconst c = contacts[0];\nreturn [{ json: { found: true, contactId: c.id, contactName: c.name, contactPhone: c.phone_number || c.identifier || '' } }];"
+      },
+      "id": "extract-contact",
+      "name": "Extract Contact",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 200]
+    },
+
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "found-check",
+              "leftValue": "={{ $json.found }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "contact-found",
+      "name": "Contact Found?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [920, 200]
+    },
+
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ conversations: [], contact: null, error: 'No contact found for this phone number' }) }}",
+        "options": { "responseCode": 200, "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }] } }
+      },
+      "id": "no-contact-resp",
+      "name": "No Contact Found",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [920, 360]
+    },
+
+    {
+      "parameters": {
+        "url": "=https://app.aiingo.com/api/v1/accounts/8/contacts/{{ $json.contactId }}/conversations",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "api_access_token", "value": "rcbgwbfThHKajjyG1VBWgkBL" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-all-convs",
+      "name": "Get All Conversations",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1140, 200]
+    },
+
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.item.json;\nconst payload = raw?.payload || [];\n\nconst conversations = [...payload]\n  .sort((a, b) => (b.last_activity_at || 0) - (a.last_activity_at || 0))\n  .map(c => {\n    const inboundMsgs = (c.messages || []).filter(m => m.message_type === 0);\n    const allMsgs = (c.messages || []).filter(m => m.message_type !== 2);\n    const lastInbound = inboundMsgs[inboundMsgs.length - 1];\n    const lastTs = c.last_activity_at ? new Date(c.last_activity_at * 1000).toISOString() : null;\n    return {\n      id: c.id,\n      status: c.status,\n      assignedAgent: c.meta?.assignee ? {\n        id: c.meta.assignee.id,\n        name: c.meta.assignee.name\n      } : null,\n      lastInboundMessage: lastInbound?.content || '',\n      lastActivity: lastTs,\n      lastActivityFormatted: lastTs ? new Date(lastTs).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '',\n      messageCount: allMsgs.length,\n      inboundCount: inboundMsgs.length,\n      chatwootUrl: `https://app.aiingo.com/app/accounts/8/conversations/${c.id}`,\n      recentMessages: allMsgs.slice(-6).map(m => ({\n        content: m.content || '',\n        direction: m.message_type === 0 ? 'inbound' : 'outbound',\n        agentName: m.sender?.name || '',\n        ts: m.created_at ? new Date(m.created_at * 1000).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''\n      }))\n    };\n  });\n\nreturn [{ json: { conversations, total: conversations.length } }];"
+      },
+      "id": "format-all-convs",
+      "name": "Format All Conversations",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1360, 200]
+    },
+
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" },
+              { "name": "Content-Type", "value": "application/json" }
+            ]
+          }
+        }
+      },
+      "id": "return-convs",
+      "name": "Return Conversations",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1580, 200]
+    },
+
+    {
+      "parameters": {
+        "jsCode": "const body = $input.item.json.body;\nconst conversationId = body?.conversationId;\nconst agentId = body?.agentId;\nif (!conversationId || !agentId) {\n  return [{ json: { valid: false, error: 'conversationId and agentId are required' } }];\n}\nreturn [{ json: { valid: true, conversationId, agentId } }];"
+      },
+      "id": "validate-assign",
+      "name": "Validate Assign Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 500]
+    },
+
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "valid-check",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-valid",
+      "name": "Valid Input?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [700, 500]
+    },
+
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: false, error: $json.error }) }}",
+        "options": { "responseCode": 400, "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }] } }
+      },
+      "id": "invalid-resp",
+      "name": "Invalid Input Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [700, 660]
+    },
+
+    {
+      "parameters": {
+        "url": "=https://app.aiingo.com/api/v1/accounts/8/conversations/{{ $json.conversationId }}/assignments",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "api_access_token", "value": "rcbgwbfThHKajjyG1VBWgkBL" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "assignee_id", "value": "={{ $json.agentId }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "assign-agent",
+      "name": "Assign Agent in Chatwoot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [920, 500]
+    },
+
+    {
+      "parameters": {
+        "jsCode": "const result = $input.item.json;\nconst assignee = result?.id ? { id: result.id, name: result.name } : null;\nreturn [{ json: { success: !!assignee, assignedAgent: assignee, raw: result } }];"
+      },
+      "id": "format-assign",
+      "name": "Format Assignment Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1140, 500]
+    },
+
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" },
+              { "name": "Content-Type", "value": "application/json" }
+            ]
+          }
+        }
+      },
+      "id": "return-assign",
+      "name": "Return Assignment",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1360, 500]
+    },
+
+    {
+      "parameters": {
+        "url": "=https://app.aiingo.com/api/v1/accounts/8/agents",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "api_access_token", "value": "rcbgwbfThHKajjyG1VBWgkBL" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-agents",
+      "name": "Get Agents List",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [480, 780]
+    },
+
+    {
+      "parameters": {
+        "jsCode": "const agents = $input.item.json;\nconst list = Array.isArray(agents) ? agents : [];\nreturn [{ json: { agents: list.map(a => ({ id: a.id, name: a.name, email: a.email, role: a.role, availability: a.availability_status })) } }];"
+      },
+      "id": "format-agents",
+      "name": "Format Agents",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 780]
+    },
+
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" },
+              { "name": "Content-Type", "value": "application/json" }
+            ]
+          }
+        }
+      },
+      "id": "return-agents",
+      "name": "Return Agents",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [920, 780]
+    }
+
+  ],
+  "connections": {
+    "GET customer-conversations": {
+      "main": [[{ "node": "Search Contact", "type": "main", "index": 0 }]]
+    },
+    "Search Contact": {
+      "main": [[{ "node": "Extract Contact", "type": "main", "index": 0 }]]
+    },
+    "Extract Contact": {
+      "main": [[{ "node": "Contact Found?", "type": "main", "index": 0 }]]
+    },
+    "Contact Found?": {
+      "main": [
+        [{ "node": "Get All Conversations", "type": "main", "index": 0 }],
+        [{ "node": "No Contact Found", "type": "main", "index": 0 }]
+      ]
+    },
+    "Get All Conversations": {
+      "main": [[{ "node": "Format All Conversations", "type": "main", "index": 0 }]]
+    },
+    "Format All Conversations": {
+      "main": [[{ "node": "Return Conversations", "type": "main", "index": 0 }]]
+    },
+    "POST assign-agent": {
+      "main": [[{ "node": "Validate Assign Input", "type": "main", "index": 0 }]]
+    },
+    "Validate Assign Input": {
+      "main": [[{ "node": "Valid Input?", "type": "main", "index": 0 }]]
+    },
+    "Valid Input?": {
+      "main": [
+        [{ "node": "Assign Agent in Chatwoot", "type": "main", "index": 0 }],
+        [{ "node": "Invalid Input Response", "type": "main", "index": 0 }]
+      ]
+    },
+    "Assign Agent in Chatwoot": {
+      "main": [[{ "node": "Format Assignment Result", "type": "main", "index": 0 }]]
+    },
+    "Format Assignment Result": {
+      "main": [[{ "node": "Return Assignment", "type": "main", "index": 0 }]]
+    },
+    "GET agents": {
+      "main": [[{ "node": "Get Agents List", "type": "main", "index": 0 }]]
+    },
+    "Get Agents List": {
+      "main": [[{ "node": "Format Agents", "type": "main", "index": 0 }]]
+    },
+    "Format Agents": {
+      "main": [[{ "node": "Return Agents", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": ["chatwoot", "crm", "pearlspot"],
+  "pinData": {}
+}
