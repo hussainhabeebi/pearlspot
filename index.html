@@ -2,7 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pearl Spot CRM">
+<meta name="theme-color" content="#0ea5e9">
+<link rel="manifest" href="/manifest.json">
 <title>Pearl Spot Tours · CRM</title>
 <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -415,7 +421,7 @@ tr:last-child td{border-bottom:none}
 .cw-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin:18px 0 10px}
 
 /* ── MOBILE NAV ── */
-.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:58px;background:var(--sidebar-bg);border-top:1px solid rgba(255,255,255,.08);z-index:400;align-items:center;justify-content:space-around;padding:0 4px}
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:calc(58px + env(safe-area-inset-bottom));background:var(--sidebar-bg);border-top:1px solid rgba(255,255,255,.08);z-index:400;align-items:center;justify-content:space-around;padding:0 4px;padding-bottom:env(safe-area-inset-bottom)}
 .mobile-nav-btn{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;color:var(--sidebar-text);cursor:pointer;font-family:inherit;padding:6px 10px;border-radius:8px;transition:.1s;flex:1}
 .mobile-nav-btn:hover,.mobile-nav-btn.active{color:var(--sidebar-active);background:var(--sidebar-active-bg)}
 .mobile-nav-btn span:first-child{font-size:18px}
@@ -453,7 +459,7 @@ tr:last-child td{border-bottom:none}
   .sidebar{display:none}
   .mobile-nav{display:flex!important}
   #app{flex-direction:column}
-  .main{width:100%;min-width:0;padding-bottom:58px}
+  .main{width:100%;min-width:0;padding-bottom:calc(58px + env(safe-area-inset-bottom))}
   .topbar-search{display:none}
   .topbar{padding:0 12px;gap:6px}
   .topbar .btn.sm{padding:5px 10px;font-size:11px}
@@ -607,7 +613,6 @@ tr:last-child td{border-bottom:none}
     <div class="sidebar-section">Workspace</div>
     <a class="slink active" onclick="showPage('today',this)"><span class="sicon">🏠</span> <span>Today</span></a>
     <a class="slink" onclick="showPage('conversations',this)"><span class="sicon">💬</span> <span>Conversations</span> <span class="sbadge" id="badge-convs">0</span></a>
-    <a class="slink" onclick="showPage('custchats',this)"><span class="sicon">👥</span> <span>Customer Chats</span></a>
     <a class="slink" onclick="showPage('kanban',this)"><span class="sicon">📋</span> <span>Pipeline</span></a>
     <a class="slink" onclick="showPage('enquiries',this)"><span class="sicon">⛵</span> <span>Enquiries</span> <span class="sbadge grey" id="badge-leads">0</span></a>
 
@@ -1381,7 +1386,6 @@ tr:last-child td{border-bottom:none}
   <button class="mobile-nav-btn active" onclick="mobileNav('today',this)"><span>🏠</span><span>Today</span></button>
   <button class="mobile-nav-btn" onclick="mobileNav('kanban',this)"><span>📋</span><span>Board</span></button>
   <button class="mobile-nav-btn" onclick="mobileNav('enquiries',this)"><span>⛵</span><span>Leads</span></button>
-  <button class="mobile-nav-btn" onclick="mobileNav('custchats',this)"><span>👥</span><span>Customers</span></button>
   <button class="mobile-nav-btn" onclick="mobileNav('analytics',this)"><span>📊</span><span>Reports</span></button>
 </nav>
 <!-- FAB for mobile quick-add -->
